@@ -1,0 +1,53 @@
+
+services:
+
+
+  mongo:
+    # image: mongo:3.2
+    # image: mongo:3.4
+    image: mongo:3.6
+    restart: always
+    expose:
+      - "27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - ../data/mongo_db:/data/db
+      - ../data/mongo_dump:/data/dump
+    networks:
+      - frontend
+      - mongo
+
+
+  clojure:
+    restart: always
+    build: 
+      context: ./clojure
+      dockerfile: Dockerfile_Clojure
+    ports:
+      - '9000:9000'
+    expose:
+      - "9000"
+    volumes:
+      # - ./app:/usr/src/app
+      - ./app/lib:/usr/src/app
+    environment:
+      VIRTUAL_HOST:
+        lib.physcon.my, lib.physcon.ru,
+    networks:
+      - frontend
+      - mongo
+    links:
+      - mongo
+
+
+
+
+networks:
+  frontend:
+    external: true 
+    name: frontend 
+  mongo:
+
+ 

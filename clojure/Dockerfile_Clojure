@@ -1,0 +1,14 @@
+
+FROM clojure
+# COPY . /usr/src/app
+WORKDIR /usr/src/app
+# CMD ["lein", "run"]
+# CMD ["bash"]
+# lein ring server-headless 8080
+# CMD ["lein" "ring" "server-headless" "8080"]
+
+# ENTRYPOINT ["lein" "ring" "server-headless" "8080"]
+ENTRYPOINT lein ring server-headless 9000
+
+
+

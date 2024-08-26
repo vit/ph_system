@@ -1,0 +1,17 @@
+
+<html>
+  <head>
+    <title>{{ page_title }} | IPACS Library</title>
+  </head>  
+  <body>
+
+    {% include "templates/layouts/topnav.html" %}
+
+    ===================================
+    {{ content | safe }}
+    ===================================
+
+    {% include "templates/layouts/bottom.html" %}
+  </body>
+</html>
+
