@@ -13,8 +13,8 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
     volumes:
-      - ../data/mongo_db:/data/db
-      - ../data/mongo_dump:/data/dump
+      - ../../data/mongo_db:/data/db
+      - ../../data/mongo_dump:/data/dump
     networks:
       - frontend
       - mongo
@@ -33,8 +33,15 @@ services:
       # - ./app:/usr/src/app
       - ./app/lib:/usr/src/app
     environment:
+      IPACS_DOMAIN_NAME: ${IPACS_DOMAIN_NAME}
+      COMS_DOMAIN_NAME: ${COMS_DOMAIN_NAME}
+      CAP_DOMAIN_NAME: ${CAP_DOMAIN_NAME}
+      LIB_DOMAIN_NAME: ${LIB_DOMAIN_NAME}
+      CONF_DOMAIN_NAME: ${CONF_DOMAIN_NAME}
+      ALBUM_DOMAIN_NAME: ${ALBUM_DOMAIN_NAME}
       VIRTUAL_HOST:
-        lib.physcon.my, lib.physcon.ru,
+        ${LIB_DOMAIN_NAME},
+        # lib.physcon.my, lib.physcon.ru,
     networks:
       - frontend
       - mongo

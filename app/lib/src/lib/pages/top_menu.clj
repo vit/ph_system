@@ -1,11 +1,16 @@
 (ns lib.pages.top-menu)
 
 
-(def menu [{:id "ipacs" :name "IPACS Home" :url "http://physcon.my"}
-                 {:id "coms" :name "CoMS" :url "http://coms.physcon.my"}
-                 {:id "cap" :name "CAP Journal" :url "http://cap.physcon.my"}
-                 {:id "lib" :name "Library" :url "http://lib.physcon.my"}
-                 {:id "conferences" :name "Conferences" :url "http://conf.physcon.my"}
-                 {:id "album" :name "Album" :url "http://album.physcon.my"}])
+(defn make-url [name]
+  (str "http://" (System/getenv name)))
+
+
+(def menu [{:id "ipacs" :name "IPACS Home" :url (make-url "IPACS_DOMAIN_NAME")}
+                 {:id "coms" :name "CoMS" :url (make-url "COMS_DOMAIN_NAME")}
+                 {:id "cap" :name "CAP Journal" :url (make-url "CAP_DOMAIN_NAME")}
+                 {:id "lib" :name "Library" :url (make-url "LIB_DOMAIN_NAME")}
+                 {:id "conferences" :name "Conferences" :url (make-url "CONF_DOMAIN_NAME")}
+                 {:id "album" :name "Album" :url (make-url "ALBUM_DOMAIN_NAME")}])
+
 
 
