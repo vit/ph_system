@@ -44,6 +44,9 @@ down:	## Stop docker compose
 ps:	## List docker compose containers
 	docker compose ps
 
+c:
+	docker compose config
+
 
 
 build:

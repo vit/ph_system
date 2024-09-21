@@ -7,6 +7,7 @@ services:
     # image: mongo:3.4
     image: mongo:3.6
     restart: always
+    container_name: ph_lib_mongo_${ENV_NAME}
     expose:
       - "27017"
     environment:
@@ -22,6 +23,7 @@ services:
 
   clojure:
     restart: always
+    container_name: ph_lib_clojure_${ENV_NAME}
     build: 
       context: ./clojure
       dockerfile: Dockerfile_Clojure
