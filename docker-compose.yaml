@@ -14,8 +14,8 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
     volumes:
-      - ../../data/mongo_db:/data/db
-      - ../../data/mongo_dump:/data/dump
+      - ../data/mongo_db:/data/db
+      - ../data/mongo_dump:/data/dump
     networks:
       - frontend
       - mongo
@@ -27,8 +27,8 @@ services:
     build: 
       context: ./clojure
       dockerfile: Dockerfile_Clojure
-    ports:
-      - '9000:9000'
+    # ports:
+    #   - '9000:9000'
     expose:
       - "9000"
     volumes:
