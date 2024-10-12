@@ -1,6 +1,7 @@
 
-services:
+name: ph_lib_${ENV_NAME}
 
+services:
 
   mongo:
     # image: mongo:3.2
