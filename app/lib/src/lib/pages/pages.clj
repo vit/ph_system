@@ -1,8 +1,8 @@
 ;; (ns lib.pages.pages
 (ns lib.pages.pages
   (:require 
-  ;;  [selmer.parser :as s]
    [lib.pages.top-menu :as tm]
+   [lib.pages.doc.meta-citation :as mc]
    [hiccup2.core :as h]
    ))
 
@@ -14,11 +14,7 @@
 
 (defn render-authors [authors]
   (h/html
-   (let [author_strings
-         (for [a authors]
-           (author_to_text a))
-         author_strings_separated
-         (interpose ", " author_strings)]
+   (let [author_strings (for [a authors] (author_to_text a))]
      [:span (clojure.string/join ", " author_strings)])))
 
 
@@ -37,9 +33,6 @@
     (for [c children]
       [:li {:style "margin-top: 0.3rem;"}
        (render-one-child c)])]))
-
-
-
 
 
 
@@ -146,7 +139,6 @@
 
 
 
-
 (defn render-layout [args page]
   (h/html
    [:html {:style "line-height: 1.15;"}
@@ -154,12 +146,18 @@
      [:meta {:charset "utf-8"}]
      [:title {} "************* | IPACS Electronic Library"]
      [:meta {:name "viewport" :content "width=device-width,minimum-scale=1"}]
-     [:meta {:name "description" :content "****************"}]]
+     [:meta {:name "description" :content "****************"}]
+
+     (let [doc (args :doc)]
+       (if doc
+         (mc/meta-citation doc) nil))]
+
+
+
     [:body {:style "margin: 0; background-color: #f4f4f4; font-family: avenir next, avenir, sans-serif;"}
      [:header
-        (render-top-menu-block)
-        (render-title-block)
-      ]
+      (render-top-menu-block)
+      (render-title-block)]
     ;;  [:div "bredcrumbs 1"]
      [:main {:style "padding-bottom: 16rem;"}
       ;; [:div "bredcrumbs 2"]
@@ -185,26 +183,9 @@
 (defn render-page
   [page args]
   (str (h/html
-        (render-layout {}
+        (render-layout args
                 ((pages page) args)))))
 
-
-
-
-
-
-
-
-
-
-
-
-;; (defn render-page
-;;   [page args]
-;;   (s/render-file "templates/layouts/application.html"
-;;                  {:content
-;;                   (s/render-file (format "templates/%s.html" page) args)
-;;                   :ipacs_menu tm/menu}))
 
 
 
