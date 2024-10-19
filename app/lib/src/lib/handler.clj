@@ -10,10 +10,12 @@
 
 
 (defn render-doc [id] 
-  (pages/render-page :doc {:doc (dbc/get-doc conn id)}))
+  (pages/render-page-doc {:doc (dbc/get-doc conn id)}))
+  ;; (pages/render-page :doc {:doc (dbc/get-doc conn id)}))
 
 (defn render-home []
-  (pages/render-page :home {}))
+  (pages/render-page-home {}))
+  ;; (pages/render-page :home {}))
 
 
 

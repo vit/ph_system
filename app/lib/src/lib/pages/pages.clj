@@ -139,25 +139,25 @@
 
 
 
-(defn render-layout [args page]
+
+
+(defn render-layout [args]
   (h/html
    [:html {:style "line-height: 1.15;"}
     [:head
      [:meta {:charset "utf-8"}]
-     [:title {} "************* | IPACS Electronic Library"]
      [:meta {:name "viewport" :content "width=device-width,minimum-scale=1"}]
+
+     [:title {} "************* | IPACS Electronic Library"]
+
      [:meta {:name "description" :content "****************"}]
-
-     (let [doc (args :doc)]
-       (if doc
-         (mc/meta-citation doc) nil))]
-
-
+     (args :meta-tags)]
 
     [:body {:style "margin: 0; background-color: #f4f4f4; font-family: avenir next, avenir, sans-serif;"}
      [:header
       (render-top-menu-block)
       (render-title-block)]
+     
     ;;  [:div "bredcrumbs 1"]
      [:main {:style "padding-bottom: 16rem;"}
       ;; [:div "bredcrumbs 2"]
@@ -166,26 +166,32 @@
         ;; [:header {}
         ;;  [:h1 {:style "font-size: 3rem;"}
         ;;   "Qwqrwe wer dfgs grf er"]]
-        [:div {:style "font-size: 1.25rem;"} page]]]]
+        [:div {:style "font-size: 1.25rem;"} (args :page-body)]]]]
      [:div {:class "bottom"}]]]
   ))
 
 
 
-(def pages {
-            ;; :home (fn [args] "home page")
-            :home page-home
-            :doc page-doc
-})
+
+(defn doc-meta-tags [args]
+  (let [doc (args :doc)]
+    (if doc
+      (mc/meta-tags-citation doc) nil)))
 
 
-
-(defn render-page
-  [page args]
+(defn render-page-home
+  [args]
   (str (h/html
-        (render-layout args
-                ((pages page) args)))))
+        (render-layout {:page-body (page-home args)
+                        :meta-tags nil}
+                ))))
 
-
+(defn render-page-doc [args]
+  (let [meta-tags (doc-meta-tags args)
+        page-body (page-doc args)]
+    (str (h/html
+          (render-layout
+           {:page-body page-body
+            :meta-tags meta-tags})))))
 
 
