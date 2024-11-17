@@ -21,14 +21,25 @@
           (conj parent-rez d))))
 )
 
+
+(defn get-file-id [conn doc-id]
+  (let [
+        file (mc/find-one (conn :db) "docs.files" {"_meta.parent" doc-id} {:keywordize? false})
+        file-id (if (nil? file) nil (file "_id"))
+  ] file-id))
+
+
+
 (defn get-doc [conn id]
   (let [doc (mc/find-one (conn :db) "docs" {:_id id} {:keywordize? false})
         children (mc/find (conn :db) "docs" {"_meta.parent" id} {:keywordize? false})
-        ancestors (get-ancestors conn doc)]
+        ancestors (get-ancestors conn doc)
+        file-id (get-file-id conn id)]
     (assoc
-     (assoc
-      doc "children" children)
-     "ancestors" ancestors)))
+     doc
+     "children" children
+     "ancestors" ancestors
+     "file-id" file-id)))
 
 
 (defn db-connect

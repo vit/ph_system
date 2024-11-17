@@ -85,6 +85,7 @@
          subtitle (info "subtitle")
          abstract (info "abstract")
          authors (doc "authors")
+         file-id (doc "file-id")
          children (doc "children")
          ancestors (doc "ancestors")]
      [:div {:class "doc-page"
@@ -97,6 +98,8 @@
       [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 0.85em; text-align: center;"} subtitle]
       [:p {:style "font-family: serif; font-weight: 900; font-size: 0.85em; text-align: center;"} (render-authors authors)]
       [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif;"} abstract]
+      [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif;"} "File: "
+       [:a {:href (str "/file?id=" file-id)} "download"]]
       [:div {:style ""} (render-children children)]])))
 
 
