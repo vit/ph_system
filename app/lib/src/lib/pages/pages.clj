@@ -70,10 +70,10 @@
 
 
 
-(defn render-ancestors [ancestors]
+(defn render-breadcrumbs [breadcrumbs]
   [:p
    [:a {:href "/"} "Root"]
-   (for [a ancestors]
+   (for [a breadcrumbs]
      [:span " / "
       [:a {:href (str "/doc?id=" (a :id))} (a :title)]])])
 
@@ -85,21 +85,25 @@
          subtitle (info "subtitle")
          abstract (info "abstract")
          authors (doc "authors")
-         file-id (doc "file-id")
+         file-info (doc "file-info")
+         file-id (if (some? file-info) (file-info "_id") nil)
          children (doc "children")
-         ancestors (doc "ancestors")]
+         breadcrumbs (doc "breadcrumbs")]
      [:div {:class "doc-page"
             :sstyle "text-align: center;"}
           ;;  [:p (str "args: " args)]
       ;; [:p (str "doc: " doc)]
           ;;  [:p (str "info: " info)]
-      [:div {:style ""} (render-ancestors ancestors)]
+      [:div {:style ""} (render-breadcrumbs breadcrumbs)]
       [:h2 {:style "text-align: center;"} title]
       [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 0.85em; text-align: center;"} subtitle]
       [:p {:style "font-family: serif; font-weight: 900; font-size: 0.85em; text-align: center;"} (render-authors authors)]
       [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif;"} abstract]
-      [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif;"} "File: "
-       [:a {:href (str "/file?id=" file-id)} "download"]]
+      (if (some? file-info)
+        [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif;"} file-info])
+      (if (some? file-id)
+        [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif;"} "File: "
+         [:a {:href (str "/file?id=" file-id)} "download"]])
       [:div {:style ""} (render-children children)]])))
 
 
