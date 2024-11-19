@@ -99,8 +99,8 @@
       [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 0.85em; text-align: center;"} subtitle]
       [:p {:style "font-family: serif; font-weight: 900; font-size: 0.85em; text-align: center;"} (render-authors authors)]
       [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif;"} abstract]
-      (if (some? file-info)
-        [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif;"} file-info])
+      ;; (if (some? file-info)
+      ;;   [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif;"} file-info])
       (if (some? file-id)
         [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif;"} "File: "
          [:a {:href (str "/file?id=" file-id)} "download"]])
