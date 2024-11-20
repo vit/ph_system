@@ -159,9 +159,9 @@
     [:a {:href "/" :style "font-size: 1.5rem; text-decoration: none; font-weight: 200; display: inline-block; color: rgba(255, 255, 255, .9);"}
      "IPACS Electronic library"]
 
-        [:div {:style "display: flex; align-items: center; justify-content: center;"}
-         [:form {:action "/search" :method "get"}
-          [:input {:name "q" :placeholder "Search" :style "display: flex; align-items: center; justify-content: center; max-width: 100%; min-width: 250px;"}]
+        [:div {:style "display: flex; align-items: center; justify-content: center; width: 50%;"}
+         [:form {:action "/search" :method "get" :style "display: flex; align-items: center; justify-content: center; margin: 0; width: 100%;"}
+          [:input {:name "q" :placeholder "Search" :style "font-size: 1.25rem; display: flex; align-items: center; justify-content: center; width: 100%; min-width: 100px;"}]
          ]
          
          ]
