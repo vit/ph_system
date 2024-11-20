@@ -54,6 +54,13 @@
      :gfs gfs}))
 
 
+(defn search [conn q]
+  (let [docs (find-docs conn {"$text" {"$search" q}})]
+    docs))
+
+
+
+
 ;; For debug purposes
 
 (defn gfs-test [conn id]

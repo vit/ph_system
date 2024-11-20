@@ -12,6 +12,9 @@
 (defn render-doc [id] 
   (pages/render-page-doc {:doc (dbc/get-doc conn id)}))
 
+(defn render-search [q]
+  (pages/render-page-search {:res (dbc/search conn q)}))
+
 (defn render-file [id]
   (let
    [file (dbc/get-file-by-id conn id)
@@ -25,7 +28,8 @@
   
 
 (defn render-gfs [id]
-     (dbc/gfs-test conn id))
+  (dbc/gfs-test conn id))
+
 
 
 (defn render-home []
@@ -36,6 +40,7 @@
   (GET "/doc" [id] (render-doc id))
   (GET "/file" [id] (render-file id))
   (GET "/gfs" [id] (render-gfs id))
+  (GET "/search" [q] (render-search q))
   (route/not-found "Not Found"))
 
 

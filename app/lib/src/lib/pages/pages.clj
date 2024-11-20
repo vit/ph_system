@@ -22,10 +22,16 @@
 (defn render-one-child [elm]
   (let [id (elm "_id")
         info (elm "info")
-        title (info "title")]
+        authors (elm "authors")
+        title (info "title") 
+        subtitle (info "subtitle")
+        ]
     (h/html
+     [:div {:style "font-family: serif; font-weight: 900; font-size: 0.85em;"} (render-authors authors)]
      [:div
-      [:a {:href (format "/doc?id=%s" id)} title]])))
+      [:a {:href (format "/doc?id=%s" id)} title]]
+     [:div
+      [:i subtitle]])))
 
 (defn render-children [children]
   (h/html
@@ -110,6 +116,24 @@
 
 
 
+(defn page-search [args]
+  (h/html
+   (let [res (args :res)
+         ]
+     [:div {:class "doc-page"
+       :sstyle "text-align: center;"}
+ [:h2 {:style "text-align: center;"} "Search results"]
+     [:div {:class "doc-page"
+            :sstyle "text-align: center;"}
+      [:div {:style ""} (render-children res)]
+      ]])))
+
+
+
+
+
+
+
 
 
 (defn render-top-menu-block []
@@ -134,6 +158,16 @@
    [:div {:style "display: flex; justify-content: space-between; margin-right: auto; margin-left: auto; align-items: center;"}
     [:a {:href "/" :style "font-size: 1.5rem; text-decoration: none; font-weight: 200; display: inline-block; color: rgba(255, 255, 255, .9);"}
      "IPACS Electronic library"]
+
+        [:div {:style "display: flex; align-items: center; justify-content: center;"}
+         [:form {:action "/search" :method "get"}
+          [:input {:name "q" :style "display: flex; align-items: center; justify-content: center; max-width: 100%; min-width: 250px;"}]
+         ]
+         
+         ]
+        [:div {:style "display: flex; align-items: center;"} ""]
+
+
 
     ;; [:div {:style "display: flex; align-items: center;"}
     ;;  [:ul {:style "margin: 10px; padding-left: 0;"}
@@ -196,6 +230,14 @@
 (defn render-page-doc [args]
   (let [meta-tags (doc-meta-tags args)
         page-body (page-doc args)]
+    (str (h/html
+          (render-layout
+           {:page-body page-body
+            :meta-tags meta-tags})))))
+
+(defn render-page-search [args]
+  (let [meta-tags (doc-meta-tags args)
+        page-body (page-search args)]
     (str (h/html
           (render-layout
            {:page-body page-body
