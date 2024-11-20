@@ -161,7 +161,7 @@
 
         [:div {:style "display: flex; align-items: center; justify-content: center;"}
          [:form {:action "/search" :method "get"}
-          [:input {:name "q" :style "display: flex; align-items: center; justify-content: center; max-width: 100%; min-width: 250px;"}]
+          [:input {:name "q" :placeholder "Search" :style "display: flex; align-items: center; justify-content: center; max-width: 100%; min-width: 250px;"}]
          ]
          
          ]
