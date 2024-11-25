@@ -36,14 +36,17 @@
         authors (doc "authors")
         children (doc "children")
         ancestors (doc "ancestors")
+        file-info (doc "file-info")
+        file-id (if (some? file-info) (file-info "_id") nil)
 
         pub-time (t/unparse (t/formatter "YYYY/mm/dd") (t/parse ctime))
         ]
     (h/html
      (meta-title title)
      (meta-publication-date pub-time)
-    ;;  (meta-publication-date ctime)
-     (meta-pdf-url id)
+    ;;  (meta-pdf-url id)
+     (if (some? file-id)
+       (meta-pdf-url file-id) nil)
      (meta-authors authors)
      )))
 

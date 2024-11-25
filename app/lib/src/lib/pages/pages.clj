@@ -151,7 +151,7 @@
                    :href (mi :url)} (mi :name)]]))]]]]]))
 
 
-(defn render-title-block []
+(defn render-title-block [args]
   (h/html
  [:div {:class "" :style "background-color: #357edd;"}
   [:nav {:class "" :style "padding-left: 2rem; padding-right: 2rem; padding-top: 1rem; padding-bottom: 1rem;"}
@@ -161,7 +161,14 @@
 
         [:div {:style "display: flex; align-items: center; justify-content: center; width: 50%;"}
          [:form {:action "/search" :method "get" :style "display: flex; align-items: center; justify-content: center; margin: 0; width: 100%;"}
-          [:input {:name "q" :placeholder "Search" :style "font-size: 1.25rem; display: flex; align-items: center; justify-content: center; width: 100%; min-width: 100px;"}]
+          [:input {
+                   :name "q"
+                   :placeholder "Search"
+                   :style "font-size: 1.25rem; display: flex; align-items: center; justify-content: center; width: 100%; min-width: 100px;"
+                   :value (let [search-query (args :search-query)]
+                            (if (not-empty search-query) search-query ""))
+                   }
+           ]
          ]
          
          ]
@@ -189,18 +196,24 @@
      [:meta {:charset "utf-8"}]
      [:meta {:name "viewport" :content "width=device-width,minimum-scale=1"}]
 
-     [:title {} "************* | IPACS Electronic Library"]
+     (let [page-title (args :page-title)
+           title (if (some? page-title) (str page-title " | ") "")]
+       [:title {} (str title "IPACS Electronic Library")])
 
-     [:meta {:name "description" :content "****************"}]
-     (args :meta-tags)]
+     (let [page-description (args :page-description)]
+       (if (some? page-description)
+          [:meta {:name "description" :content page-description}] ""))
+
+     (args :meta-tags)
+     ]
 
     [:body {:style "margin: 0; background-color: #f4f4f4; font-family: avenir next, avenir, sans-serif;"}
      [:header
       (render-top-menu-block)
-      (render-title-block)]
-     
+      (render-title-block args)]
+
     ;;  [:div "bredcrumbs 1"]
-     [:main {:style "padding-bottom: 16rem;"}
+     [:main {:style "padding-bottom: 1rem;"}
       ;; [:div "bredcrumbs 2"]
       [:div {:style "display: flex; margin-right: auto; margin-left: auto; margin-top: .5rem; max-width: 64rem;"}
        [:article {:style "margin-right: auto; margin-left: auto; padding-left: 2rem; padding-right: 2rem; ppadding-top: 4rem; padding-bottom: 4rem; max-width: 48rem;"}
@@ -208,8 +221,15 @@
         ;;  [:h1 {:style "font-size: 3rem;"}
         ;;   "Qwqrwe wer dfgs grf er"]]
         [:div {:style "font-size: 1.25rem;"} (args :page-body)]]]]
-     [:div {:class "bottom"}]]]
-  ))
+     [:div {:class "bottom"}]
+
+
+
+     [:footer {:style "padding: 1rem; background-color: #357edd;"}
+      [:div {:style "display: flex; justify-content: space-between; background-color: transparent;"}
+       [:a {:style "display: inline-block; font-size: 1.25rem; text-decoration: none; padding-left: 1rem; padding-right: 1rem; padding-top: .5rem; padding-bottom: .5rem; color: rgba(255, 255, 255, .7); font-weight: 400; background-color: transparent;"
+            :href "https://www.ipme.ru/ipme/labs/ccs/"}
+        "©  The Laboratory \"Control of Complex Systems\", IPME RAS 2003 — 2024"]]]]]))
 
 
 
@@ -218,6 +238,18 @@
   (let [doc (args :doc)]
     (if doc
       (mc/meta-tags-citation doc) nil)))
+
+(defn doc-page-title [args]
+  (let [doc (args :doc)
+        info (doc "info")
+        title (info "title")]
+    title))
+
+(defn doc-page-description [args]
+  (let [doc (args :doc)
+        info (doc "info")
+        description (info "abstract")]
+    (if (not-empty description) description nil)))
 
 
 (defn render-page-home
@@ -229,11 +261,18 @@
 
 (defn render-page-doc [args]
   (let [meta-tags (doc-meta-tags args)
-        page-body (page-doc args)]
+        page-title (doc-page-title args)
+        page-description (doc-page-description args)
+        page-body (page-doc args)
+        ]
     (str (h/html
           (render-layout
            {:page-body page-body
-            :meta-tags meta-tags})))))
+            :meta-tags meta-tags
+            :page-title page-title
+            :page-description page-description
+            }
+           )))))
 
 (defn render-page-search [args]
   (let [meta-tags (doc-meta-tags args)
@@ -241,6 +280,9 @@
     (str (h/html
           (render-layout
            {:page-body page-body
-            :meta-tags meta-tags})))))
+            :meta-tags meta-tags
+            :page-title "Search results"
+            :search-query (args :search-query)
+            })))))
 
 

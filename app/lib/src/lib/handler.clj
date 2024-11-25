@@ -13,7 +13,10 @@
   (pages/render-page-doc {:doc (dbc/get-doc conn id)}))
 
 (defn render-search [q]
-  (pages/render-page-search {:res (dbc/search conn q)}))
+  (pages/render-page-search {
+                             :res (dbc/search conn q)
+                             :search-query q
+                             }))
 
 (defn render-file [id]
   (let
