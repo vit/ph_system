@@ -188,42 +188,33 @@
 
 
 
-
-(defn render-layout [args]
+;; (defn render-layout [args]
+(defn render-layout [{:keys [page-title page-description page-body] :as args}]
   (h/html
    [:html {:style "line-height: 1.15;"}
     [:head
      [:meta {:charset "utf-8"}]
      [:meta {:name "viewport" :content "width=device-width,minimum-scale=1"}]
 
-     (let [page-title (args :page-title)
-           title (if (some? page-title) (str page-title " | ") "")]
-       [:title {} (str title "IPACS Electronic Library")])
 
-     (let [page-description (args :page-description)]
-       (if (some? page-description)
-          [:meta {:name "description" :content page-description}] ""))
+     [:title {} (str
+                 (if (not-empty page-title) (str page-title " | ") "")
+                 "IPACS Electronic Library")]
 
-     (args :meta-tags)
-     ]
+     (if (not-empty page-description)
+       [:meta {:name "description" :content page-description}] "")
+
+     (args :meta-tags)]
 
     [:body {:style "margin: 0; background-color: #f4f4f4; font-family: avenir next, avenir, sans-serif;"}
      [:header
       (render-top-menu-block)
       (render-title-block args)]
 
-    ;;  [:div "bredcrumbs 1"]
      [:main {:style "padding-bottom: 1rem;"}
-      ;; [:div "bredcrumbs 2"]
       [:div {:style "display: flex; margin-right: auto; margin-left: auto; margin-top: .5rem; max-width: 64rem;"}
        [:article {:style "margin-right: auto; margin-left: auto; padding-left: 2rem; padding-right: 2rem; ppadding-top: 4rem; padding-bottom: 4rem; max-width: 48rem;"}
-        ;; [:header {}
-        ;;  [:h1 {:style "font-size: 3rem;"}
-        ;;   "Qwqrwe wer dfgs grf er"]]
-        [:div {:style "font-size: 1.25rem;"} (args :page-body)]]]]
-     [:div {:class "bottom"}]
-
-
+        [:div {:style "font-size: 1.25rem;"} page-body]]]]
 
      [:footer {:style "padding: 1rem; background-color: #357edd;"}
       [:div {:style "display: flex; justify-content: space-between; background-color: transparent;"}
