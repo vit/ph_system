@@ -4,6 +4,7 @@
    [lib.pages.top-menu :as tm]
    [lib.pages.doc.meta-citation :as mc]
    [hiccup2.core :as h]
+   [hiccup.util :as hu]
    ))
 
 
@@ -72,6 +73,18 @@
                [:i "The documents, submitted by IPACS members"]]]]]]))
          
 
+(defn page-not-found [args]
+  (h/html
+   [:div {:class "doc-page"
+          :style "text-align: center; padding-top: 5rem;"}
+    [:div {:class "top_dirs"}
+     [:div {:class "block" :style "padding: 1rem; font-size: 4rem;"}
+      "404"]
+     [:div {:class "block" :style "padding: 1rem; font-size: 2rem;"}
+      "Page not found"]]]))
+         
+
+
 
 
 
@@ -104,7 +117,18 @@
       [:h2 {:style "text-align: center;"} title]
       [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 0.85em; text-align: center;"} subtitle]
       [:p {:style "font-family: serif; font-weight: 900; font-size: 0.85em; text-align: center;"} (render-authors authors)]
-      [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif;"} abstract]
+      ;; [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif;"} abstract]
+      [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif;"} 
+       (hu/raw-string
+       (clojure.string/replace
+        (hu/escape-html
+        abstract
+         )
+        #"\r\n|\n|\r" "<br />\n")
+)
+       
+       
+       ]
       ;; (if (some? file-info)
       ;;   [:p {:style "font-family: Verdana, Arial, Helvetica, sans-serif;"} file-info])
       (if (some? file-id)
@@ -249,6 +273,13 @@
         (render-layout {:page-body (page-home args)
                         :meta-tags nil}
                 ))))
+
+(defn render-page-not-found
+  [args]
+  (str (h/html
+        (render-layout {:page-body (page-not-found args)}))))
+
+
 
 (defn render-page-doc [args]
   (let [meta-tags (doc-meta-tags args)

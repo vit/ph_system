@@ -20,9 +20,11 @@
 
 
 (defn get-file-by-id [conn id]
-  {:writer (fn [ostream] (mongo-write-file-to-stream conn id ostream))
-   :info (find-file-info conn {"_id" id})})
-
+  (let [writer (fn [ostream] (mongo-write-file-to-stream conn id ostream))
+        info (find-file-info conn {"_id" id})]
+    (if (some? info)
+      {:writer writer :info info}
+      nil)))
 
 (defn get-doc-breadcrumbs [conn doc]
   (let [id (doc "_id")
@@ -38,11 +40,27 @@
 
 (defn get-doc [conn id]
   (let [doc (find-doc conn {:_id id})]
-    (assoc
-     doc
-     "file-info" (find-file-info conn {"_meta.parent" id})
-     "children" (find-docs conn {"_meta.parent" id})
-     "breadcrumbs" (get-doc-breadcrumbs conn doc))))
+    (if (some? doc)
+      (assoc
+       doc
+       "file-info" (find-file-info conn {"_meta.parent" id})
+       "children" (find-docs conn {"_meta.parent" id}
+                             
+                            ;;  @docs.find(
+                            ;;  				{'_meta.class' => LIB_DOC_CLASS, '_meta.parent' => id}
+                            ;;  			).sort( [[ '_meta.ctime', -1]] ).map do |d|
+                            ;;  				{
+                            ;;  					'_id' => d['_id'],
+                            ;;  					'info' => d['info'],
+                            ;;  					'authors' => d['authors']
+                            ;;  				}
+                            ;;  			end
+                             
+                             )
+       "breadcrumbs" (get-doc-breadcrumbs conn doc))
+      nil))
+  
+  )
 
 
 (defn db-connect []
