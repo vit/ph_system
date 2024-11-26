@@ -2,6 +2,8 @@
   (:require [compojure.core :refer :all]
             [compojure.route :as route]
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+            ;; [ring.middleware.defaults :refer [wrap-defaults site-defaults wrap-resource]]
+            [ring.middleware.resource :refer [wrap-resource]]
             [ring.util.response :as r]
             [lib.model.model :as dbc]
             [lib.pages.pages :as pages]))
@@ -83,7 +85,8 @@
 
 
 
-
 (def app
-  (wrap-defaults app-routes site-defaults))
+  (wrap-defaults (wrap-resource app-routes "public") site-defaults))
 
+;; (def app
+;;   (wrap-defaults app-routes site-defaults))

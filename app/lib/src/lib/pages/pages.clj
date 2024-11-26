@@ -219,32 +219,32 @@
     [:head
      [:meta {:charset "utf-8"}]
      [:meta {:name "viewport" :content "width=device-width,minimum-scale=1"}]
+     [:link {:rel "icon" :type "image/x-icon" :href "/favicon.ico"}]
 
+      [:title {} (str
+                  (if (not-empty page-title) (str page-title " | ") "")
+                  "IPACS Electronic Library")]
 
-     [:title {} (str
-                 (if (not-empty page-title) (str page-title " | ") "")
-                 "IPACS Electronic Library")]
+      (if (not-empty page-description)
+        [:meta {:name "description" :content page-description}] "")
 
-     (if (not-empty page-description)
-       [:meta {:name "description" :content page-description}] "")
+      (args :meta-tags)]
 
-     (args :meta-tags)]
+     [:body {:style "margin: 0; background-color: #f4f4f4; font-family: avenir next, avenir, sans-serif;"}
+      [:header
+       (render-top-menu-block)
+       (render-title-block args)]
 
-    [:body {:style "margin: 0; background-color: #f4f4f4; font-family: avenir next, avenir, sans-serif;"}
-     [:header
-      (render-top-menu-block)
-      (render-title-block args)]
+      [:main {:style "padding-bottom: 1rem;"}
+       [:div {:style "display: flex; margin-right: auto; margin-left: auto; margin-top: .5rem; max-width: 64rem;"}
+        [:article {:style "margin-right: auto; margin-left: auto; padding-left: 2rem; padding-right: 2rem; ppadding-top: 4rem; padding-bottom: 4rem; max-width: 48rem;"}
+         [:div {:style "font-size: 1.25rem;"} page-body]]]]
 
-     [:main {:style "padding-bottom: 1rem;"}
-      [:div {:style "display: flex; margin-right: auto; margin-left: auto; margin-top: .5rem; max-width: 64rem;"}
-       [:article {:style "margin-right: auto; margin-left: auto; padding-left: 2rem; padding-right: 2rem; ppadding-top: 4rem; padding-bottom: 4rem; max-width: 48rem;"}
-        [:div {:style "font-size: 1.25rem;"} page-body]]]]
-
-     [:footer {:style "padding: 1rem; background-color: #357edd;"}
-      [:div {:style "display: flex; justify-content: space-between; background-color: transparent;"}
-       [:a {:style "display: inline-block; font-size: 1.25rem; text-decoration: none; padding-left: 1rem; padding-right: 1rem; padding-top: .5rem; padding-bottom: .5rem; color: rgba(255, 255, 255, .7); font-weight: 400; background-color: transparent;"
-            :href "https://www.ipme.ru/ipme/labs/ccs/"}
-        "©  The Laboratory \"Control of Complex Systems\", IPME RAS 2003 — 2024"]]]]]))
+      [:footer {:style "padding: 1rem; background-color: #357edd;"}
+       [:div {:style "display: flex; justify-content: space-between; background-color: transparent;"}
+        [:a {:style "display: inline-block; font-size: 1.25rem; text-decoration: none; padding-left: 1rem; padding-right: 1rem; padding-top: .5rem; padding-bottom: .5rem; color: rgba(255, 255, 255, .7); font-weight: 400; background-color: transparent;"
+             :href "https://www.ipme.ru/ipme/labs/ccs/"}
+         "©  The Laboratory \"Control of Complex Systems\", IPME RAS 2003 — 2024"]]]]]))
 
 
 
