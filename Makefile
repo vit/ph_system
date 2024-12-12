@@ -62,4 +62,11 @@ clojure:
 		my_clojure
 
 
+backup:
+	docker exec ph_lib_mongo_$(ENV_NAME) bash -c 'mongodump --username=root --password=example --archive | gzip -c | cat' > ./data/export/mongo_dump_$(ENV_NAME)_`date +%Y-%m-%d"_"%H_%M_%S`.gz
+
+restore: ## cat archive.gz | make restore
+	docker exec -i ph_lib_mongo_$(ENV_NAME) bash -c 'gunzip -c | mongorestore --username=root --password=example --archive'
+
+
 

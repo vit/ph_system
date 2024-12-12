@@ -15,8 +15,9 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
     volumes:
-      - ../data/mongo_db:/data/db
-      - ../data/mongo_dump:/data/dump
+      - mongo-data:/data/db
+      # - ../data/mongo_db:/data/db
+      # - ../data/mongo_dump:/data/dump
     networks:
       - frontend
       - mongo
@@ -59,5 +60,8 @@ networks:
     external: true 
     name: frontend 
   mongo:
+
+volumes:
+  mongo-data:
 
  
