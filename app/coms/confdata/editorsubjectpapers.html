@@ -1,0 +1,193 @@
+<?
+$PAGEID = 'editorial';
+
+
+
+if (!$USERPIN)
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+You need to enter the system.
+<br>
+Use the form in the upper right corner of the page.
+</center>
+<p>
+
+PAGEBODY;
+
+else {
+
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Section papers</span></center>
+<p>
+
+PAGEBODY;
+
+$PAGEBODY .= <<<PAGEBODY
+<a href="editorial.html">Return to editorial office</a>
+<p>
+
+PAGEBODY;
+
+if($PERMISSIONS['EDITOR_WIEW_REVIEWING_DATA'] && $iseditor) {
+
+
+$subjid = "";
+
+//$score = $_REQUEST[score]?(int)$_REQUEST[score]:"NULL";
+//$decision = $_REQUEST[decision]?(int)$_REQUEST[decision]:"NULL";
+
+$subjid0 = $_REQUEST['subjid'];
+
+
+//if( $subjid0 > 0 && $PERMISSIONS['SUBJADM_EDIT_SUBJECT'] ) {
+  $result = pg_query("SELECT * FROM subject WHERE context=$CURRENTCONT AND subjid=$subjid0 AND editor=$EDITORID");
+  if( $row = pg_fetch_array($result) ) {
+    $subjid = $row['subjid'];
+    $ctitle1 = htmlspecialchars($row[title]);
+    $cabstract1 = nl2br( htmlspecialchars($row[abstract]) );
+  }
+//}
+
+
+if( $subjid > 0 ) {
+  $flag = $_REQUEST[flag];
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<center>
+
+<b>Section ID:</b> $subjid
+<br>
+<b>Section title:</b> $ctitle1
+<p>
+
+PAGEBODY;
+
+
+
+$cellclass1 = "cell1";
+$cellclass2 = "cell2";
+$cellclass = $cellclass1;
+
+
+$PAGEBODY .= <<<PAGEBODY
+<table align=center border=1>
+  <tr class=$cellclass2>
+    <th rowspan=2>Paper_ID</th>
+    <th>Title</th>
+    <!-- th>Section</th -->
+    <th>Registrator</th>
+    <th>Download</th>
+  </tr>
+  <tr class=$cellclass2>
+    <th class=cell3 colspan=3>Abstract</th>
+  </tr>
+
+PAGEBODY;
+
+  $result = pg_query("
+SELECT p.*, t.shortstr || ' ' || u.fname || ' ' || u.lname || ' (PIN:' || p.registrator || ')' AS name
+FROM 
+  (paper AS p
+   INNER JOIN userpin AS u ON p.registrator=u.pin AND p.subject=$subjid)
+    LEFT JOIN title AS t ON u.title=t.titleid
+ORDER BY p.papnum
+");
+
+  while( $row = pg_fetch_array($result) ) {
+    $papid = $row['papnum'];
+    $ctitle1 = htmlspecialchars($row[title]);
+    $cabstract1 = nl2br( htmlspecialchars($row[abstract]) );
+    $uname1 = htmlspecialchars($row[name]);
+
+    $subject1 = (int)$row['subject'];
+    $subject1_str = $SUBJECTS[$subject1];
+
+
+    $filename = $papersdir."/c".$CURRENTCONT."p".$row[papnum];
+    if ( file_exists($filename) ) {
+      $srcfname = $row[filename];
+      preg_match('|(.*)\.(.*)|', $srcfname, $fnparse);
+      $fileext = $fnparse[2];
+      $externfname = "c{$CURRENTCONT}p{$row[papnum]}r{$row[registrator]}.$fileext";
+      $papfilesize = filesize( $filename );
+
+
+      $downloadtext = <<<downloadtext
+    <a href="{$ROOT}getpaper/$externfname">$papfilesize bytes</a>
+
+downloadtext;
+    } else {
+      $downloadtext = <<<downloadtext
+    No
+
+downloadtext;
+    }
+
+
+
+    $PAGEBODY .= <<<PAGEBODY
+<tr class=$cellclass>
+  <td align=center rowspan=2>
+    <a href="{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row[registrator]}.html" title="Paper information"
+      onClick="window.open('{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row[registrator]}.html', '', 'location=no, menubar=no, toolbar=no, statusbar=no, scrollbars=yes, width=620, height=550, resizable=yes'); return false;"
+    >[&nbsp;$papid&nbsp;]</a>
+  </td>
+  <td>
+    $ctitle1
+  </td>
+  <!-- td>
+    $subject1_str
+  </td -->
+  <td align=center>$uname1</td>
+  <td align=center>
+    $downloadtext
+  </td>
+</tr>
+<tr class=$cellclass>
+  <td class=cell3 colspan=3>
+    $cabstract1
+  </td>
+</tr>
+
+PAGEBODY;
+
+    $cellclass1 = $cellclass2;
+    $cellclass2 = $cellclass;
+    $cellclass = $cellclass1;
+  }
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+<br>
+
+PAGEBODY;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+</center>
+
+PAGEBODY;
+
+
+}
+
+
+}
+
+
+
+
+
+}
+
+
+?>

@@ -1,5 +1,5 @@
 
-name: ph_lib_${ENV_NAME}
+name: ph_system_${ENV_NAME}
 
 services:
 
@@ -8,7 +8,7 @@ services:
     # image: mongo:3.4
     image: mongo:3.6
     restart: always
-    container_name: ph_lib_mongo_${ENV_NAME}
+    container_name: ph_system_mongo_${ENV_NAME}
     expose:
       - "27017"
     environment:
@@ -25,7 +25,7 @@ services:
 
   clojure:
     restart: always
-    container_name: ph_lib_clojure_${ENV_NAME}
+    container_name: ph_system_clojure_${ENV_NAME}
     build: 
       context: ./clojure
       dockerfile: Dockerfile_Clojure
@@ -53,14 +53,139 @@ services:
       - mongo
 
 
+# >>>
+  nginx:
+    restart: always
+    container_name: ph_system_web_${ENV_NAME}
+    build: 
+      context: ./nginx
+      dockerfile: Dockerfile_Nginx
+    expose:
+      - "80"
+    volumes:
+      - ./app/coms:/var/www/html
+      - backup:/data/backup
+    secrets:
+      - htpasswd-coms
+    environment:
+      VIRTUAL_HOST:
+        ${COMS_DOMAIN_NAME},
+    networks:
+      - frontend
+      - php
+    links:
+      - php-fpm
+
+  php-fpm:
+    restart: always
+    container_name: ph_system_php_${ENV_NAME}
+    build: 
+      context: ./php
+      dockerfile: Dockerfile_PhpFpm
+    expose:
+      - "9000"
+    volumes:
+      - ./app/coms:/var/www/html
+      - coms-papers:/data/papers
+      - backup:/data/backup
+    networks:
+      - php
+      - pg
+      - smtp
+
+  php-cron:
+    restart: always
+    container_name: ph_system_cron_${ENV_NAME}
+    build: 
+      context: ./php
+      dockerfile: Dockerfile_PhpCron
+    volumes:
+      - ./app/coms:/var/www/html
+      - coms-papers:/data/papers
+    networks:
+      - php
+      - pg
+      - smtp
+
+  postgres:
+    restart: always
+    container_name: ph_system_pg_${ENV_NAME}
+    build: 
+      context: ./pg
+      dockerfile: Dockerfile_Pg
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - backup:/data/backup
+    environment:
+      POSTGRES_USER: "root"
+      POSTGRES_PASSWORD: "root"
+    expose:
+      - "5432"
+    networks:
+      - pg
+
+  postfix:
+    restart: always
+    container_name: ph_system_mail_${ENV_NAME}
+    build: 
+      context: ./postfix
+      dockerfile: Dockerfile
+    expose:
+      - "25"
+    environment:
+      maildomain: ${IPACS_DOMAIN_NAME}
+      smtp_user: sender:love
+    secrets:
+      - mail.private
+    networks:
+      - smtp
+
+
+# <<<
+
+
+  # admin-nginx:
+  #   restart: always
+  #   container_name: ph_system_admin_${ENV_NAME}
+  #   build: 
+  #     context: ./admin_nginx
+  #     dockerfile: Dockerfile_Nginx
+  #   expose:
+  #     - "80"
+  #   volumes:
+  #     - ./app/admin:/var/www/html
+  #     - backup:/data/backup
+  #   environment:
+  #     VIRTUAL_HOST:
+  #       ${ADMIN_DOMAIN_NAME},
+  #   networks:
+  #     - frontend
+
+
+
+
+
+secrets:
+  mail.private:
+    file: .secrets/domainkeys/mail.private
+  htpasswd-coms:
+    file: .secrets/web/htpasswd-coms
+
+volumes:
+  mongo-data:
+  pg-data:
+  coms-papers:
+  opendkim-domainkeys:
+  backup:
 
 networks:
   frontend:
     external: true 
     name: frontend 
   mongo:
+  php:
+  pg:
+  smtp:
 
-volumes:
-  mongo-data:
 
  

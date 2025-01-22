@@ -1,0 +1,52 @@
+<?
+//$PARTID = 'pin';
+$PAGEID = 'main';
+
+include_once("start.php");
+//include("start.php");
+
+//$PAGETITLE = "Account management";
+
+$PAGEBODY = <<<PAGEBODY
+
+<ul>
+<li>
+To use the system enter your data in the upper right corner of the page.
+<p>
+</li>
+<li>
+Forgot your PIN? Search our database with your name at
+"<a href="find.html"><b>Find user</b></a>".
+<p>
+</li>
+<li>
+Forgot your password? Click here
+"<a href="retrieve.html"><b>Retrieve password</b></a>".
+You will get you password by e-mail.
+<p>
+</li>
+<li>
+Registration of new users
+"<a href="new.html"><b>Register new user</b></a>".
+<p>
+</li>
+<!-- li>
+To enter the system use the form in the upper right corner of the page.
+<p>
+</li -->
+<li>
+You may update you personal data at
+"<a href="info.html"><b>My data</b></a>"
+(You need to enter the system).
+<p>
+</li>
+</ul>
+
+
+
+PAGEBODY;
+
+
+include_once("finish.php");
+
+?>

@@ -1,0 +1,290 @@
+<?
+$pageid = mailcenter;
+
+include_once("start.php");
+
+//include_once("mainmenu.php");
+
+$mailtitle = trim( $_REQUEST['mailtitle'] );
+$addmailflag = $_REQUEST['addmailflag'];
+$mlid = $_REQUEST['mlid'];
+$mldata = $_REQUEST['mldata'];
+$mlaction = $_REQUEST['mlaction'];
+
+if ( $mlaction == "savemail" ) {
+  $result = pg_query("UPDATE maildata SET mltitle='$mldata[title]', mlsubject='$mldata[subject]', mlfrom='$mldata[from]', mlbody='$mldata[body]', mldate=NOW() WHERE mlid='$mlid'");
+}
+
+if ( $mlaction == "savereceivers" ) {
+  $mlrcvrflag = $_REQUEST['mlrcvrflag'];
+  $mlrcvrdata = $_REQUEST['mlrcvrdata'];
+  $rcvrflags = 0;
+  if( is_array( $mlrcvrflag ) )
+    foreach ($mlrcvrflag as $f)
+      $rcvrflags |= $f;
+  $rcvrid = (int)$mlrcvrdata[rcvrid];
+  if( $rcvrid == 0 )
+    $rcvrid = "NULL";
+
+  $result = pg_query("UPDATE maildata SET mlrcvrflags='$rcvrflags', mlrcvrpin=$rcvrid, mlrcvraddr='$mlrcvrdata[rcvraddr]' WHERE mlid='$mlid'");
+}
+
+if ( $mlaction == "send" ) {
+  $result = pg_query("SELECT * FROM maildata WHERE mlid='$mlid'");
+  if( $ml = pg_fetch_array( $result ) ) {
+    $rcvridflag = ( $ml[mlrcvrflags] & 1 ) > 0;
+    $rcvraddrflag = ( $ml[mlrcvrflags] & 2 ) > 0;
+    $rcvrallflag = ( $ml[mlrcvrflags] & 128 ) > 0;
+
+    $mlrcvrid = $ml[mlrcvrpin];
+    $mlrcvraddr = $ml[mlrcvraddr];
+
+    if ( $rcvridflag ) {
+      $result = pg_query("INSERT INTO mailtask (taskpin, tasktrycnt, taskstatus, tasktype, mlid) VALUES('$mlrcvrid', '0', '0', '1', '$mlid')");
+    }
+    if ( $rcvraddrflag ) {
+      $result = pg_query("INSERT INTO mailtask (taskemail, tasktrycnt, taskstatus, tasktype, mlid) VALUES ('$mlrcvraddr', '0', '0', '2', '$mlid')");
+    }
+    if ( $rcvrallflag ) {
+      $result = pg_query("INSERT INTO mailtask (taskpin, tasktrycnt, taskstatus, tasktype, mlid) SELECT pin, '0', '0', '1', '$mlid' FROM userpin WHERE enabled=true");
+    }
+
+  }
+}
+
+if ( $mlaction == "toarchive" ) {
+  $result = pg_query("UPDATE mailtask SET taskstatus=taskstatus+2 WHERE mlid='$mlid' AND (taskstatus='1' OR taskstatus='0')");
+}
+
+if ( $mlaction == "cleararchive" ) {
+  $result = pg_query("DELETE FROM mailtask WHERE mlid='$mlid' AND (taskstatus='2' OR taskstatus='3')");
+}
+
+
+
+$result = pg_query("SELECT * FROM maildata WHERE mlid='$mlid'");
+if( $ml = pg_fetch_array( $result ) ) {
+
+  $PAGEBODY .= <<<PAGEBODY
+<br>
+Last updated at $ml[mldate]
+<br><br>
+
+<div style="border-style: solid; border-width: thin; border-color: '#aaaaaa'; margin: 0;">
+<b>Edit mail: </b>
+<FORM name=editmailform METHOD="POST" style="margin: 0;">
+  Title: <input TYPE="text" NAME="mldata[title]" SIZE=80 MAXLENGTH=150 value="$ml[mltitle]"><br>
+  From: <input TYPE="text" NAME="mldata[from]" SIZE=80 MAXLENGTH=150 value="$ml[mlfrom]"><br>
+  Subject: <input TYPE="text" NAME="mldata[subject]" SIZE=80 MAXLENGTH=150 value="$ml[mlsubject]"><br>
+  <textarea name="mldata[body]" rows=20 cols=80 wrap=physical>$ml[mlbody]</textarea><br>
+  <input type="hidden" name="mlaction" value="savemail">
+  <input type="submit" value="Save mail">
+</FORM>
+</div>
+
+PAGEBODY;
+
+$rcvridflag = ( $ml[mlrcvrflags] & 1 ) > 0;
+$rcvraddrflag = ( $ml[mlrcvrflags] & 2 ) > 0;
+$rcvrallflag = ( $ml[mlrcvrflags] & 128 ) > 0;
+
+$rcvridchecked = $rcvridflag?" checked":"";
+$rcvraddrchecked = $rcvraddrflag?" checked":"";
+$rcvrallchecked = $rcvrallflag?" checked":"";
+
+$PAGEBODY .= <<<PAGEBODY
+<br>
+<div style="border-style: solid; border-width: thin; border-color: '#aaaaaa'; margin: 0;">
+<b>Edit receivers: </b>
+<FORM name=editreceiversform METHOD="POST" aACTION="<?= $GLOBALS[mailcenter]?>" eENCTYPE="application/x-www-form-urlencoded" style="margin: 0;">
+  To PIN: <input type=checkbox name="mlrcvrflag[]" value="1" $rcvridchecked>
+  PIN: <input TYPE="text" NAME="mlrcvrdata[rcvrid]" SIZE=10 MAXLENGTH=12 value="$ml[mlrcvrpin]"><br>
+  To address: <input type=checkbox name="mlrcvrflag[]" value="2" $rcvraddrchecked>
+  Address: <input TYPE="text" NAME="mlrcvrdata[rcvraddr]" SIZE=60 MAXLENGTH=150 value="$ml[mlrcvraddr]"><br>
+  To all: <input type=checkbox name="mlrcvrflag[]" value="128" $rcvrallchecked>
+<br>
+  <input type="hidden" name="mlaction" value="savereceivers">
+  <input type="submit" value="Save receivers">
+</FORM>
+</div>
+
+PAGEBODY;
+
+
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+<br>
+<a name="mailstate"></a>
+<div style="border-style: solid; border-width: thin; border-color: '#aaaaaa'; margin: 0;">
+<b>Mail control / view state: </b> 
+<FORM name=sendmailform METHOD="POST" ACTION="#mailstate" aENCTYPE="application/x-www-form-urlencoded" style="margin: 0;">
+  <input type=hidden name="mlid" value="$mlid">
+  <input type="hidden" name="mlaction" value="">
+  <input type="submit" name="sendmail" value="Send" onClick="sendmailform.mlaction.value='send'">
+  <input type="submit" name="toarchive" value="To archive" onClick="sendmailform.mlaction.value='toarchive'">
+  <input type="submit" name="refresh" value="Refresh info" onClick="sendmailform.mlaction.value=''">
+</FORM>
+
+PAGEBODY;
+
+$mlstat = db_ml_getMailStatistics( $mlid );
+
+$PAGEBODY .= <<<PAGEBODY
+<b>Statistics:</b><br>
+<b>Queued (in all)</b>: {$mlstat[cnt]} &nbsp;
+<b>Sent</b>: {$mlstat[sent]} &nbsp;
+<b>Errors</b>: {$mlstat[err]} &nbsp;
+</div>
+
+PAGEBODY;
+
+$PAGEBODY .= <<<PAGEBODY
+<br>
+<div style="border-style: solid; border-width: thin; border-color: '#aaaaaa'; margin: 0;">
+<b>Mail queue: </b>
+
+PAGEBODY;
+
+$PAGEBODY .= <<<PAGEBODY
+<table border=1 wwidth=100%>
+<tr>
+  <th>status</th>
+  <th>error</th>
+  <th>by</th>
+  <th>pin</th>
+  <th>email</th>
+</tr>
+
+PAGEBODY;
+
+$by_arr = array(1 => pin, 2 => email, 4 => context, 8 => 'paper id');
+
+$result = pg_query("SELECT * FROM mailtask WHERE mlid='$mlid' AND (taskstatus='1' OR taskstatus='0') ORDER BY taskid DESC");
+while( $row = pg_fetch_array( $result ) ) {
+  $err = $row[taskerror];
+  $marker = '';
+  if ( $err ) {
+    $marker = 'style="background-color: #ff0000;"';
+  }
+
+  $proc1 = $row[taskstatus]==1?"processed":"not processed";
+  $PAGEBODY .= <<<PAGEBODY
+<tr>
+  <td>$proc1</td>
+  <td $marker>$err</td>
+  <td>{$by_arr[$row[tasktype]]}</td>
+  <td>$row[taskpin]</td>
+  <td>$row[taskemail]</td>
+</tr>
+
+PAGEBODY;
+}
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+</div>
+
+PAGEBODY;
+
+
+$PAGEBODY .= <<<PAGEBODY
+<br>
+<div style="border-style: solid; border-width: thin; border-color: '#aaaaaa'; margin: 0;">
+<b>Mail archive: </b>
+
+PAGEBODY;
+
+$PAGEBODY .= <<<PAGEBODY
+<a name="mailarch"></a>
+<FORM name=archform METHOD="POST" ACTION="#mailarch" aENCTYPE="application/x-www-form-urlencoded" style="margin: 0;">
+  <input type=hidden name="mlid" value="$mlid">
+  <input type="hidden" name="mlaction" value="">
+  <input type="submit" name="cleararchive" value="Clear archive" onClick="archform.mlaction.value='cleararchive'">
+</FORM>
+
+PAGEBODY;
+
+
+$PAGEBODY .= <<<PAGEBODY
+<table border=1 wwidth=100%>
+<tr>
+  <th>status</th>
+  <th>error</th>
+  <th>by</th>
+  <th>pin</th>
+  <th>email</th>
+</tr>
+
+PAGEBODY;
+
+$by_arr = array(1 => pin, 2 => email, 4 => context, 8 => 'paper id');
+
+$result = pg_query("SELECT * FROM mailtask WHERE mlid='$mlid' AND (taskstatus='2' OR taskstatus='3') ORDER BY taskid DESC");
+while( $row = pg_fetch_array( $result ) ) {
+    $err = $row[taskerror];
+    $marker = '';
+    if ( $err ) {
+      $marker = 'style="background-color: #ff0000;"';
+    }
+    $proc1 = $row[taskstatus]==3?"processed":"not processed";
+
+$PAGEBODY .= <<<PAGEBODY
+<tr>
+  <td>$proc1</td>
+  <td $marker>$err</td>
+  <td>{$by_arr[$row[tasktype]]}</td>
+  <td>$row[taskpin]</td>
+  <td>$row[taskemail]</td>
+</tr>
+
+PAGEBODY;
+
+  }
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+</div>
+
+PAGEBODY;
+}
+
+function db_ml_getMailStatistics( $mlid ) {
+  $rez = array();
+
+  $result = pg_query("SELECT COUNT(*) FROM mailtask WHERE mlid='$mlid' AND ( taskstatus='1' OR taskstatus='0' )");
+  if ( $result ) {
+    if (pg_num_rows($result) > 0) {
+      $row = pg_fetch_array($result);
+      $cnt = $row[0];
+    }
+  }
+  $rez[cnt] = $cnt;
+
+  $result = pg_query("SELECT COUNT(*) FROM mailtask WHERE mlid='$mlid' AND taskstatus='1' AND taskerror='0'");
+  if ( $result ) {
+    if (pg_num_rows($result) > 0) {
+      $row = pg_fetch_array($result);
+      $sent = $row[0];
+    }
+  }
+  $rez[sent] = $sent;
+
+  $result = pg_query("SELECT COUNT(*) FROM mailtask WHERE mlid='$mlid' AND taskstatus='1' AND taskerror!='0'");
+  if ( $result ) {
+    if (pg_num_rows($result) > 0) {
+      $row = pg_fetch_array($result);
+      $err = $row[0];
+    }
+  }
+  $rez[err] = $err;
+
+  return $rez;
+}
+
+
+include_once("finish.php");
+
+?>

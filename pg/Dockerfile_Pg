@@ -1,0 +1,14 @@
+FROM postgres:12
+
+RUN localedef -i ru_RU -c -f CP1251 -A /usr/share/locale/locale.alias ru_RU.CP1251
+# ENV LANG ru_RU.CP1251
+
+# COPY ./sql/01_init/pg_20240426_fixed.sql /docker-entrypoint-initdb.d/
+# COPY ./sql/02_update/z_400_update.sql /docker-entrypoint-initdb.d/
+COPY ./init/01_create/* /docker-entrypoint-initdb.d/
+COPY ./init/02_update/* /docker-entrypoint-initdb.d/
+
+COPY ./config/backup-pg.sh /backup-pg.sh
+
+
+

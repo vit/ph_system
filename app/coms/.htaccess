@@ -1,0 +1,5 @@
+
+AddType application/x-httpd-php .html
+
+php_flag magic_quotes_gpc 1
+php_flag magic_quotes_runtime 0

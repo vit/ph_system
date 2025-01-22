@@ -3,3 +3,37 @@
 
 data/import
 data/export
+
+
+
+
+.secrets
+
+
+nginx/default.conf
+
+config.php
+app/coms/papers
+
+# admin/conf.php
+
+# pg_*.sql
+
+pg/init/01_create
+# data/pg
+data/domainkeys
+# data/log
+# data/papers
+
+
+backup
+
+trash
+
+
+
+admin_nginx
+
+app/admin/
+
+

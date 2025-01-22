@@ -1,0 +1,53 @@
+<?
+$pageid = allkeywords;
+
+include_once("start.php");
+
+
+  $flag = $_REQUEST[flag];
+  $kwid = $_REQUEST[kwid];
+  $name = trim( $_REQUEST[name] );
+
+
+  if ( $flag=="save" && $name ) {
+    $result = pg_query("UPDATE keyword SET name='$name' WHERE kwid='$kwid'");
+  }
+
+
+
+$result = pg_query("SELECT * FROM keyword WHERE kwid='$kwid'");
+if( $row = pg_fetch_array($result) ) {
+
+  $row[name] = htmlspecialchars($row[name]);
+
+  $PAGEBODY .= <<<PAGEBODY
+
+<a href="allkeywords.html">&lt;&lt; Back</a>
+
+<center>
+<h2>Edit Keyword</h2>
+
+<p>
+
+<table>
+<td align=left>
+<b>Keyword ID: $row[kwid]</b>
+<form method=post>
+  <input type=hidden name="flag" value="save">
+  <input type=hidden name="kwid" value="$row[kwid]">
+  Name: <input type=text name="name" size=32 value="$row[name]"><br>
+<br>
+  <input type=submit value="Submit"><br>
+</form>
+</td>
+</table>
+</center>
+
+PAGEBODY;
+
+}
+
+
+
+include_once("finish.php");
+?>

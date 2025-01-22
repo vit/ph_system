@@ -1,0 +1,188 @@
+<?
+$PAGEID = 'subjects';
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Sections</span></center>
+<p>
+
+PAGEBODY;
+
+
+  $flag = $_REQUEST['flag'];
+  $title = trim( $_REQUEST['title']);
+  $abstract = trim( $_REQUEST['abstract']);
+  $isinvited = $_REQUEST['isinvited']?"TRUE":"FALSE";
+  $managerpin = trim( $_REQUEST['managerpin']);
+  $managerpin = $managerpin>0?$managerpin:"NULL";
+  $editorid = trim( $_REQUEST['editorid']);
+  $editorid = $editorid>0?$editorid:"NULL";
+  $marked = &$_REQUEST['marked'];
+
+  if ( $flag=="add" ) {
+    $result = @pg_query("INSERT INTO subject (context, manager, title, abstract, isinvited, editor) VALUES ($CURRENTCONT, $managerpin, '$title', '$abstract', $isinvited, $editorid)");
+//    print pg_last_error()."<br>\n";
+  }
+
+  if ( $flag=="delete" && isset($marked) ) {
+    foreach( $marked as $nomer ) {
+      $result = @pg_query("DELETE FROM subject WHERE context=$CURRENTCONT AND subjid='$nomer'");
+//    print pg_last_error()."<br>\n";
+    }
+  }
+
+
+$editors = array(0 => 'Uncertain');
+
+/*
+$result = pg_query("
+SELECT e.*, t.shortstr || ' ' || u.fname || ' ' || u.lname || ' (PIN:' || e.userpin || ')' AS name
+FROM (editor AS e INNER JOIN userpin AS u ON e.userpin=u.pin AND e.context=$CURRENTCONT)
+  LEFT JOIN title AS t ON u.title=t.titleid
+ORDER BY name;
+");
+while( $row = pg_fetch_array($result) ) {
+  $editors[$row[editorid]] = $row[name];
+}
+*/
+
+$result = pg_query("
+SELECT e.*, getfullnamewithpin(e.userpin) AS name
+FROM editor AS e
+WHERE e.context=$CURRENTCONT
+ORDER BY name;
+");
+while( $row = pg_fetch_array($result) ) {
+  $editors[$row[editorid]] = $row[name];
+}
+
+
+
+  $EDLIST = "<SELECT name=editorid>";
+//  $EDLIST .= "<OPTION value=0> -- Not defined -- </OPTION>";
+  foreach($editors AS $num => $name) {
+    $selflag = "";
+//    $selflag = $num==$row[editor]?"SELECTED":"";
+    $EDLIST .= "<OPTION value=$num $selflag>$name</OPTION>";
+  }
+  $EDLIST .= "</SELECT>";
+
+
+
+$cellclass1 = "cell1";
+$cellclass2 = "cell2";
+$cellclass = $cellclass1;
+
+
+$PAGEBODY .= <<<PAGEBODY
+<center>
+<form method=post name=subjform>
+<table align=center wwidth=100% border=1>
+<tr class=$cellclass2 aalign=left>
+<th width=1 rowspan=2>Mark</th>
+<th>Title</th>
+<th>Invited?</th>
+<th wwidth=1>Manager</th>
+<th>Editor</th>
+<th>Edit</th>
+</tr>
+<tr class=cell3>
+<th colspan=5>Abstract</th>
+</tr>
+
+PAGEBODY;
+
+  $result = pg_query("
+SELECT *, getfullnamewithpin(manager) AS managername
+FROM subject
+WHERE context=$CURRENTCONT 
+ORDER BY isinvited, title, subjid;
+");
+
+  while( $row = pg_fetch_array($result) ) {
+    $ctitle1 = htmlspecialchars($row['title']);
+    $cabstract1 = nl2br( htmlspecialchars($row['abstract']) );
+    $invited1 = $row[isinvited]=='t'?"Yes":"No";
+/*
+    $managerpin1 = $row[manager];
+    if( $managerpin1 ) {
+      $result1 = pg_query("
+SELECT t.shortstr || ' ' || u.fname || ' ' || u.lname AS name
+FROM userpin AS u LEFT JOIN title AS t ON u.title=t.titleid
+WHERE u.pin=$managerpin1; 
+");
+      if( $row1 = pg_fetch_array($result1) ) {
+        $managerpin1 .= " (".$row1[0].")";
+      }
+    }
+*/
+    $managerpin1 = $row[managername];
+
+    $editorid1 = $editors[$row[editor]];
+//    $editorid1 = $row[editorname];
+
+
+    $PAGEBODY .= <<<PAGEBODY
+<tr class=$cellclass>
+<td wwidth=1 align=center rowspan=2><input type=checkbox name="marked[]" value=$row[subjid]></td>
+<td>$ctitle1</td>
+<td align=center>$invited1</td>
+<td align=center>$managerpin1</td>
+<td align=center>$editorid1</td>
+<td align=center><a href="editsubject.html?subjid=$row[subjid]">edit</a></td>
+</tr>
+<tr class=cell3>
+<td colspan=5>$cabstract1</td>
+</tr>
+
+
+PAGEBODY;
+
+    $cellclass1 = $cellclass2;
+    $cellclass2 = $cellclass;
+    $cellclass = $cellclass1;
+  }
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+
+PAGEBODY;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+<br>
+  <input type=hidden name="flag" value="">
+  <input type=button value="Delete marked" onClick="if ( confirm('Delete marked - Are you sure?') ) { subjform.flag.value='delete'; subjform.submit(); }">
+<br>
+</form>
+</center>
+
+PAGEBODY;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+<center>
+<table border=0>
+<td align=left>
+<b>Add section</b>
+<form method=post style="margin:0;">
+  <input type=hidden name="flag" value="add">
+  Title: <input type=text name="title" size=50><br>
+  Abstract: <textarea cols=50 rows=5 name="abstract"></textarea><br>
+  Invited: <input type=checkbox name="isinvited" value=1><br>
+  Section manager PIN: <input type=text name="managerpin" size=5><br>
+  Section editor : $EDLIST<br>
+  <input type=submit value="Submit"><br>
+</form>
+</td>
+</table>
+</center>
+<br>
+
+PAGEBODY;
+
+
+
+?>

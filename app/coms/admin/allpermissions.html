@@ -1,0 +1,109 @@
+<?
+$pageid = 'allpermissions';
+
+include_once("start.php");
+
+//include_once("mainmenu.php");
+
+
+//print "countryflag={$_REQUEST['countryflag']} <br>\n";
+//print "name={$_REQUEST['name']} <br>\n";
+
+  $flag = isset($_REQUEST['flag']) ? $_REQUEST['flag'] : null;
+  $name = isset($_REQUEST['name']) ? trim( $_REQUEST['name']) : '';
+  $marked = &$_REQUEST['marked'];
+//  $marked = isset($_REQUEST['marked']) ? $_REQUEST['marked'] : null;
+
+  if ( $flag=="add" && $name ) {
+    $result = pg_query("INSERT INTO permission (name) VALUES ('$name')");
+//    print pg_last_error()."<br>\n";
+  }
+
+  if ( $flag=="delete" && isset($marked) ) {
+    foreach( $marked as $nomer ) {
+      $result = pg_query("DELETE FROM permission WHERE permid='$nomer'");
+//    print pg_last_error()."<br>\n";
+    }
+  }
+
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<center>
+<h2>All permissions</h2>
+
+<p>
+
+<table>
+<td align=left>
+<b>Add permission</b>
+<form method=post>
+  <input type=hidden name="flag" value="add">
+  Name: <input type=text name="name" size=32><br>
+  <input type=submit value="Submit"><br>
+</form>
+</td>
+</table>
+</center>
+
+PAGEBODY;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<p>
+
+<form method=post name=permform>
+<table align=center wwidth=100% border=1>
+<tr align=left>
+<th width=1>Mark</th>
+<th>Id</th>
+<th>Name</th>
+<th width=1></th>
+</tr>
+
+PAGEBODY;
+
+  $result = pg_query("SELECT * FROM permission ORDER BY name;");
+  while( $row = pg_fetch_array($result) ) {
+
+$cname1 = htmlspecialchars($row['name']);
+
+    $PAGEBODY .= <<<PAGEBODY
+<tr>
+<td width=1><input type=checkbox name="marked[]" value=$row[permid]></td>
+<td>$row[permid]</td>
+<td>$cname1</td>
+<td width=1><a href=editpermission.html?permid=$row[permid]>edit</a></td>
+</tr>
+PAGEBODY;
+
+  }
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+
+PAGEBODY;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+  <input type=hidden name="flag" value="">
+  <input type=button value="Delete marked" onClick="if ( confirm('Delete marked - Are you sure?') ) { permform.flag.value='delete'; permform.submit(); }">
+<br>
+</form>
+
+<br>
+
+PAGEBODY;
+
+
+
+
+include_once("finish.php");
+?>

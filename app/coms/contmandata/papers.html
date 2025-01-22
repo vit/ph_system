@@ -1,0 +1,366 @@
+<?
+$PAGEID = 'papers';
+
+
+
+$inpage = 20;
+
+if( isset($_REQUEST['page']) )
+  $page = $_REQUEST['page'];
+else
+  $page = 0;
+
+$result = pg_query("SELECT COUNT(*) FROM paper WHERE context=$CURRENTCONT");
+if( $row = pg_fetch_array($result) ) {
+  $totalquantity = $row[0];
+}
+
+$pages = (int)($totalquantity / $inpage);
+$pagesrest = $totalquantity % $inpage;
+if($pagesrest>0)
+  $pages++;
+
+$PAGESMAP = makepagesmap($page, $pages);
+
+$offs = $inpage*$page;
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Papers</span></center>
+
+$PAGESMAP
+
+<p>
+
+PAGEBODY;
+
+
+
+
+
+  $papflag = $_REQUEST[papflag];
+
+  $subject = $_REQUEST[subject]?(int)$_REQUEST['subject']:"NULL";
+  $decision = $_REQUEST[decision]?(int)$_REQUEST['decision']:"NULL";
+
+  $editorid = (int)$_REQUEST['editorid'];
+  $editorid = $editorid>0?$editorid:"NULL";
+
+  $marked = &$_REQUEST[marked];
+
+
+  if ( $papflag=="assigneditor" && isset($marked) ) {
+    foreach( $marked as $nomer ) {
+      $result = @pg_query("UPDATE paper SET editor=$editorid WHERE context=$CURRENTCONT AND papnum='$nomer'");
+//    print pg_last_error()."<br>\n";
+    }
+  }
+
+
+    if ( $papflag=="setpapdecision" && isset($marked) ) {
+      foreach( $marked as $nomer ) {
+        $result = @pg_query("UPDATE paper SET finaldecision=$decision WHERE context=$CURRENTCONT AND papnum='$nomer'");
+//      print pg_last_error()."<br>\n";
+      }
+    }
+
+    if ( $papflag=="setpapsubject" && isset($marked) ) {
+      foreach( $marked as $nomer ) {
+        $result = @pg_query("UPDATE paper SET finalsubject=$subject WHERE context=$CURRENTCONT AND papnum='$nomer'");
+//      print pg_last_error()."<br>\n";
+      }
+    }
+
+
+    if ( $papflag=="setpapall" && isset($marked) ) {
+      foreach( $marked as $nomer ) {
+        $result = @pg_query("UPDATE paper SET finaldecision=$decision, finalsubject=$subject WHERE context=$CURRENTCONT AND papnum='$nomer'");
+//      print pg_last_error()."<br>\n";
+      }
+    }
+
+
+    if ( $papflag=="copyfromeditorsall" ) {
+      $result = @pg_query("UPDATE paper SET finaldecision=ed_recommendation, finalsubject=ed_subject WHERE context=$CURRENTCONT");
+//      print pg_last_error()."<br>\n";
+    }
+
+
+
+
+    if ( $papflag=="delpap" && isset($marked) ) {
+      foreach($marked as $elm) {
+        $result = @pg_query("DELETE FROM paper WHERE context=$CURRENTCONT AND papnum=$elm");
+        @unlink( paper_fileName( $CURRENTCONT, $elm ) );
+//print paper_fileName( $CURRENTCONT, $elm )."<br>";
+      }
+    }
+
+
+
+
+
+
+$cellclass1 = "cell1";
+$cellclass2 = "cell2";
+$cellclass = $cellclass1;
+
+$PAGEBODY .= <<<PAGEBODY
+<center>
+<form method=post name=papform>
+<table align=center wwidth=100% border=1>
+<tr class=$cellclass2 aalign=left>
+<th width=1 rowspan=2>Mark</th>
+<th>ID</th>
+<th>Title</th>
+<th>Section</th>
+<th>Registrator</th>
+<th>Editor</th>
+<th>Download</th>
+</tr>
+
+<tr class=cell8>
+<th colspan=6>Final decision and section</th>
+</tr>
+
+<!-- tr class=cell4>
+<th colspan=6>Editor's recommendations: score, decision, comments</th>
+</tr -->
+
+PAGEBODY;
+
+  $result = pg_query("
+SELECT
+  p.*,
+  getfullnamewithpin(p.registrator) AS registratorname,
+  getfullnamewithpin(e.userpin) AS editorname
+FROM 
+  paper AS p LEFT JOIN editor AS e ON p.editor=e.editorid
+  WHERE p.context=$CURRENTCONT
+ORDER BY p.papnum
+LIMIT $inpage OFFSET $offs
+");
+  while( $row = pg_fetch_array($result) ) {
+    $papid = $row['papnum'];
+    $ctitle1 = htmlspecialchars($row['title']);
+
+    $subject1 = (int)$row['subject'];
+    $subject1_str = $SUBJECTS[$subject1];
+
+    $cabstract1 = nl2br( htmlspecialchars($row['abstract']) );
+    $registratorname = $row['registratorname'];
+    $editorname = $row['editorname'];
+
+    $ed_subject = (int)$row['ed_subject'];
+    $ed_subject_str = $SUBJECTS[$ed_subject];
+
+    $ed_score = (int)$row['ed_score'];
+    $ed_score_str = $SCORES[$ed_score];
+
+    $ed_decision = (int)$row['ed_recommendation'];
+    $ed_decision_str = $EDITORPAPERDECISIONS[$ed_decision];
+
+
+    $cipccomments = nl2br( htmlspecialchars($row['ed_ipccomments']) );
+    $cauthcomments = nl2br( htmlspecialchars($row['ed_authcomments']) );
+
+
+    $fin_subject = (int)$row['finalsubject'];
+    $fin_subject_str = $SUBJECTS[$fin_subject];
+
+    $fin_decision = (int)$row['finaldecision'];
+    $fin_decision_str = $FINALPAPERDECISIONS[$fin_decision];
+
+
+    $filename = $papersdir."/c".$CURRENTCONT."p".$row['papnum'];
+    if ( file_exists($filename) ) {
+      $srcfname = $row['filename'];
+      preg_match('|(.*)\.(.*)|', $srcfname, $fnparse);
+      $fileext = $fnparse[2];
+      $externfname = "c{$CURRENTCONT}p{$row[papnum]}r{$row['registrator']}.$fileext";
+      $papfilesize = filesize( $filename );
+
+
+      $downloadtext = <<<downloadtext
+    <a href="{$ROOT}getpaper/$externfname">$papfilesize bytes</a>
+
+downloadtext;
+    } else {
+      $downloadtext = <<<downloadtext
+    No
+
+downloadtext;
+    }
+
+
+
+    $PAGEBODY .= <<<PAGEBODY
+<tr class=$cellclass>
+<td wwidth=1 align=center rowspan=2><input type=checkbox class=$cellclass style="border: none;" name="marked[]" value=$row[papnum]></td>
+<td align=center>
+  <a href="{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row[registrator]}.html" title="Paper information"
+    onClick="window.open('{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row[registrator]}.html', '', 'location=no, menubar=no, toolbar=no, statusbar=no, scrollbars=yes, width=620, height=550, resizable=yes'); return false;"
+  >[&nbsp;$papid&nbsp;]</a>
+</td>
+<td>$ctitle1</td>
+<td align=center>$subject1_str</td>
+<td align=center>$registratorname</td>
+<td align=center>$editorname</td>
+  <td align=center>
+    $downloadtext
+  </td>
+
+PAGEBODY;
+
+
+
+
+
+    $PAGEBODY .= <<<PAGEBODY
+</tr>
+
+<tr class=cell8>
+<td colspan=6>
+<b>Final decision:</b> <span class=selection3>$fin_decision_str</span>;
+<b>Final section:</b> <span class=selection3>$fin_subject_str</span>;
+</td>
+</tr>
+
+PAGEBODY;
+
+    $cellclass1 = $cellclass2;
+    $cellclass2 = $cellclass;
+    $cellclass = $cellclass1;
+  }
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+
+PAGEBODY;
+
+
+
+
+$editors = array(0 => 'Uncertain');
+
+$result = pg_query("
+SELECT e.*, t.shortstr || ' ' || u.fname || ' ' || u.lname || ' (PIN:' || e.userpin || ')' AS name
+FROM (editor AS e INNER JOIN userpin AS u ON e.userpin=u.pin AND e.context=$CURRENTCONT)
+  LEFT JOIN title AS t ON u.title=t.titleid
+ORDER BY name;
+");
+while( $row = pg_fetch_array($result) ) {
+  $editors[$row['editorid']] = $row['name'];
+}
+
+  $EDLIST = "<SELECT name=editorid>";
+//  $EDLIST .= "<OPTION value=0> -- Not defined -- </OPTION>";
+  foreach($editors AS $num => $name) {
+    $selflag = "";
+//    $selflag = $num==$row[editor]?"SELECTED":"";
+    $EDLIST .= "<OPTION value=$num $selflag>$name</OPTION>";
+  }
+  $EDLIST .= "</SELECT>";
+
+
+
+    $pscore = "<select name=score>";
+    foreach($SCORES as $key => $val) {
+      $selected = "";
+//      $selected = $key==$row['ed_score']?" selected":"";
+      $pscore .= "<option value=$key $selected>$val</option>";
+    }
+    $pscore .= "</select>";
+
+    $pdec = "<select name=decision>";
+    foreach($FINALPAPERDECISIONS as $key => $val) {
+      $selected = "";
+      $pdec .= "<option value=$key $selected>$val</option>";
+    }
+    $pdec .= "</select>";
+
+    $psubj = "<select name=subject>";
+    foreach($SUBJECTS as $key => $val) {
+      $selected = "";
+      $psubj .= "<option value=$key $selected>$val</option>";
+    }
+    $psubj .= "</select>";
+
+
+
+//if ( $issubjman && $PERMISSIONS['SUBJADM_DELETE_SUBJECT'] ) {
+  $PAGEBODY .= <<<PAGEBODY
+<input type=hidden name="papflag" value="">
+<br>
+<input type=button value="Assign editor for marked papers" onClick="if ( confirm('Assign editor - Are you sure?') ) { papform.papflag.value='assigneditor'; papform.submit(); }">
+  $EDLIST
+<br>
+
+<br>
+<input type=button value="Set final decision for marked papers" onClick="if ( confirm('Set final decision - Are you sure?') ) { papform.papflag.value='setpapdecision'; papform.submit(); }">
+&nbsp;$pdec
+<br>
+<br>
+
+<input type=button value="Set final section for marked papers" onClick="if ( confirm('Set final section - Are you sure?') ) { papform.papflag.value='setpapsubject'; papform.submit(); }">
+&nbsp;$psubj
+<br>
+<br>
+
+<input type=button value="Set decision and section for marked papers" onClick="if ( confirm('Set decision and section - Are you sure?') ) { papform.papflag.value='setpapall'; papform.submit(); }">
+<br>
+<br>
+
+<input type=button value="Copy all final decisions and sections from editors'" onClick="if ( confirm('Copy decisions and sections - Are you sure?') ) { papform.papflag.value='copyfromeditorsall'; papform.submit(); }">
+
+<br>
+<hr>
+<input type=button value="Delete marked papers" onClick="if ( confirm('Delete papers - Are you sure?') )  if ( confirm('Really?!!') )  { papform.papflag.value='delpap'; papform.submit(); }">
+
+
+
+
+PAGEBODY;
+//}
+
+$PAGEBODY .= <<<PAGEBODY
+<br>
+</form>
+</center>
+
+PAGEBODY;
+
+
+
+
+
+
+
+function makepagesmap($page, $pages) {
+
+  $PAGESMAP = <<<PAGESMAP
+<b>Pages ($pages in all):</b>
+
+PAGESMAP;
+
+  for ($i=0, $ii=$i+1; $i<$pages; $i++, $ii++)
+    if($i==$page)
+      $PAGESMAP .= <<<PAGESMAP
+<b><a href="?page=$i">$ii</a></b>
+
+PAGESMAP;
+    else
+      $PAGESMAP .= <<<PAGESMAP
+<a href="?page=$i">$ii</a>
+
+PAGESMAP;
+
+  return $PAGESMAP;
+}
+
+
+
+
+?>

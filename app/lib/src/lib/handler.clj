@@ -2,11 +2,15 @@
   (:require [compojure.core :refer :all]
             [compojure.route :as route]
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
+            [ring.middleware.json :refer [json-response wrap-json-response wrap-json-body]]
+            [ring.middleware.cors :refer [wrap-cors]]
             ;; [ring.middleware.defaults :refer [wrap-defaults site-defaults wrap-resource]]
             [ring.middleware.resource :refer [wrap-resource]]
             [ring.util.response :as r]
             [lib.model.model :as dbc]
-            [lib.pages.pages :as pages]))
+            [lib.pages.pages :as pages]
+            ;; [lib.rpc.rpc :as rpc]
+            ))
 
 
 (def conn (dbc/db-connect))
@@ -71,22 +75,81 @@
   (pages/render-page-home {}))
 
 
+
+
+(defn call-rpc [req]
+  
+)
+
+
+
+
+
+
+
+
+(defn wrap-rpc [f]
+  (-> f
+      (wrap-json-response)
+      (wrap-json-body)
+      (wrap-cors
+       :access-control-allow-origin [#".*"]
+       :access-control-allow-methods [:get :put :post :delete :options])))
+
+;; (defn call-rpc [method payload]
+;;   {:id "4321"
+;;    :title "Paper Title"
+;;    :request {:method method
+;;              :payload payload}})
+
+(defn call-rpc [method payload]
+  (let [result (dbc/call-rpc conn method payload)]
+    result))
+
+
+
+
+
 (defroutes app-routes
   (GET "/" [] (render-home))
   (GET "/doc" [id] (render-doc id))
   (GET "/file" [id] (render-file id))
   (GET "/gfs" [id] (render-gfs id))
   (GET "/search" [q] (render-search q))
-  ;; (route/not-found (pages/render-page-not-found {}))
-  ;; (route/not-found (render-not-found))
-  (render-not-found)
-  
-  )
 
 
+  ;; (OPTIONS "/rpc" []
+  ;;   (wrap-rpc
+  ;;    (fn [request]
+  ;;      (r/response ""))))
+
+  ;; (POST "/rpc" []
+  ;;   (wrap-rpc
+  ;;    (fn handler [request]
+  ;;      (println request)
+  ;;      (r/response
+  ;;       (let [body (:body request)]
+  ;;         (call-rpc
+  ;;          (get body "method")
+  ;;          (get body "payload")))))))
+
+
+
+
+
+  (render-not-found))
+
+
+;; (def app
+;;   (wrap-defaults (wrap-resource app-routes "public") site-defaults))
 
 (def app
-  (wrap-defaults (wrap-resource app-routes "public") site-defaults))
+  (wrap-defaults (wrap-resource app-routes "public") 
+                 (assoc-in site-defaults [:security :anti-forgery] false)
+                 ))
+
+
+;; (wrap-defaults app-routes (assoc-in site-defaults [:security :anti-forgery] false))
 
 ;; (def app
 ;;   (wrap-defaults app-routes site-defaults))

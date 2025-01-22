@@ -1,0 +1,213 @@
+<?
+$PAGEID = 'mysubjects';
+
+  $PAGEBODY .= <<<PAGEBODY
+
+<center><span class=subtitle>My sections</span></center>
+<p>
+
+PAGEBODY;
+
+
+
+if (!$USERPIN)
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+You need to enter the system.
+<br>
+Use the form in the upper right corner of the page.
+</center>
+<p>
+
+PAGEBODY;
+
+else {
+
+
+if( $PERMISSIONS['USER_REGISTER_NEW_SUBJECT'] || $issubjman ) {
+
+
+  $flag = $_REQUEST[flag];
+  $title = trim( $_REQUEST[title]);
+  $abstract = trim( $_REQUEST['abstract']);
+  $isinvited = $_REQUEST[isinvited]?"TRUE":"FALSE";
+//  $managerpin = trim( $_REQUEST[managerpin]);
+//  $managerpin = $managerpin>0?$managerpin:"NULL";
+  $marked = &$_REQUEST[marked];
+
+  if ( $flag=="add" && $PERMISSIONS['USER_REGISTER_NEW_SUBJECT'] ) {
+    @$result = pg_query("INSERT INTO subject (context, manager, title, abstract, isinvited) VALUES ($CURRENTCONT, $USERPIN, '$title', '$abstract', $isinvited)");
+//    print pg_last_error()."<br>\n";
+  }
+
+
+  if ( $flag=="delete" && isset($marked) && $PERMISSIONS['SUBJADM_DELETE_SUBJECT'] ) {
+    foreach( $marked as $nomer ) {
+      @$result = pg_query("DELETE FROM subject WHERE context=$CURRENTCONT AND subjid='$nomer' AND manager=$USERPIN");
+//    print pg_last_error()."<br>\n";
+    }
+  }
+
+
+
+$cellclass1 = "cell1";
+$cellclass2 = "cell2";
+$cellclass = $cellclass1;
+
+$PAGEBODY .= <<<PAGEBODY
+<center>
+<form method=post name=subjform>
+<table align=center wwidth=100% border=1>
+<tr class=$cellclass2 aalign=left>
+<th width=1 rowspan=2>Mark</th>
+<th>Title</th>
+<th>Invited?</th>
+<!-- th wwidth=1>Manager</th -->
+<th>Edit</th>
+</tr>
+<tr aalign=left class=cell3 bbgcolor="#eeffee">
+<th colspan=3>Abstract</th>
+</tr>
+
+PAGEBODY;
+
+  $result = pg_query("
+SELECT * 
+FROM subject
+WHERE context=$CURRENTCONT AND manager=$USERPIN
+ORDER BY isinvited, title, subjid;
+");
+  while( $row = pg_fetch_array($result) ) {
+    $ctitle1 = htmlspecialchars($row[title]);
+    $cabstract1 = nl2br( htmlspecialchars($row['abstract']) );
+    $invited1 = $row[isinvited]=='t'?"Yes":"No";
+
+
+    $PAGEBODY .= <<<PAGEBODY
+<tr class=$cellclass bbgcolor="$color">
+<td wwidth=1 align=center rowspan=2><input type=checkbox class=$cellclass style="border: none;" name="marked[]" value=$row[subjid]></td>
+<td>$ctitle1</td>
+<td align=center>$invited1</td>
+<!-- td align=center>$managerpin1</td -->
+
+PAGEBODY;
+
+    if( $PERMISSIONS['SUBJADM_EDIT_SUBJECT'] )
+      $PAGEBODY .= <<<PAGEBODY
+<td align=center><a href="editsubject.html?subjid=$row[subjid]">edit</a></td>
+
+PAGEBODY;
+    else
+      $PAGEBODY .= <<<PAGEBODY
+<td align=center>Disabled</td>
+
+PAGEBODY;
+
+
+    $PAGEBODY .= <<<PAGEBODY
+</tr>
+<!-- tr bgcolor="$color" -->
+<tr class=cell3 bbgcolor="#eeffee">
+<td colspan=3>$cabstract1</td>
+</tr>
+
+PAGEBODY;
+
+//    $color1 = $color2;
+//    $color2 = $color;
+//    $color = $color1;
+    $cellclass1 = $cellclass2;
+    $cellclass2 = $cellclass;
+    $cellclass = $cellclass1;
+  }
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+
+PAGEBODY;
+
+
+if ( $issubjman && $PERMISSIONS['SUBJADM_DELETE_SUBJECT'] ) {
+  $PAGEBODY .= <<<PAGEBODY
+<br>
+<input type=hidden name="flag" value="">
+<input type=button value="Delete marked" onClick="if ( confirm('Delete marked - Are you sure?') ) { subjform.flag.value='delete'; subjform.submit(); }">
+
+PAGEBODY;
+}
+
+$PAGEBODY .= <<<PAGEBODY
+<br>
+</form>
+</center>
+
+PAGEBODY;
+
+
+if( $PERMISSIONS['USER_REGISTER_NEW_SUBJECT'] ) {
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+<table>
+<td align=left>
+<b>Add section</b>
+<form method=post style="margin:0;">
+  <input type=hidden name="flag" value="add">
+  Title: <input type=text name="title" size=50><br>
+  Abstract: <textarea cols=50 rows=5 name="abstract"></textarea><br>
+  Invited: <input type=checkbox style="border: none;" name="isinvited" value=1><br>
+<!--  Section manager PIN: <input type=text name="managerpin" size=5><br -->
+  <input type=submit value="Submit"><br>
+</form>
+</td>
+</table>
+</center>
+<p>
+
+PAGEBODY;
+}
+
+
+
+
+
+$p1 = $PERMISSIONS['USER_REGISTER_NEW_SUBJECT']?'Yes':'No';
+$p2 = $PERMISSIONS['SUBJADM_DELETE_SUBJECT']?'Yes':'No';
+$p3 = $PERMISSIONS['SUBJADM_EDIT_SUBJECT']?'Yes':'No';
+$p4 = $PERMISSIONS['SUBJADM_REMOVE_PAPER_FROM_SUBJECT']?'Yes':'No';
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+<b>Current permissions:</b>
+
+<table align=center border=1>
+<tr>
+<td>Add new section</td>
+<td>$p1</td>
+</tr>
+<tr>
+<td>Delete section</td>
+<td>$p2</td>
+</tr>
+<tr>
+<td>Edit section</td>
+<td>$p3</td>
+</tr>
+<tr>
+<td>Remove paper from section</td>
+<td>$p4</td>
+</tr>
+</table>
+</center>
+<p>
+
+PAGEBODY;
+
+
+}
+
+
+}
+
+?>

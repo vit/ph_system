@@ -1,0 +1,1052 @@
+<?
+$PAGEID = 'mypapers';
+
+if (!$USERPIN)
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+You need to enter the system.
+<br>
+Use the form in the upper right corner of the page.
+</center>
+<p>
+
+
+
+PAGEBODY;
+
+else {
+// -------------------------
+
+$PAPID = 0;
+$PAPID0 = $_REQUEST['selpaperid'];
+
+$asterisk = '<span class=error>*</span>';
+
+$NEWPIN = 0;
+$authdiagnosis = "";
+
+
+/*
+$subjects = array();
+$result = pg_query("SELECT * FROM subject WHERE context='$CURRENTCONT' ORDER BY isinvited, title;");
+while( $row = pg_fetch_array($result) ) {
+  $subjects[$row[subjid]] = $row[isinvited]=='t'?"INVITED: ".$row[title]:$row[title];
+}
+*/
+
+//print_r($subjects);
+
+
+
+
+if( $PAPID0 > 0 ) {
+  $result = pg_query("SELECT COUNT(*) FROM paper WHERE context=$CURRENTCONT AND papnum=$PAPID0 AND registrator=$USERPIN");
+  if( $row = pg_fetch_array($result) ) {
+    if( $row[0]>0 )
+      $PAPID = $PAPID0;
+  }
+}
+
+$TITLE = trim( $_REQUEST['paperinfo']['title'] );
+$ABSTRACT = trim( $_REQUEST['paperinfo']['abstract'] );
+$AUTHORS_S = trim( $_REQUEST['paperinfo']['authors'] );
+$CONFIRMED = $_REQUEST['confirmed'] ? (int)$_REQUEST['confirmed'] : 0;
+//$TITLE = stripslashes(trim( $_REQUEST['paperinfo']['title'] ));
+//$ABSTRACT = stripslashes(trim( $_REQUEST['paperinfo']['abstract'] ));
+$SUBJID = (int)$_REQUEST['paperinfo']['subjid'];
+$PRESENTTYPE = (int)$_REQUEST['paperinfo']['presenttype'];
+
+if( !$PERMISSIONS['SYS_USE_AUTHORS_PAPER_SUBJECT'] )
+  $SUBJID = 0;
+
+$init0 = $_REQUEST['value0'];
+$init1 = $_REQUEST['value1'];
+$init2 = $_REQUEST['value2'];
+
+$autpin = $_REQUEST['autpin'];
+$addautpin = trim( $_REQUEST['addautpin'] );
+$selaut = $_REQUEST['selaut'];
+
+if( !is_array($autpin) )
+  $autpin = array();
+
+$diagnosis = "";
+
+$savedflag = true;
+
+if( $_REQUEST['editpaperop'] == 'save' || $_REQUEST['editpaperop'] == 'addauthor' || $_REQUEST['editpaperop'] == 'delauthor' || $_REQUEST['editpaperop'] == 'addauthorbyinfo' )
+  $savedflag = false;
+
+// ���������� ������ �� PIN ��� ����������
+if( $_REQUEST['editpaperop'] == 'addauthor' ) {
+  if( existspin($addautpin) && !in_array($addautpin, $autpin) ) {
+    $autpin[] = $addautpin;
+  }
+}
+
+if( $_REQUEST['editpaperop'] == 'addauthorbyinfo' ) {
+
+
+
+
+
+
+
+
+$personaldata = array();
+if( isset( $_REQUEST['personaldata'] ) ) {
+  $personaldata = $_REQUEST['personaldata'];
+  foreach($personaldata as $key => $elm) {
+    $personaldata[$key] = trim($personaldata[$key]);
+  }
+
+  if( strlen($personaldata['lname']) == 0 ) {
+    $authdiagnosis .= "<br>'Last name' field cannot be empty";
+  }
+
+  if( strlen($personaldata['email']) == 0 ) {
+    $authdiagnosis .= "<br>'E-mail' field cannot be empty";
+  }
+
+  if( strlen($authdiagnosis) > 0 ) {
+    $authdiagnosis = "<div class=error>$authdiagnosis</div><br>";
+  }
+
+  if( strlen($authdiagnosis) == 0 ) {
+
+
+    $result = pg_query(<<<ENDQUERY
+SELECT addusershort(
+  '{$personaldata['title']}',
+  '{$personaldata['fname']}',
+  '{$personaldata['lname']}',
+  '{$personaldata['email']}'
+);
+ENDQUERY
+    );
+
+//print pg_last_error();
+
+    if( $row = pg_fetch_array($result) ) {
+      $NEWPIN = $row[0];
+      $autpin[] = $NEWPIN;
+      $personaldata = array();
+      $authdiagnosis = "
+<div class=error>
+New user has been added with PIN $NEWPIN.
+Please use this PIN next time for this person.
+</div><br>
+";
+      if( $_REQUEST['sendpassword']==1 ) {
+        include_once( "email/directmail.php" );
+        $flag = mail_send_now("newuserasauthor", $NEWPIN);
+      }
+
+    }
+  }
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+// �������� ������ ��� ����������
+if( $_REQUEST['editpaperop'] == 'delauthor' && is_array($selaut) ) {
+  $autpin1 = array();
+  foreach( $autpin as $elm )
+    if( !in_array($elm, $selaut) )
+      $autpin1[] = $elm;
+  $autpin = $autpin1;
+}
+
+if( $_REQUEST['editpaperop'] == 'save' && (
+      $PAPID && $PERMISSIONS['PAPREG_EDIT_REGISTERED_PAPER'] ||
+      !$PAPID && $PERMISSIONS['USER_REGISTER_NEW_PAPER'] )
+  ) {
+//    $savedflag = false;
+
+
+  if( $SUBJID > 0 )
+    $SUBJECT = $SUBJID;
+  else
+    $SUBJECT = "NULL";
+
+  // ���������� ������ ������
+
+  if( ! $CONFIRMED ) {
+    $diagnosis = "You must confirm that all authors are entered and the title is correct";
+  } else if( $TITLE=='' ) {
+    $diagnosis = "Cannot save: 'Title' field must not be empty";
+  } else if( $AUTHORS_S=='' ) {
+    $diagnosis = "Cannot save: 'Authors' field must not be empty";
+  } else if( $PAPID ) {
+//    $result = pg_query("UPDATE paper SET title='$TITLE', abstract='$ABSTRACT' WHERE context=$CURRENTCONT AND papnum=$PAPID AND registrator=$USERPIN");
+//    $result = pg_query("UPDATE paper SET title='$TITLE', abstract='$ABSTRACT', subject=$SUBJECT, presenttype=$PRESENTTYPE WHERE context=$CURRENTCONT AND papnum=$PAPID AND registrator=$USERPIN");
+    $result = pg_query("UPDATE paper SET title='$TITLE', abstract='$ABSTRACT', authors='$AUTHORS_S', subject=$SUBJECT, presenttype=$PRESENTTYPE WHERE context=$CURRENTCONT AND papnum=$PAPID AND registrator=$USERPIN");
+    $diagnosis = "Paper info is updated";
+    $savedflag = true;
+  } else {
+//    $result = pg_query("SELECT addnewpaper($CURRENTCONT, $USERPIN, '$TITLE', '$ABSTRACT')");
+//    $result = pg_query("SELECT addnewpaper($CURRENTCONT, $USERPIN, '$TITLE', '$ABSTRACT', $SUBJECT, $PRESENTTYPE)");
+    $result = pg_query("SELECT addnewpaper2($CURRENTCONT, $USERPIN, '$TITLE', '$ABSTRACT', '$AUTHORS_S', $SUBJECT, $PRESENTTYPE)");
+    $row = pg_fetch_array($result);
+    $PAPID=$row[0];
+    $savedflag = true;
+  }
+
+  // ���������� �������� ���� ������
+  if( $PAPID && $savedflag ) {
+    $list1 = array(); $list2 = array();
+    if ( $_REQUEST['value1'] ) {
+      preg_match_all('/[^\|]+\|([^\|]+)/', $_REQUEST['value1'], $list);
+      $list1 = $list[1];
+    }
+    if ( $_REQUEST['value2'] ) {
+      preg_match_all('/[^\|]+\|([^\|]+)/', $_REQUEST['value2'], $list);
+      $list2 = $list[1];
+    }
+
+    $result = pg_query("DELETE FROM pap_kw WHERE context=$CURRENTCONT AND papnum=$PAPID");
+
+    foreach($list1 as $elm)
+      $result = pg_query("
+INSERT INTO pap_kw (context, papnum, keyword, weight)
+VALUES ($CURRENTCONT, $PAPID, $elm, 3)
+");
+
+    foreach($list2 as $elm)
+      $result = pg_query("
+INSERT INTO pap_kw (context, papnum, keyword, weight)
+VALUES ($CURRENTCONT, $PAPID, $elm, 2)
+");
+
+  }
+
+  // ���������� ������� ������
+  if( $PAPID && $savedflag ) {
+    $result = pg_query("DELETE FROM author WHERE papnum=$PAPID AND context=$CURRENTCONT");
+    foreach( $autpin as $elm )
+      $result = pg_query("INSERT INTO author (context, papnum, autpin) VALUES($CURRENTCONT, $PAPID, $elm)");
+  }
+
+}
+
+
+// ������ ������ ������
+if( $PAPID && $savedflag ) {
+  $result = pg_query("SELECT * FROM paper WHERE context=$CURRENTCONT AND papnum=$PAPID AND registrator=$USERPIN");
+  if( $row = pg_fetch_array($result) ) {
+    $TITLE = $row['title'];
+    $ABSTRACT = $row['abstract'];
+    $AUTHORS_S = $row['authors'];
+    $SUBJID = $row['subject'];
+    $PRESENTTYPE = $row['presenttype'];
+  }
+} else {
+  $TITLE = stripslashes($TITLE);
+  $ABSTRACT = stripslashes($ABSTRACT);
+  $AUTHORS_S = stripslashes($AUTHORS_S);
+}
+
+
+// ������ �������� ���� ������
+if( $savedflag ) {
+  if( $PAPID ) {
+    $result = pg_query("
+SELECT kw.kwid, kw.name, pkw.weight
+FROM (keyword AS kw INNER JOIN cont_kw AS ckw ON kw.kwid=ckw.keyword AND ckw.context=$CURRENTCONT)
+  LEFT JOIN pap_kw AS pkw ON pkw.context=$CURRENTCONT AND pkw.papnum=$PAPID AND pkw.keyword=ckw.keyword
+ORDER BY kw.name
+");
+  } else {
+    $result = pg_query("
+SELECT kw.kwid, kw.name, 0
+FROM (keyword AS kw INNER JOIN cont_kw AS ckw ON kw.kwid=ckw.keyword AND ckw.context=$CURRENTCONT)
+ORDER BY kw.name
+");
+  }
+  if ( $result ) {
+    $list0 = array(); $list1 = array(); $list2 = array();
+    while( $row = pg_fetch_array($result) ) {
+      switch($row['weight']) {
+        case 3:
+          $list1[] = $row['name']."|".$row['kwid'];
+          break;
+        case 2:
+          $list2[] = $row['name']."|".$row['kwid'];
+          break;
+        default:
+          $list0[] = $row['name']."|".$row['kwid'];
+          break;
+      }
+    }
+    $init0 = join("|", $list0); $init1 = join("|", $list1); $init2 = join("|", $list2);
+  }
+}
+
+// ������ ������� ������
+if( $PAPID && $savedflag ) {
+  $autpin=array();
+  $result = pg_query("
+SELECT a.autpin AS pin, u.lname AS name
+FROM author AS a INNER JOIN userpin AS u ON a.autpin=u.pin AND a.papnum=$PAPID AND a.context=$CURRENTCONT
+ORDER BY pin
+");
+  while( $row = pg_fetch_array($result) ) {
+    $autpin[] = $row['pin'];
+  }
+
+}
+
+
+// ���������� ������ �������
+$AUTHORS = "";
+
+$AUTHORS .= <<<AUTHORS
+<br>
+Add authors to the paper authors database according to the list of the authors above.
+<br>
+(Otherwise information about acceptance/rejection and reviewers comments will not be available)
+
+
+AUTHORS;
+
+
+$AUTHORS .= <<<AUTHORS
+<!-- br>
+<a target=_blank href="{$ROOT}pin/find.html">&gt;&gt; Find user &gt;&gt;</a -->
+
+<table border=0>
+<td>
+
+AUTHORS;
+
+
+$AUTHORS .= <<<AUTHORS
+<strong>Authors (with PINs):</strong><br>
+<table border=1 sstyle="font-size: 10pt;">
+<tr>
+<th>Mark</th>
+<th>PIN</th>
+<th>Name</th>
+</tr>
+
+AUTHORS;
+
+foreach( $autpin as $elm ) {
+  $autmark = "";
+  if ( $elm==$addautpin )
+    $autmark = 'style="color: red;"';
+    $aname = getUserName($elm);
+  $AUTHORS .= <<<AUTHORS
+<tr $autmark>
+<td><input type=checkbox name="selaut[]" value="$elm"></td>
+<td><input type=hidden name="autpin[]" value="$elm">$elm</td>
+<td>$aname</td>
+</tr>
+
+AUTHORS;
+}
+
+$AUTHORS .= <<<AUTHORS
+</table>
+Enter author PIN: <input type=text name=addautpin size=3>
+<input type=button value="Add author by PIN" onClick="savealllists(); document.paperinfoform.editpaperop.value='addauthor'; document.paperinfoform.submit(); return false;">
+&nbsp;
+<br>
+<input type=button value="Remove marked authors" onClick="savealllists(); document.paperinfoform.editpaperop.value='delauthor'; document.paperinfoform.submit(); return false;">
+
+AUTHORS;
+
+
+
+$utitle = "<SELECT name=\"personaldata[title]\" size=1>\n";
+$result = pg_query("SELECT * FROM title ORDER BY titleid;");
+while($row = pg_fetch_array($result) ) {
+  $selected = "";
+  if ($personaldata['title'] == $row['titleid'])
+    $selected = " SELECTED";
+  $utitle .= "<OPTION value={$row['titleid']}$selected>{$row['shortstr']}</OPTION>\n";
+}
+$utitle .= "</SELECT>\n";
+
+
+$AUTHORS .= <<<AUTHORS
+</td>
+<td vvalign=top class=cell1>
+
+<a target=_blank href="{$ROOT}pin/find.html">&gt;&gt; Find user &gt;&gt;</a>
+<br>
+<br>
+
+$authdiagnosis
+If author is not registered yet, you can enter information about him here.
+<br>
+New user will be registered in database and password will be generated automatically.
+<br>
+Please do not add information about the same person more then once, use his/her PIN instead.
+<table class=cell1>
+  <tr>
+    <td colspan=2>
+    </td>
+  </tr>
+  <!-- tr>
+    <td colspan=1></td>
+    <td colspan=1>$asterisk - field cannot be empty</td>
+  </tr -->
+  <tr>
+    <td colspan=1>Title</td>
+    <td colspan=1>$utitle</td>
+  </tr>
+  <tr>
+    <td colspan=1>First Name</td>
+    <td colspan=1><input type="text" size=30 name="personaldata[fname]" value="{$personaldata['fname']}"></td>
+  </tr>
+  <tr>
+    <td colspan=1>Last Name $asterisk</td>
+    <td colspan=1><input type="text" size=30 name="personaldata[lname]" value="{$personaldata['lname']}"></td>
+  </tr>
+  <tr>
+    <td colspan=1>E-mail $asterisk</td>
+    <td colspan=1><input type="text" size=30 name="personaldata[email]" value="{$personaldata['email']}"></td>
+  </tr>
+  <tr>
+    <td colspan=1>Send password<br>to e-mail</td>
+    <td colspan=3><input type="checkbox" name="sendpassword" value="1" style="border: none;"></td>
+  </tr>
+  <tr>
+    <td colspan=1>
+    </td>
+    <td colspan=1>
+<input type=button value="Add author by info" onClick="savealllists(); document.paperinfoform.editpaperop.value='addauthorbyinfo'; document.paperinfoform.submit(); return false;">
+    </td>
+  </tr>
+</table>
+</td>
+
+AUTHORS;
+
+$AUTHORS .= <<<AUTHORS
+</table>
+
+AUTHORS;
+
+
+$presenttypearr = array(1 => 'Regular', 2 => 'Poster');
+
+
+  $PRESENTLIST = "<SELECT name=paperinfo[presenttype]>";
+//  $PRESENTLIST .= "<OPTION value=0> -- Not defined -- </OPTION>";
+  foreach($presenttypearr AS $num => $val) {
+    $selflag = $num==$PRESENTTYPE?"SELECTED":"";
+    $PRESENTLIST .= "<OPTION value=$num $selflag>$val</OPTION>";
+  }
+  $PRESENTLIST .= "</SELECT>";
+
+
+  $SUBJLIST = "<SELECT name=paperinfo[subjid]>";
+//  $SUBJLIST .= "<OPTION value=0> -- Not defined -- </OPTION>";
+//  foreach($subjects AS $num => $subjtitle) {
+  foreach($SUBJECTS AS $num => $subjtitle) {
+    $selflag = $num==$SUBJID?"SELECTED":"";
+    $SUBJLIST .= "<OPTION value=$num $selflag>$subjtitle</OPTION>";
+  }
+  $SUBJLIST .= "</SELECT>";
+
+
+
+
+
+$SUBTITLE = $PAPID?"Edit paper info":"Submit new paper";
+$PAPIDTEXT = $PAPID?$PAPID:"Not yet assigned";
+
+$PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>$SUBTITLE</span></center>
+<p>
+
+PAGEBODY;
+
+$PAGEBODY .= <<<PAGEBODY
+<a href="mypapers.html">Return to "My papers"</a>
+<p>
+
+PAGEBODY;
+
+
+if( $PAPID || $PERMISSIONS['USER_REGISTER_NEW_PAPER'] ) {
+
+
+
+  if( !$PAPID )
+      $PAGEBODY .= <<<PAGEBODY
+In order to submit the paper:
+<ol>
+<li>Enter the paper information (title,  list of the authors, abstracts) in the appropriate windows;</li>
+<li>Choose Section/Minisymposium, if your paper belongs to an Invited session or Minisymposium;</li>
+<li>Choose  your preferred presentation type and set of Keywords;</li>
+<li>Click "save paper info". You will be prompted by the paper ID for using in further correspondence. The window for uploading your file will appear;</li>
+<li>Upload the file of your paper, preferably in PDF format.</li>
+</ol>
+You can update your data later.
+<p>
+
+PAGEBODY;
+
+
+  $KEYWORDS = keywords( "paperinfoform", $init0, $init1, $init2 );
+
+  $PAGEBODY .= <<<PAGEBODY
+
+<table width=99% border=0 style="margin: 0;">
+<tr><td wwidth=33% align=left>
+  <h3>Paper info</h3>
+
+PAGEBODY;
+
+  if( $diagnosis )
+    $PAGEBODY .= <<<PAGEBODY
+<span style="color: red;">$diagnosis</span>
+<p>
+
+PAGEBODY;
+
+  $PAGEBODY .= <<<PAGEBODY
+</td>
+<td wwidth=33% align=center>
+  <strong><span style="border-bottom: thin solid ggreen;">Paper_ID: $PAPIDTEXT</span></strong>
+</td>
+</tr>
+</table>
+
+PAGEBODY;
+
+  if( $PAPID && $PERMISSIONS['PAPREG_EDIT_REGISTERED_PAPER'] ||
+      !$PAPID && $PERMISSIONS['USER_REGISTER_NEW_PAPER'] ) {
+
+
+    $PAGEBODY .= <<<PAGEBODY
+<form name="paperinfoform" METHOD="POST" ENCTYPE="application/x-www-form-urlencoded" style="margin: 0;">
+
+  <input type="hidden" name="selpaperid" value="$PAPID">
+  <!-- input type="hidden" name="papersop" value="" -->
+  <input type="hidden" name="editpaperop" value="1">
+<table width=99% border=0>
+
+<tr>
+<td valign=top colspan=2 width=99%>
+Enter title of the paper:
+</td>
+</tr>
+<tr>
+<td valign=top><strong>Title: $asterisk</strong></td>
+<td width=99%>
+  <textarea name="paperinfo[title]" cols=60 rows=2 wrap=virtual>$TITLE</textarea>
+</td>
+</tr>
+
+<tr>
+<td valign=top colspan=2 width=99%>
+Enter the authors of the paper in the order of their appearance:
+</td>
+</tr>
+<tr>
+<td valign=top><strong>Authors (text): $asterisk</strong></td>
+<td width=99%>
+  <textarea name="paperinfo[authors]" cols=60 rows=2 wrap=virtual>$AUTHORS_S</textarea>
+</td>
+</tr>
+
+<tr>
+<td valign=top colspan=2 width=99%>
+Enter the abstracts of the paper in plain text format:
+</td>
+</tr>
+<tr>
+<td><strong>Abstracts: $asterisk</strong></td>
+<td width=99%>
+  <textarea name="paperinfo[abstract]" cols=60 rows=5 wrap=virtual>$ABSTRACT</textarea>
+</td>
+</tr>
+
+PAGEBODY;
+
+
+    if( $PERMISSIONS['SYS_USE_AUTHORS_PAPER_SUBJECT'] )
+      $PAGEBODY .= <<<PAGEBODY
+<tr>
+<td><strong>Section/Minisymposium:</strong></td>
+<td width=99%>
+$SUBJLIST
+</td>
+</tr>
+
+PAGEBODY;
+
+
+    $PAGEBODY .= <<<PAGEBODY
+<tr>
+<td><strong>Preferred presentation type:</strong></td>
+<td width=99%>
+$PRESENTLIST
+</td>
+</tr>
+
+
+<tr>
+<td valign=top colspan=2 width=99%>
+Choose main and secondary keywords of the paper:
+</td>
+</tr>
+<tr><td colspan=2 align=center>
+  $KEYWORDS
+</td></tr>
+</table>
+  $AUTHORS
+<br>
+<!-- br -->
+
+$asterisk - field cannot be empty
+<br> 
+
+<input style="color: red;" type=checkbox value="1" name="confirmed"> Please confirm that all authors and abstracts are entered and the title is correct.
+<br> 
+<input style="color: red;" type=button value="Save paper info" onClick="if( this.form.confirmed.checked ) { savealllists(); document.paperinfoform.editpaperop.value='save'; document.paperinfoform.submit(); } else alert('You did not confirm that all authors and abstracts are entered and the title is correct'); return false;">
+<!-- input style="color: red;" type=button value="Save paper info" onClick="alert( this.form.confirmed.checked );" -->
+<!-- input style="color: red;" type=button value="Save paper info QQQQQQQQQ" onClick="alert( 'clicked' );" -->
+
+</form>
+<p>
+
+PAGEBODY;
+  } else {
+    $PAGEBODY .= <<<PAGEBODY
+<center>
+You cannot edit paper info now.
+</center>
+<p>
+
+PAGEBODY;
+  }
+
+
+if( $PAPID ) {
+	$diagnosis = "";
+
+	if ( $_FILES[paperfile] ) {
+		$fex = file_exists(paper_fileName( $CURRENTCONT, $PAPID ));
+		if( $fex && $PERMISSIONS['PAPREG_REUPLOAD_REGISTERED_PAPER'] || !$fex && $PERMISSIONS['PAPREG_UPLOAD_REGISTERED_PAPER'] ) {
+			if( paper_upload_file( $CURRENTCONT, $PAPID ) ) {
+				$diagnosis = "File is uploaded successfully. Thank you for submission.";
+				//if( $_REQUEST['sendconfirmation']==1 ) {
+
+				$PAPERTITLE = '';
+				$result = pg_query("SELECT title FROM paper WHERE context=$CURRENTCONT AND papnum=$PAPID0 AND registrator=$USERPIN");
+				if( $row = pg_fetch_array($result) ) {
+					$PAPERTITLE = $row[0];
+				}
+				include_once( "email/directmail.php" );
+				$flag = mail_send_now("paperuploaded", $USERPIN, "", array(
+					'PAPERID' => $PAPID,
+					'CURRENTCONT' => $CURRENTCONT,
+					'CURRENTCONTTITLE' => $CURRENTCONTTITLE,
+					'PAPERTITLE' => $PAPERTITLE,
+					'SUBJECT' => 'Notification of submission to '.$CURRENTCONTSHORTTITLE
+				));
+				if( $GLOBALS['FILE_UPLOADED_LOG_EMAIL'] )
+					$log_emails = is_array( $GLOBALS['FILE_UPLOADED_LOG_EMAIL'] ) ? $GLOBALS['FILE_UPLOADED_LOG_EMAIL'] : array( $GLOBALS['FILE_UPLOADED_LOG_EMAIL'] );
+				//	$flag = mail_send_now("paperuploaded", $USERPIN, $GLOBALS['FILE_UPLOADED_LOG_EMAIL'], array(
+					foreach( $log_emails as $log_email ) {
+						$flag = mail_send_now("paperuploaded", $USERPIN, $log_email, array(
+							'PAPERID' => $PAPID,
+							'CURRENTCONT' => $CURRENTCONT,
+							'CURRENTCONTTITLE' => $CURRENTCONTTITLE,
+							'PAPERTITLE' => $PAPERTITLE,
+							'SUBJECT' => 'Notification of submission to '.$CURRENTCONTSHORTTITLE.' (copy)'
+						));
+					}
+				//}
+			}
+		}
+	}
+
+	if( $_REQUEST['paperop'] == 'remove' && $PERMISSIONS['PAPREG_REMOVE_UPLOADED_PAPER'] ) {
+		@unlink( paper_fileName( $CURRENTCONT, $PAPID ) );
+		$result = pg_query("UPDATE paper SET filetype=NULL, filename=NULL WHERE context=$CURRENTCONT AND papnum='$PAPID'");
+	}
+
+
+    $PAGEBODY .= <<<PAGEBODY
+<p>
+  <h3>Paper file</h3>
+
+PAGEBODY;
+
+    if( $diagnosis )
+        $PAGEBODY .= <<<PAGEBODY
+<span style="color: red; font-size: 200%">$diagnosis</span>
+<p>
+
+PAGEBODY;
+
+    $fex = file_exists(paper_fileName( $CURRENTCONT, $PAPID ));
+
+    if( $fex ) {
+      $ftype = paper_getFileType( $CURRENTCONT, $PAPID );
+      $fsize = paper_getFileSize( $CURRENTCONT, $PAPID );
+      $ftime = paper_getFileTimeEx( $CURRENTCONT, $PAPID );
+
+
+      $PAGEBODY .= <<<PAGEBODY
+<b>Paper is uploaded on $ftime</b>. File size: $fsize;&nbsp; File type: $ftype<br>
+
+PAGEBODY;
+
+      if( $PERMISSIONS['PAPREG_REUPLOAD_REGISTERED_PAPER'] )
+        $PAGEBODY .= <<<PAGEBODY
+You can re-upload your paper (File size not greater than 2Mb)<br>
+<form name="paperuploadform" METHOD="POST" ENCTYPE="multipart/form-data" style="margin: 0;">
+  <input type="hidden" name="selpaperid" value="$PAPID">
+  <input type="hidden" name="MAX_FILE_SIZE" value="8388608">
+  <input type=file name=paperfile>
+
+<!-- Send confirmation by e-mail:
+  <input type="checkbox" name="sendconfirmation" value="1" style="border: none;" -->
+<br>
+
+  <input style="color: red;" type=button value="Upload file" onClick="document.paperuploadform.submit(); return false;">
+</form>
+<p>
+
+PAGEBODY;
+      else
+        $PAGEBODY .= <<<PAGEBODY
+<p>
+<center>
+You cannot re-upload paper file now.
+</center>
+<p>
+
+PAGEBODY;
+
+
+
+
+      if( $PERMISSIONS['PAPREG_REMOVE_UPLOADED_PAPER'] )
+        $PAGEBODY .= <<<PAGEBODY
+<b>Remove:</b><br>
+You can remove your paper file<br>
+<form name="paperremoveform" METHOD="POST" ENCTYPE="multipart/form-data" style="margin: 0;">
+  <input type="hidden" name="selpaperid" value="$PAPID">
+  <input type="hidden" name="paperop" value="remove">
+  <input style="color: red;" type=button value="Remove file" onClick="if ( confirm('Remove paper file - are you sure?') ) { document.paperremoveform.submit(); } return false;">
+</form>
+<p>
+
+PAGEBODY;
+      else
+        $PAGEBODY .= <<<PAGEBODY
+<b>Remove:</b><br>
+<center>
+You cannot remove paper file now.
+</center>
+<p>
+
+PAGEBODY;
+
+    } else {
+
+      if( $PERMISSIONS['PAPREG_UPLOAD_REGISTERED_PAPER'] )
+        $PAGEBODY .= <<<PAGEBODY
+File is not uploaded.<br>
+You can upload your paper (File size not greater than 2Mb)<br>
+<form name="paperuploadform" METHOD="POST" ENCTYPE="multipart/form-data" style="margin: 0;">
+  <input type="hidden" name="selpaperid" value="$PAPID">
+  <input type="hidden" name="MAX_FILE_SIZE" value="8388608">
+  <input type=file name=paperfile>
+
+<!-- Send confirmation by e-mail:
+  <input type="checkbox" name="sendconfirmation" value="1" style="border: none;" -->
+<br>
+
+  <input style="color: red;" type=button value="Upload file" onClick="document.paperuploadform.submit(); return false;">
+</form>
+<p>
+
+PAGEBODY;
+      else
+        $PAGEBODY .= <<<PAGEBODY
+<center>
+You cannot upload paper file now.
+</center>
+<p>
+
+PAGEBODY;
+
+    }
+
+
+  }
+
+
+} else {
+    $PAGEBODY .= <<<PAGEBODY
+<center>
+Paper submission is disabled now.
+</center>
+<p>
+
+PAGEBODY;
+
+}
+
+
+
+// -------------------------
+} // $USERPIN
+
+
+
+
+//function keywords($FORMNAME, $PAPID, $INIT0, $INIT1, $INIT2) {
+function keywords($FORMNAME, $INIT0, $INIT1, $INIT2) {
+  $KEYWORDSJS = keywordsjs();
+  $msg = <<<KEYWORDS
+$KEYWORDSJS
+<script language="JavaScript">
+  function initalllists() {
+    initlist(document.$FORMNAME.lst0, document.$FORMNAME.value0.value);
+    initlist(document.$FORMNAME.lst1, document.$FORMNAME.value1.value);
+    initlist(document.$FORMNAME.lst2, document.$FORMNAME.value2.value);
+  }
+  function savealllists() {
+    document.$FORMNAME.value0.value = savelist(document.$FORMNAME.lst0);
+    document.$FORMNAME.value1.value = savelist(document.$FORMNAME.lst1);
+    document.$FORMNAME.value2.value = savelist(document.$FORMNAME.lst2);
+  }
+</script>
+
+<table width="100%" wwidth="400" border=0 cellpadding=0 cellspacing=0>
+  <tr>
+  <td width="1%" wwidth="40%">
+    <strong>Keywords</strong><br>
+    <select name="lst0" nname="list0[]" size=10 multiple style="WIDTH: 200px; height: 100px;">
+      <option>====================</option>
+    </select>
+  </td>
+  <td wwidth="1%" wwidth="40%">
+    <table wwidth=1% border=0 cellpadding=0 cellspacing=0>
+      <tr>
+        <td align=center>
+          <table border=0 cellpadding=0 cellspacing=0>
+            <tr>
+              <td>
+                <input type="button" value=">>" onClick="move(document.$FORMNAME.lst0, document.$FORMNAME.lst1)">
+              <td>
+            </tr>
+            <tr>
+              <td>
+                <input type="button" value="<<" onClick="move(document.$FORMNAME.lst1, document.$FORMNAME.lst0)">
+              <td>
+            </tr>
+          </table>
+        </td>
+        <td align=center>
+          Main keywords<br>
+          <select name="lst1" nname="list1[]" size=4 multiple style="WIDTH: 200px; height: 100px;">
+            <option>====================</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>
+        </td>
+        <td align=center>
+          Secondary
+          <input type="button" value="\/" onClick="move(document.$FORMNAME.lst1, document.$FORMNAME.lst2)">
+          <input type="button" value="/\" onClick="move(document.$FORMNAME.lst2, document.$FORMNAME.lst1)">
+          keywords
+        </td>
+      </tr>
+      <tr>
+        <td align=center>
+          <table wwidth="100%" border=0 cellpadding=0 cellspacing=0>
+            <tr>
+              <td>
+                <input type="button" value=">>" onClick="move(document.$FORMNAME.lst0, document.$FORMNAME.lst2)">
+              <td>
+            </tr>
+            <tr>
+              <td>
+                <input type="button" value="<<" onClick="move(document.$FORMNAME.lst2, document.$FORMNAME.lst0)">
+              <td>
+            </tr>
+          </table>
+        </td>
+        <td align=center>
+          <select name="lst2" nname="list2[]" size=4 multiple style="WIDTH: 200px; height: 100px;">
+            <option>====================</option>
+          </select>
+        </td>
+      </tr>
+    </table>
+  </td>
+  </tr>
+</table>
+<input type="hidden" name="value0" value="$INIT0">
+<input type="hidden" name="value1" value="$INIT1">
+<input type="hidden" name="value2" value="$INIT2">
+
+<script language="JavaScript">
+<!-- //
+  initalllists();
+// -->
+</script>
+
+
+KEYWORDS;
+
+  return $msg;
+}
+
+
+function keywordsjs() {
+  $msg = <<<KEYWORDSJS
+
+<script language="JavaScript">
+
+// Compare 2 "Option" objects
+function cmpOptions(a, b) {
+  if( a.text < b.text ) return -1;
+  if( a.text > b.text ) return 1;
+  return 0;
+};
+
+// Move selected elements from list1 to list2
+function move( list1, list2 ) {
+// Arrays, where list's elements will be placed
+// after arrangement
+  var arr1 = new Array(), arr2 = new Array();
+
+// Advance elements of the first (source) list.
+// If element is selected - move it to arr2
+  var obj, obj2, i;
+  for(i=0; i<list1.length; ++i) {
+    obj = list1.options[i];
+    obj2 = new Option(obj.text, obj.value);
+    if( obj.selected )
+      arr2[ arr2.length ] = obj2;
+    else
+      arr1[ arr1.length ] = obj2;
+  }
+
+// Copy elements from the second list
+// (destination) to arr2
+  for(i=0;i<list2.length;++i) {
+    obj = list2.options[i];
+    obj2 = new Option(obj.text, obj.value);
+    arr2[ arr2.length ] = obj2;
+  }
+
+// Arrange destination elements ascending
+  arr2.sort( cmpOptions );
+
+// Clear lists
+  list2.length = list1.length = 0;
+
+// Filling in list from arrays
+  for(i=0; i<arr1.length; i++)
+    list1.options[ list1.length ] = arr1[i];
+
+  for(i=0; i<arr2.length; i++)
+    list2.options[ list2.length ] = arr2[i];
+}
+
+// Initialization string: "name0|value0|name1|value1" etc...
+function initlist(list, str) {
+  list.length = 0;
+  var arr;
+  if (str) {
+    arr = str.split("|");
+    for(i=0; i<arr.length; i+=2)
+      list.options[ list.length ] = new Option(arr[i], arr[i+1]);;
+  }
+}
+
+function savelist(list) {
+  var arr = new Array();
+  var rez = "";
+  if (list.length>0) {
+    rez = list.options[0].text + "|" + list.options[0].value;
+    for(var i=1;i<list.length;++i)
+      rez += "|" + list.options[i].text + "|" + list.options[i].value;
+  }
+
+  return rez;
+}
+</script>
+
+KEYWORDSJS;
+  return $msg;
+}
+
+
+
+
+
+function paper_upload_file( $context, $papid ) {
+//  $fname = $GLOBALS[HTTP_POST_FILES][paperfile][name];
+//  $fsize = $GLOBALS[HTTP_POST_FILES][paperfile][size];
+//  $ftype = $GLOBALS[HTTP_POST_FILES][paperfile][type];
+
+  $fname = $_FILES['paperfile']['name'];
+  $fsize = $_FILES['paperfile']['size'];
+  $ftype = $_FILES['paperfile']['type'];
+  $ftmpname = $_FILES['paperfile']['tmp_name'];
+#  print <<<EEE
+#  <!--
+#  fname=$fname
+#  fsize=$fsize
+#  ftype=$ftype
+#  ftmpname=$ftmpname
+#  -->
+#EEE
+#;
+  $filename = paper_fileName( $context, $papid );
+  if ( $fsize > 0 && $papid ) {
+    $result = pg_query("UPDATE paper SET filetype='$ftype', filename='$fname' WHERE context=$context AND papnum='$papid'");
+    if ( move_uploaded_file( $_FILES['paperfile']['tmp_name'], $filename ) ) {
+      chmod( $filename, 0775 );
+      return 1;
+    }
+  }
+}
+
+function paper_getFileType( $context, $papid ) {
+  $result = pg_query("SELECT filetype FROM paper WHERE context=$context AND papnum='$papid'");
+  if ($row = pg_fetch_array($result))
+    return $row[filetype];
+}
+
+function paper_getFileSize( $context, $papid ) {
+  $filename = paper_fileName( $context, $papid );
+  if ( file_exists( $filename ) )
+    return filesize( $filename );
+}
+
+?>

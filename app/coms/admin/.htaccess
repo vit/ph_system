@@ -1,0 +1,8 @@
+#Control panel protect start
+AuthName "Input password"
+AuthType Basic
+AuthUserFile "/users/p/h/physcon.ru/.htpasswd/.htpasswd1"
+<Files *>
+require valid-user
+</Files>
+#Control panel protect stop

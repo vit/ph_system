@@ -26,6 +26,8 @@
       {:writer writer :info info}
       nil)))
 
+
+
 (defn get-doc-breadcrumbs [conn doc]
   (let [id (doc "_id")
         meta (doc "_meta")
@@ -38,6 +40,39 @@
               parent-rez (get-doc-breadcrumbs conn parent-doc)]
           (conj parent-rez d)))))
 
+
+(defn get-doc-breadcrumbs-by-id [conn id]
+  (let [doc (find-doc conn {:_id id})
+        meta (doc "_meta")
+        info (doc "info")
+        title (info "title")
+        d {:id id :title title}
+        parent-id (meta "parent")]
+    (if (nil? parent-id) [d]
+        (let [parent-rez (get-doc-breadcrumbs-by-id conn parent-id)]
+          (conj parent-rez d)))))
+
+
+(defn get-doc-children-by-id [conn id]
+  (map
+   (fn [doc] (let [info (doc "info")
+                  ;;  doc-id (doc "_id")
+                   doc-id (doc "_id")
+                   title (info "title")
+                   subtitle (info "subtitle")
+                   d {:id doc-id :title title :subtitle subtitle}]
+               d
+               )
+     )
+   (find-docs conn {"_meta.parent" id})
+  ;;  (find-docs conn {"_meta.parent" nil})
+   )
+  
+  )
+
+
+
+
 (defn get-doc [conn id]
   (let [doc (find-doc conn {:_id id})]
     (if (some? doc)
@@ -45,7 +80,7 @@
        doc
        "file-info" (find-file-info conn {"_meta.parent" id})
        "children" (find-docs conn {"_meta.parent" id}
-                             
+
                             ;;  @docs.find(
                             ;;  				{'_meta.class' => LIB_DOC_CLASS, '_meta.parent' => id}
                             ;;  			).sort( [[ '_meta.ctime', -1]] ).map do |d|
@@ -55,12 +90,36 @@
                             ;;  					'authors' => d['authors']
                             ;;  				}
                             ;;  			end
-                             
                              )
        "breadcrumbs" (get-doc-breadcrumbs conn doc))
-      nil))
-  
-  )
+      nil)))
+
+
+
+
+
+
+
+
+(defn call-rpc [conn method payload]
+  (let [rpc-map {"get_doc_data" (fn []
+                                  (let [doc (find-doc conn {:_id (get payload "id")})]
+                                    (when (some? doc) doc)))
+                 "get_doc_path" (fn []
+                                  (let [rez (get-doc-breadcrumbs-by-id conn (get payload "id"))]
+                                    (when (some? rez) rez)))
+                 "get_doc_children" (fn []
+                                      (let [rez (get-doc-children-by-id conn (get payload "id"))]
+                                        (when (some? rez) rez)))}
+        fn-to-call (get rpc-map method)
+        result (fn-to-call)]
+    (println result)
+    result))
+
+
+
+
+
 
 
 (defn db-connect []

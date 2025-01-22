@@ -1,0 +1,183 @@
+<?php
+$PAGEID = 'revoffice';
+
+if (!$USERPIN)
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+You need to enter the system.
+<br>
+Use the form in the upper right corner of the page.
+</center>
+<p>
+
+PAGEBODY;
+
+else {
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Edit paper review</span></center>
+<p>
+
+PAGEBODY;
+
+  $PAGEBODY .= <<<PAGEBODY
+<a href="revoffice.html">Return to reviewer's office</a>
+<p>
+
+PAGEBODY;
+
+  if( $PERMISSIONS['REVIEWER_WIEW_REVIEWING_DATA'] && $isreviewer ) {
+
+    $papid = "";
+    $r_ipccomments = "";
+    $r_authcomments = "";
+
+    $score = $_REQUEST[score]?(int)$_REQUEST[score]:"NULL";
+    $decision = $_REQUEST[decision]?(int)$_REQUEST[decision]:"NULL";
+    $subject = $_REQUEST[subject]?(int)$_REQUEST[subject]:"NULL";
+
+    $papid0 = (int)$_REQUEST['papid'];
+
+
+    $result = pg_query("SELECT * FROM review WHERE context=$CURRENTCONT AND papnum=$papid0 AND revpin=$USERPIN");
+    if( $row = pg_fetch_array($result) ) {
+      $papid = $row['papnum'];
+    }
+
+    if( $papid > 0 ) {
+      $flag = $_REQUEST[flag];
+      $r_ipccomments = trim( $_REQUEST[r_ipccomments]);
+      $r_authcomments = trim( $_REQUEST[r_authcomments]);
+
+/*
+      $r_ipccomments_e = pg_escape_string($r_ipccomments);
+      $r_authcomments_e = pg_escape_string($r_authcomments);
+
+  $PAGEBODY .= <<<PAGEBODY
+<p>
+    $r_ipccomments | $r_authcomments
+    <br>
+    $r_ipccomments_e | $r_authcomments_e
+</p>
+PAGEBODY;
+
+*/
+
+      if($PERMISSIONS['REVIEWER_EDIT_REVIEWS']) {
+        if ( $flag=="save" ) {
+//          @$result = pg_query("UPDATE review SET ipccomments='$r_ipccomments_e', authcomments='$r_authcomments_e', score=$score, recommendation=$decision, subject=$subject WHERE context=$CURRENTCONT AND papnum=$papid AND revpin=$USERPIN");
+//          @$result = pg_query("UPDATE review SET ipccomments='$r_ipccomments', authcomments='$r_authcomments', score=$score, recommendation=$decision, subject=$subject WHERE context=$CURRENTCONT AND papnum=$papid AND revpin=$USERPIN");
+//          $result = pg_query("UPDATE review SET ipccomments='$r_ipccomments', authcomments='$r_authcomments', score=$score, recommendation=$decision, subject=$subject WHERE context=$CURRENTCONT AND papnum=$papid AND revpin=$USERPIN");
+
+/*
+$query = "UPDATE review SET ipccomments='$r_ipccomments', authcomments='$r_authcomments', score=$score, recommendation=$decision, subject=$subject WHERE context=$CURRENTCONT AND papnum=$papid AND revpin=$USERPIN";
+  $PAGEBODY .= <<<PAGEBODY
+<p>
+    $query
+</p>
+PAGEBODY;
+*/
+
+//          $result = pg_query("UPDATE review SET ipccomments='$r_ipccomments_e', authcomments='$r_authcomments_e', score=$score, recommendation=$decision, subject=$subject WHERE context=$CURRENTCONT AND papnum=$papid AND revpin=$USERPIN");
+          @$result = pg_query("UPDATE review SET ipccomments='$r_ipccomments', authcomments='$r_authcomments', score=$score, recommendation=$decision, subject=$subject WHERE context=$CURRENTCONT AND papnum=$papid AND revpin=$USERPIN");
+        }
+      }
+
+      $result = pg_query("SELECT * FROM review WHERE context=$CURRENTCONT AND papnum=$papid AND revpin=$USERPIN");
+      if( $row = pg_fetch_array($result) ) {
+        $papid = $row['papnum'];
+        $r_ipccomments = $row['ipccomments'];
+        $r_authcomments = $row['authcomments'];
+
+        $pscore = "<select name=score>";
+        foreach($SCORES as $key => $val) {
+    //      $selected = "";
+          $selected = $key==$row['score']?" selected":"";
+          $pscore .= "<option value=$key $selected>$val</option>";
+        }
+        $pscore .= "</select>";
+
+        $pdec = "<select name=decision>";
+        foreach($REVIEWERPAPERDECISIONS as $key => $val) {
+    //      $selected = "";
+          $selected = $key==$row['recommendation']?" selected":"";
+          $pdec .= "<option value=$key $selected>$val</option>";
+        }
+        $pdec .= "</select>";
+
+        $psubj = "<select name=subject>";
+        foreach($SUBJECTS as $key => $val) {
+    //      $selected = "";
+          $selected = $key==$row['subject']?" selected":"";
+          $psubj .= "<option value=$key $selected>$val</option>";
+        }
+        $psubj .= "</select>";
+      }
+
+      $PAGEBODY .= <<<PAGEBODY
+<center>
+<form method=post style="margin:0;">
+<input type=hidden name="flag" value="save">
+<table>
+  <tr><td align=right><b>Paper ID:</b></td><td><b>$papid</b></td></tr>
+  <tr><td align=right valign=top>Comments to IPC:</td><td><textarea cols=50 rows=5 name="r_ipccomments">$r_ipccomments</textarea></td></tr>
+  <tr><td align=right valign=top>Comments to Authors:</td><td><textarea cols=50 rows=5 name="r_authcomments">$r_authcomments</textarea></td></tr>
+  <tr><td align=right>Score:</td><td>$pscore</td></tr>
+  <tr><td align=right>Recommended decision:</td><td>$pdec</td></tr>
+  <tr><td align=right>Recommended section:</td><td>$psubj</td></tr>
+
+PAGEBODY;
+
+
+      if($PERMISSIONS['REVIEWER_EDIT_REVIEWS']) {
+        $PAGEBODY .= <<<PAGEBODY
+  <tr><td></td><td><input type=submit value="Submit"></td></tr>
+
+PAGEBODY;
+      }
+
+      $PAGEBODY .= <<<PAGEBODY
+</table>
+</form>
+</center>
+<p>
+
+PAGEBODY;
+
+    }
+  }
+
+/*
+//  $result = pg_query("SELECT count(*) FROM review WHERE authcomments like '%IT IS NECESSARY TO TETHER%' and context=$CURRENTCONT");
+//  $result = pg_query("SELECT count(*) FROM review WHERE authcomments like '%Using … one can%' and not (authcomments like '%with ONE CAN%') context=$CURRENTCONT");
+//  $result = pg_query("SELECT count(*) FROM review WHERE authcomments like '%Using … one can%' and not (authcomments like '%with ONE CAN%') and context=$CURRENTCONT");
+//  $result = pg_query("SELECT count(*) FROM review WHERE authcomments like '%Using … one can%' and not (authcomments like '%with ONE CAN%')");
+//  $result = pg_query("SELECT papnum, revpin, ipccomments, authcomments FROM review WHERE authcomments not like '%Using … one can%'");
+//  $result = pg_query("SELECT papnum, revpin, ipccomments, authcomments FROM review WHERE context=$CURRENTCONT");
+  
+//  $result = pg_query("SELECT papnum, revpin, ipccomments, authcomments FROM review WHERE (authcomments is null or authcomments not like '%Using … one can%') and context=$CURRENTCONT");
+//  $result = pg_query("SELECT papnum, revpin, ipccomments, authcomments FROM review WHERE (authcomments is null or authcomments not like '%Using … one can%') and context=$CURRENTCONT");
+//  $result = pg_query("SELECT papnum, revpin, ipccomments, authcomments FROM review WHERE not (authcomments like '%Using … one can%') and context=$CURRENTCONT");
+
+//  $result = pg_query("SELECT papnum, revpin, ipccomments, authcomments FROM review WHERE authcomments like '%Using … one can%' and not (authcomments like '%with ONE CAN%') and context=$CURRENTCONT");
+  $result = pg_query("SELECT papnum, revpin, ipccomments, authcomments FROM review WHERE authcomments like '%Using … one can%' and not (authcomments like '%with ONE CAN%')");
+
+
+$cnt = 0;
+  while( $row = pg_fetch_array($result) ) {
+    $cnt++;
+  $PAGEBODY .= <<<PAGEBODY
+<p>
+    $cnt | $row[0] | $row[1]
+</p>
+PAGEBODY;
+  }
+
+
+//  $result = pg_query("UPDATE review SET ipccomments='-', authcomments='-' WHERE authcomments like '%Using … one can%' and not (authcomments like '%with ONE CAN%') ");
+*/
+
+}
+
+
+?>

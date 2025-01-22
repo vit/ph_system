@@ -1,0 +1,108 @@
+<?
+$pageid = 'countries';
+
+include_once("start.php");
+
+//include_once("mainmenu.php");
+
+  $countryflag = $_REQUEST['countryflag'];
+  $name = $_REQUEST['name'];
+  $marked = &$_REQUEST['marked'];
+
+  if ( $countryflag=="add" && trim($name) ) {
+    $result = pg_query("INSERT INTO country (name) VALUES ('$name')");
+//    print pg_last_error()."<br>\n";
+  }
+
+  if ( $countryflag=="delete" && isset($marked) ) {
+    foreach( $marked as $nomer ) {
+      $result = pg_query("DELETE FROM country WHERE cid='$nomer'");
+//    print pg_last_error()."<br>\n";
+    }
+  }
+
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<center>
+<h2>Countries</h2>
+
+<p>
+
+<table>
+<td align=left>
+<b>Add country</b>
+<form method=post>
+  <input type=hidden name="countryflag" value="add">
+  Name: <input type=text name="name" size=32><br>
+  <input type=submit value="Submit"><br>
+</form>
+</td>
+</table>
+</center>
+
+PAGEBODY;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<p>
+
+<form method=post name=countriesform>
+<table align=center wwidth=100% border=1>
+<tr align=left>
+<th width=1>Mark</th>
+<th>Id</th>
+<th>Name</th>
+<th width=1></th>
+</tr>
+
+PAGEBODY;
+
+  $result = pg_query("SELECT * FROM country WHERE cid>100 ORDER BY name;");
+//  $result = pg_query("SELECT * FROM country ORDER BY name;");
+//  $result = pg_query("SELECT * FROM portalschema.topic ORDER BY title");
+  while( $row = pg_fetch_array($result) ) {
+
+//$cname1 = $row[name];
+//$cname1 = stripslashes($row[name]);
+$cname1 = htmlspecialchars($row['name']);
+
+    $PAGEBODY .= <<<PAGEBODY
+<tr>
+<td width=1><input type=checkbox name="marked[]" value=$row[cid]></td>
+<td>$row[cid]</td>
+<td>$cname1</td>
+<td width=1><a href=editcountry.html?cid=$row[cid]>edit</a></td>
+</tr>
+PAGEBODY;
+
+  }
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+
+PAGEBODY;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+  <input type=hidden name="countryflag" value="">
+  <input type=button value="Delete marked" onClick="if ( confirm('Delete marked - Are you sure?') ) { countriesform.countryflag.value='delete'; countriesform.submit(); }">
+<br>
+</form>
+
+<br>
+
+PAGEBODY;
+
+
+
+
+include_once("finish.php");
+?>

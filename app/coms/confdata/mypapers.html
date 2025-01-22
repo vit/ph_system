@@ -1,0 +1,333 @@
+<?
+$PAGEID = 'mypapers';
+
+  $PAGEBODY .= <<<PAGEBODY
+
+<center><span class=subtitle>My papers</span></center>
+<p>
+
+PAGEBODY;
+
+
+
+if (!$USERPIN)
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+In order to submit the paper you need to enter the system.
+<br>
+Use the form in the upper right corner of the page.
+</center>
+<p>
+
+PAGEBODY;
+
+else {
+
+  $markedpapers = isset($_REQUEST['markedpapers']) ? $_REQUEST['markedpapers'] : null;
+  if( isset($_REQUEST['papersop']) && $_REQUEST['papersop'] == 'delete' && is_array($markedpapers) && $PERMISSIONS['PAPREG_DELETE_REGISTERED_PAPER'] ) {
+    foreach($markedpapers as $elm) {
+      $result = @pg_query("DELETE FROM paper WHERE context=$CURRENTCONT AND registrator=$USERPIN AND papnum=$elm");
+      @unlink( paper_fileName( $CURRENTCONT, $elm ) );
+    }
+  }
+
+  if( $PERMISSIONS['USER_REGISTER_NEW_PAPER'] )
+    $PAGEBODY .= <<<PAGEBODY
+<a href="editpaper.html">Submit new paper</a>
+<p>
+
+PAGEBODY;
+
+
+  $cellclass1 = "cell1";
+  $cellclass2 = "cell2";
+  $cellclass = $cellclass1;
+
+
+  $finaltext = $editortext = $revtext = "";
+  if( $PERMISSIONS['PAPREG_VIEW_FINAL_DECISION'] )
+    $finaltext = "Final decision and section";
+  if( $PERMISSIONS['PAPREG_VIEW_EDITOR_COMMENTS'] )
+    $editortext = "Editor comments";
+  if( $PERMISSIONS['PAPREG_VIEW_REVIEWERS_COMMENTS'] )
+    $revtext = "Reviewer's comments";
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<form name="paperslistform" method="post" sstyle="margin: 0;">
+
+PAGEBODY;
+
+
+  $items = "";
+  $result = pg_query("
+SELECT
+  p.*,
+  concatpaperauthors(p.context, p.papnum) AS authors1,
+  concatpaperkeywords(p.context, p.papnum, 3) AS keywords1,
+  concatpaperkeywords(p.context, p.papnum, 2) AS keywords2,
+  r.revpin AS revpin, r.score AS r_score, r.subject AS r_subject, r.ipccomments AS r_ipccomments, r.authcomments AS r_authcomments, r.recommendation AS r_recommendation
+FROM 
+  paper AS p 
+    LEFT JOIN 
+      review AS r ON p.papnum=r.papnum AND r.context=$CURRENTCONT
+WHERE
+  p.registrator=$USERPIN AND p.context=$CURRENTCONT
+ORDER BY p.papnum, r.revpin;
+");
+
+
+  $revcnt = 0;
+  $papid0 = 0;
+
+  while( $row = pg_fetch_array($result) ) {
+
+    $papid = $row['papnum'];
+    $ctitle1 = htmlspecialchars($row['title']);
+    $cauthors_s1 = $row['authors'];
+    $cauthors1 = $row['authors1'];
+    $ckeywords1 = $row['keywords1'];
+    $ckeywords2 = $row['keywords2'];
+
+    $subject1 = (int)$row['subject'];
+    $subject1_str = $SUBJECTS[$subject1];
+
+    $cabstract1 = nl2br( htmlspecialchars($row['abstract']) );
+    $cauthcomments = nl2br( htmlspecialchars($row['ed_authcomments']) );
+    $rcauthcomments = nl2br( htmlspecialchars($row['r_authcomments']) );
+
+    $fin_subject = (int)$row['finalsubject'];
+    $fin_subject_str = $SUBJECTS[$fin_subject];
+
+    $fin_decision = (int)$row['finaldecision'];
+    $fin_decision_str = $FINALPAPERDECISIONS[$fin_decision];
+
+    $myfilename = $papersdir."/c".$CURRENTCONT."p".$row['papnum'];
+
+    if ( file_exists($myfilename) ) {
+      $srcfname = $row['filename'];
+      preg_match('|(.*)\.(.*)|', $srcfname, $fnparse);
+      $fileext = $fnparse[2];
+      $externfname = "c{$CURRENTCONT}p{$row['papnum']}r{$row['registrator']}.$fileext";
+      $papfilesize = filesize( $myfilename );
+      $ftime = paper_getFileTimeEx( $CURRENTCONT, $row['papnum'] );
+
+      $downloadtext = <<<downloadtext
+    <b>File:</b> $papfilesize bytes, $ftime (<a href="{$ROOT}getpaper/$externfname">Download</a>)
+
+downloadtext;
+    } else {
+      $downloadtext = <<<downloadtext
+    <b>File is not uploaded</b>
+
+downloadtext;
+    }
+
+
+    if( $papid0 != $papid ) {
+
+      if($papid0>0)
+        $PAGEBODY .= <<<PAGEBODY
+$PAPERTAIL
+<br>
+</div>
+
+PAGEBODY;
+
+      $papid0 = $papid;
+
+
+
+    $PAGEBODY .= <<<PAGEBODY
+<p>
+<div class=$cellclass>
+
+PAGEBODY;
+
+
+    if( $PERMISSIONS['PAPREG_DELETE_REGISTERED_PAPER'] )
+      $PAGEBODY .= <<<PAGEBODY
+<input type=checkbox class=$cellclass style="border: none;" name="markedpapers[]" value=$papid>
+
+PAGEBODY;
+
+
+      $PAGEBODY .= <<<PAGEBODY
+<a href="{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row['registrator']}.html" title="Paper information"
+  onClick="window.open('{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row['registrator']}.html', '', 'location=no, menubar=no, toolbar=no, statusbar=no, scrollbars=yes, width=620, height=550, resizable=yes'); return false;"
+><b>ID:</b>&nbsp;$papid</a>
+<br>
+ <b>Title:</b> $ctitle1
+<br>
+ <b>Authors (text):</b> $cauthors_s1
+<br>
+ <b>Authors (with PINs):</b> $cauthors1
+<br>
+
+PAGEBODY;
+
+    if( $PERMISSIONS['SYS_USE_AUTHORS_PAPER_SUBJECT'] )
+      $PAGEBODY .= <<<PAGEBODY
+ <b>Section:</b> $subject1_str
+<br>
+
+PAGEBODY;
+
+      $PAGEBODY .= <<<PAGEBODY
+ <b>Main keywords:</b> $ckeywords1
+<br>
+ <b>Secondary keywords:</b> $ckeywords2
+<br>
+<div cclass=cell3>
+ <b>Abstract:</b> $cabstract1
+</div>
+$downloadtext
+<p>
+=> <a href="editpaper.html?selpaperid=$papid">Edit&nbsp;paper&nbsp;info&nbsp;or&nbsp;upload&nbsp;file</a>
+<p>
+
+PAGEBODY;
+
+
+
+      $PAPERTAIL = "";
+      if( $PERMISSIONS['PAPREG_VIEW_EDITOR_COMMENTS'] )
+        $PAPERTAIL .= <<<PAGEBODY
+<div class=cell4>
+<b>Editor comments:</b> $cauthcomments
+</div>
+
+PAGEBODY;
+
+      if( $PERMISSIONS['PAPREG_VIEW_FINAL_DECISION'] )
+        $PAPERTAIL .= <<<PAGEBODY
+<div class=cell8>
+<b>Final decision:</b> <span class=selection3>$fin_decision_str</span>;
+<b>Final section:</b> <span class=selection3>$fin_subject_str</span>;
+</div>
+
+PAGEBODY;
+
+      $revcnt=0;
+
+      $cellclass1 = $cellclass2;
+      $cellclass2 = $cellclass;
+      $cellclass = $cellclass1;
+    }
+
+    if($row['revpin']) {
+      $revcnt++;
+
+      if( $PERMISSIONS['PAPREG_VIEW_REVIEWERS_COMMENTS'] )
+        $PAGEBODY .= <<<PAGEBODY
+<div class=cell6>
+<b>Reviewer $revcnt comments:</b> $rcauthcomments
+<br>
+</div>
+
+PAGEBODY;
+    }
+
+  }
+
+  if( $papid0 > 0 )
+    $PAGEBODY .= <<<PAGEBODY
+$PAPERTAIL
+<br>
+</div>
+
+PAGEBODY;
+
+  if(  $papid0 > 0  && $PERMISSIONS['PAPREG_DELETE_REGISTERED_PAPER'] )
+    $PAGEBODY .= <<<PAGEBODY
+<br>
+<input type="hidden" name="papersop" value="">
+<input type=button value="Delete marked papers" onClick="if ( confirm('Delete marked papers - are you sure?') ) { document.paperslistform.papersop.value='delete'; document.paperslistform.submit(); } return false;">
+
+PAGEBODY;
+
+/*
+  else
+    $PAGEBODY .= <<<PAGEBODY
+<center>
+You cannot delete papers now.
+</center>
+
+PAGEBODY;
+*/
+
+  $PAGEBODY .= <<<PAGEBODY
+</form>
+
+<p>
+
+PAGEBODY;
+
+/*
+$p1 = $PERMISSIONS['USER_REGISTER_NEW_PAPER']?'Yes':'No';
+$p2 = $PERMISSIONS['PAPREG_DELETE_REGISTERED_PAPER']?'Yes':'No';
+$p3 = $PERMISSIONS['PAPREG_EDIT_REGISTERED_PAPER']?'Yes':'No';
+$p4 = $PERMISSIONS['PAPREG_UPLOAD_REGISTERED_PAPER']?'Yes':'No';
+$p5 = $PERMISSIONS['PAPREG_REUPLOAD_REGISTERED_PAPER']?'Yes':'No';
+$p6 = $PERMISSIONS['PAPREG_REMOVE_UPLOADED_PAPER']?'Yes':'No';
+
+$p7 = $PERMISSIONS['PAPREG_VIEW_FINAL_DECISION']?'Yes':'No';
+$p8 = $PERMISSIONS['PAPREG_VIEW_EDITOR_COMMENTS']?'Yes':'No';
+$p9 = $PERMISSIONS['PAPREG_VIEW_REVIEWERS_COMMENTS']?'Yes':'No';
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+<b>Current permissions:</b>
+
+<table align=center border=1>
+<tr>
+<td>Register new paper</td>
+<td>$p1</td>
+</tr>
+<tr>
+<td>Delete registered paper</td>
+<td>$p2</td>
+</tr>
+<tr>
+<td>Edit registered paper</td>
+<td>$p3</td>
+</tr>
+<tr>
+<td>Upload paper file</td>
+<td>$p4</td>
+</tr>
+<tr>
+<td>Re-upload paper file</td>
+<td>$p5</td>
+</tr>
+<tr>
+<td>Remove paper file</td>
+<td>$p6</td>
+</tr>
+<tr>
+<td>View final decision</td>
+<td>$p7</td>
+</tr>
+<tr>
+<td>View editor comments</td>
+<td>$p8</td>
+</tr>
+<tr>
+<td>View reviewer's comments</td>
+<td>$p9</td>
+</tr>
+</table>
+</center>
+<p>
+
+PAGEBODY;
+*/
+
+
+}
+
+
+//include_once("finish.php");
+
+?>

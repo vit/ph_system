@@ -1,0 +1,29 @@
+FROM php:7-fpm
+
+RUN apt-get update
+
+# Install PDO and PGSQL Drivers
+RUN apt-get install -y libpq-dev \
+  && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
+  && docker-php-ext-install pdo pdo_pgsql pgsql
+
+RUN apt-get install -y msmtp
+# RUN apt-get install -y iputils-ping
+
+# And clean up the image
+RUN rm -rf /var/lib/apt/lists/*
+
+
+RUN echo "security.limit_extensions = .html .php" >> /usr/local/etc/php-fpm.d/www.conf
+COPY ./config/env-vars.conf /usr/local/etc/php-fpm.d/
+
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
+COPY ./config/php-overrides.ini $PHP_INI_DIR/conf.d/
+COPY ./config/msmtprc /etc/msmtprc
+RUN chmod 666 /etc/msmtprc
+
+
+COPY ./config/backup-papers.sh /backup-papers.sh
+
+

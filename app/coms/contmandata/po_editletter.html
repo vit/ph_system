@@ -1,0 +1,65 @@
+<?
+
+$SUBPAGEID = 'letters';
+
+  include_once("contmandata/po_start.php");
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Edit letter</span></center>
+<p>
+
+PAGEBODY;
+
+
+
+
+
+
+
+
+
+
+$mailtitle = trim( $_REQUEST['mailtitle'] );
+$addmailflag = $_REQUEST['addmailflag'];
+$mlid = $_REQUEST['mlid'];
+$mldata = $_REQUEST['mldata'];
+$mlaction = $_REQUEST['mlaction'];
+
+if ( $mlaction == "save" ) {
+//  $result = pg_query("UPDATE mldata SET title='$mldata[title]', subject='$mldata[subject]', ffrom='$mldata[from]', body='$mldata[body]', updtime=NOW() WHERE mlid='$mlid' AND context=$CURRENTCONT");
+  $result = pg_query("UPDATE mldata SET title='$mldata[title]', subject='$mldata[subject]', ffrom='$mldata[from]', tto='$mldata[to]', body='$mldata[body]', updtime=NOW() WHERE mlid='$mlid' AND context=$CURRENTCONT");
+}
+
+
+$result = pg_query("SELECT * FROM mldata WHERE mlid='$mlid' AND context=$CURRENTCONT");
+if( $ml = pg_fetch_array( $result ) ) {
+
+  $PAGEBODY .= <<<PAGEBODY
+<br>
+<a href="po_letters.html">&lt;&lt; Back to list</a>
+<p>
+
+ID: <b>$ml[mlid]</b>, Last updated at $ml[updtime]
+<br>
+
+<FORM name=editmailform METHOD="POST" style="margin: 0;">
+  Title: <input TYPE="text" NAME="mldata[title]" SIZE=80 MAXLENGTH=150 value="$ml[title]"><br>
+  From: <input TYPE="text" NAME="mldata[from]" SIZE=80 MAXLENGTH=150 value="$ml[ffrom]"><br>
+  To: <input TYPE="text" NAME="mldata[to]" SIZE=80 MAXLENGTH=150 value="$ml[tto]"><br>
+  Subject: <input TYPE="text" NAME="mldata[subject]" SIZE=80 MAXLENGTH=150 value="$ml[subject]"><br>
+  <textarea name="mldata[body]" rows=20 cols=80 wrap=physical>$ml[body]</textarea><br>
+  <input type="hidden" name="mlaction" value="save">
+  <input type="submit" value="Save">
+</FORM>
+<br>
+
+PAGEBODY;
+
+}
+
+
+
+
+
+
+?>

@@ -5,6 +5,8 @@
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [compojure "1.6.1"]
                  [ring/ring-defaults "0.3.2"]
+                 [ring/ring-json "0.5.1"]
+                 [ring-cors/ring-cors "0.1.13"]
                  [selmer "1.12.61"]
                  [hiccup "2.0.0-RC3"]
                  ;; The underlying driver -- any newer version can also be used

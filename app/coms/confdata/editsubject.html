@@ -1,0 +1,104 @@
+<?
+$PAGEID = 'mysubjects';
+
+
+
+if (!$USERPIN)
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+You need to enter the system.
+<br>
+Use the form in the upper right corner of the page.
+</center>
+<p>
+
+PAGEBODY;
+
+else {
+
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Edit section</span></center>
+<p>
+
+PAGEBODY;
+
+$PAGEBODY .= <<<PAGEBODY
+<a href="mysubjects.html">Return to sections list</a>
+<p>
+
+PAGEBODY;
+
+
+$subjid = "";
+$title = "";
+$abstract = "";
+//$isinvited = "";
+
+
+$subjid0 = $_REQUEST['subjid'];
+
+
+if( $subjid0 > 0 && $PERMISSIONS['SUBJADM_EDIT_SUBJECT'] ) {
+  $result = pg_query("SELECT * FROM subject WHERE context=$CURRENTCONT AND subjid=$subjid0 AND manager=$USERPIN");
+  if( $row = pg_fetch_array($result) ) {
+    $subjid = $row['subjid'];
+  }
+}
+
+
+if( $subjid > 0 ) {
+  $flag = $_REQUEST[flag];
+  $title = trim( $_REQUEST['title']);
+  $abstract = trim( $_REQUEST['abstract']);
+//  $isinvited = $_REQUEST['isinvited']?"TRUE":"FALSE";
+
+  if ( $flag=="save" ) {
+//    @$result = pg_query("UPDATE subject SET title='$title', abstract='$abstract', isinvited=$isinvited WHERE context=$CURRENTCONT AND subjid=$subjid AND manager=$USERPIN");
+    @$result = pg_query("UPDATE subject SET title='$title', abstract='$abstract' WHERE context=$CURRENTCONT AND subjid=$subjid AND manager=$USERPIN");
+//    print pg_last_error()."<br>\n";
+  }
+
+
+  $result = pg_query("SELECT * FROM subject WHERE context=$CURRENTCONT AND subjid=$subjid AND manager=$USERPIN");
+  if( $row = pg_fetch_array($result) ) {
+    $subjid = $row['subjid'];
+    $title = $row['title'];
+    $abstract = $row['abstract'];
+//    $isinvited = $row['isinvited']=='t'?true:false;
+
+  }
+
+//  $isinvitedchecked = $isinvited?"CHECKED":"";
+
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+<table>
+<td align=left>
+<form method=post style="margin:0;">
+  <b>Section ID: $subjid</b><br>
+  <input type=hidden name="flag" value="save">
+  Title: <input type=text name="title" size=50 value="$title"><br>
+  Abstract: <textarea cols=50 rows=5 name="abstract">$abstract</textarea><br>
+<!--  Invited: <input type=checkbox name="isinvited" value=1 $isinvitedchecked><br -->
+  <input type=submit value="Submit"><br>
+</form>
+</td>
+</table>
+</center>
+<p>
+
+PAGEBODY;
+
+}
+
+
+
+}
+
+
+//include_once("finish.php");
+
+?>

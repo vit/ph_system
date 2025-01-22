@@ -1,0 +1,151 @@
+<?
+$PAGEID = 'editorial';
+
+
+
+if (!$USERPIN)
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+You need to enter the system.
+<br>
+Use the form in the upper right corner of the page.
+</center>
+<p>
+
+PAGEBODY;
+
+else {
+
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Edit section recommendations</span></center>
+<p>
+
+PAGEBODY;
+
+$PAGEBODY .= <<<PAGEBODY
+<a href="editorial.html">Return to editorial office</a>
+<p>
+
+PAGEBODY;
+
+if($PERMISSIONS['EDITOR_WIEW_REVIEWING_DATA'] && $iseditor) {
+
+
+$subjid = "";
+//$title = "";
+//$abstract = "";
+//$isinvited = "";
+$ed_ipccomments = "";
+$ed_authcomments = "";
+$score = $_REQUEST[score]?(int)$_REQUEST[score]:"NULL";
+$decision = $_REQUEST[decision]?(int)$_REQUEST[decision]:"NULL";
+
+$subjid0 = $_REQUEST['subjid'];
+
+
+  $result = pg_query("SELECT * FROM subject WHERE context=$CURRENTCONT AND subjid=$subjid0 AND editor=$EDITORID");
+  if( $row = pg_fetch_array($result) ) {
+    $subjid = $row['subjid'];
+  }
+
+
+if( $subjid > 0 ) {
+  $flag = $_REQUEST[flag];
+//  $title = trim( $_REQUEST[title]);
+//  $abstract = trim( $_REQUEST[abstract]);
+  $ed_ipccomments = trim( $_REQUEST[ed_ipccomments]);
+  $ed_authcomments = trim( $_REQUEST[ed_authcomments]);
+
+
+  if($PERMISSIONS['EDITOR_EDIT_RECOMMENDATIONS']) {
+    if ( $flag=="save" ) {
+      @$result = pg_query("UPDATE subject SET ed_ipccomments='$ed_ipccomments', ed_authcomments='$ed_authcomments', ed_score=$score, ed_recommendation=$decision WHERE context=$CURRENTCONT AND subjid=$subjid AND editor=$EDITORID");
+//      print pg_last_error()."<br>\n";
+    }
+  }
+
+
+  $result = pg_query("SELECT * FROM subject WHERE context=$CURRENTCONT AND subjid=$subjid AND editor=$EDITORID");
+  if( $row = pg_fetch_array($result) ) {
+    $subjid = $row['subjid'];
+//    $title = $row['title'];
+//    $abstract = $row['abstract'];
+////    $isinvited = $row['isinvited']=='t'?true:false;
+
+//    $ed_ipccomments = $row['abstract'];
+    $ed_ipccomments = $row['ed_ipccomments'];
+    $ed_authcomments = $row['ed_authcomments'];
+
+
+
+    $sscore = "<select name=score>";
+    foreach($SCORES as $key => $val) {
+//      $selected = "";
+      $selected = $key==$row['ed_score']?" selected":"";
+      $sscore .= "<option value=$key $selected>$val</option>";
+    }
+    $sscore .= "</select>";
+
+    $sdec = "<select name=decision>";
+    foreach($EDITORSUBJDECISIONS as $key => $val) {
+//      $selected = "";
+      $selected = $key==$row['ed_recommendation']?" selected":"";
+      $sdec .= "<option value=$key $selected>$val</option>";
+    }
+    $sdec .= "</select>";
+
+
+  }
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+<form method=post style="margin:0;">
+<input type=hidden name="flag" value="save">
+<table>
+  <tr><td align=right><b>Section ID:</b></td><td><b>$subjid</b></td></tr>
+  <tr><td align=right valign=top>Comments to IPC:</td><td><textarea cols=50 rows=5 name="ed_ipccomments">$ed_ipccomments</textarea></td></tr>
+  <tr><td align=right valign=top>Comments to Authors:</td><td><textarea cols=50 rows=5 name="ed_authcomments">$ed_authcomments</textarea></td></tr>
+  <tr><td align=right>Score:</td><td>$sscore</td></tr>
+  <tr><td align=right>Recommended decision:</td><td>$sdec</td></tr>
+
+PAGEBODY;
+
+
+  if($PERMISSIONS['EDITOR_EDIT_RECOMMENDATIONS']) {
+    $PAGEBODY .= <<<PAGEBODY
+  <tr><td></td><td><input type=submit value="Submit"></td></tr>
+
+PAGEBODY;
+  }
+
+
+  $PAGEBODY .= <<<PAGEBODY
+</table>
+</form>
+</center>
+<p>
+
+PAGEBODY;
+
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+}
+
+
+?>

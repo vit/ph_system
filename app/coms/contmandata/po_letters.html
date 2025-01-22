@@ -1,0 +1,99 @@
+<?
+
+$SUBPAGEID = 'letters';
+
+  include_once("contmandata/po_start.php");
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Letters</span></center>
+<p>
+
+PAGEBODY;
+
+
+
+
+
+$mailtitle = trim( $_REQUEST['mailtitle'] );
+$addmailflag = $_REQUEST['addmailflag'];
+$mlaction = $_REQUEST['mlaction'];
+$marked = $_REQUEST['marked'];
+
+
+//print "$mailtitle|$mlaction<br>";
+
+if ( $mlaction=="add" && $mailtitle ) {
+  $result = pg_query("INSERT INTO mldata (context, title, updtime) VALUES ($CURRENTCONT, '$mailtitle', NOW())");
+//print pg_last_error() ."<br>";
+}
+
+
+if ( $mlaction=="del" && isset($marked) ) {
+  foreach( $marked as $nomer ) {
+    $result = pg_query("DELETE FROM mldata WHERE mlid = '$nomer' AND context=$CURRENTCONT");
+  }
+}
+
+
+
+$cellclass1 = "cell1";
+$cellclass2 = "cell2";
+$cellclass = $cellclass1;
+
+$PAGEBODY .= <<<PAGEBODY
+
+<form method=post name=mailsform sstyle="margin: 0;">
+
+<table border=0 width=100%>
+  <tr class=$cellclass2>
+  <th width=1></th>
+  <th width=1>ID</th>
+  <th>Title</th>
+  </tr>
+
+PAGEBODY;
+
+  $result = pg_query("SELECT * FROM mldata WHERE context=$CURRENTCONT ORDER BY mlid DESC;");
+  while( $row = pg_fetch_array($result) ) {
+
+
+    $PAGEBODY .= <<<PAGEBODY
+
+  <tr valign=top class=$cellclass>
+  <td width=1><input type=checkbox name="marked[]" value="$row[mlid]"></td>
+  <td width=1 align=center>$row[mlid]</td> <td><a href="po_editletter.html?mlid=$row[mlid]">$row[title]</a></td>
+  </tr>
+
+PAGEBODY;
+
+    $cellclass1 = $cellclass2; $cellclass2 = $cellclass; $cellclass = $cellclass1;
+  }
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+<input type="hidden" name="mlaction" value="">
+<input type="button" name="delmarked" value="Delete marked" onClick="if ( confirm('Delete: are you sure?') ) { mailsform.mlaction.value='del'; mailsform.submit(); }">
+</form>
+
+PAGEBODY;
+
+
+$PAGEBODY .= <<<PAGEBODY
+<FORM nname=addmailform METHOD="POST">
+  Add new letter (enter the title)
+  <input type="text" name="mailtitle" size=50 mmaxlength=150>
+  <input type="hidden" name="mlaction" value="add">
+  <input type="submit" value="Submit">
+</FORM>
+
+PAGEBODY;
+
+
+
+
+
+
+
+
+?>

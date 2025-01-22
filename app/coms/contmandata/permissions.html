@@ -1,0 +1,86 @@
+<?
+$PAGEID = 'permissions';
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Permissions</span></center>
+<p>
+
+PAGEBODY;
+
+  $flag = $_REQUEST[flag];
+  $name = trim( $_REQUEST[name]);
+  $marked = &$_REQUEST[marked];
+
+  if ( $flag=="add" && isset($marked) ) {
+    foreach( $marked as $nomer ) {
+      @$result = pg_query("INSERT INTO cont_perm (context, permission, value) VALUES ($CURRENTCONT, '$nomer', TRUE)");
+//    print pg_last_error()."<br>\n";
+    }
+  }
+
+  if ( $flag=="delete" && isset($marked) ) {
+    foreach( $marked as $nomer ) {
+      @$result = pg_query("DELETE FROM cont_perm WHERE context=$CURRENTCONT AND permission='$nomer'");
+//    print pg_last_error()."<br>\n";
+    }
+  }
+
+
+$PAGEBODY .= <<<PAGEBODY
+<center>
+
+<form method=post name=permform>
+<table align=center wwidth=100% border=1>
+<tr align=left>
+<th width=1>Mark</th>
+<!-- th>Id</th -->
+<th>Name</th>
+<th> &nbsp;?&nbsp;</th>
+</tr>
+
+PAGEBODY;
+
+  $result = pg_query("
+SELECT p.*, p1.* 
+FROM permission AS p LEFT JOIN cont_perm AS p1 ON p.permid=p1.permission AND p1.context=$CURRENTCONT 
+ORDER BY p.name;
+");
+  while( $row = pg_fetch_array($result) ) {
+    $cname1 = htmlspecialchars($row[name]);
+    $exists = $row[value]=='t'?"+":"-";
+    $PAGEBODY .= <<<PAGEBODY
+<tr>
+<td wwidth=1 align=center><input type=checkbox name="marked[]" value=$row[permid]></td>
+<!-- td>$row[permid]</td -->
+<td>$cname1</td>
+<td align=center>$exists</td>
+</tr>
+
+PAGEBODY;
+
+  }
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+<br>
+
+PAGEBODY;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+  <input type=hidden name="flag" value="">
+  <input type=button value="Enable marked" onClick="if ( confirm('Enable marked - Are you sure?') ) { permform.flag.value='add'; permform.submit(); }">
+  <input type=button value="Disable marked" onClick="if ( confirm('Disable marked - Are you sure?') ) { permform.flag.value='delete'; permform.submit(); }">
+<br>
+</form>
+
+<br>
+
+</center>
+
+PAGEBODY;
+
+
+?>

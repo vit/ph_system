@@ -1,0 +1,82 @@
+<?
+$pageid = 'mailcenter';
+
+include_once("start.php");
+
+//include_once("mainmenu.php");
+
+
+$mailtitle = trim( $_REQUEST['mailtitle'] );
+$addmailflag = $_REQUEST['addmailflag'];
+$mlaction = $_REQUEST['mlaction'];
+$marked = $_REQUEST['marked'];
+
+
+if ( $addmailflag && $mailtitle ) {
+  $result = pg_query("INSERT INTO maildata (mltitle, mldate) VALUES ('$mailtitle', NOW());");
+}
+
+
+if ( $mlaction=="del" && isset($marked) ) {
+  foreach( $marked as $nomer ) {
+    $result = pg_query("DELETE FROM maildata WHERE mlid = '$nomer'");
+  }
+}
+
+
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<form method=post name=mailsform sstyle="margin: 0;">
+
+<table border=0 width=100%>
+  <tr><th colspan=3>Mails</th></tr>
+
+PAGEBODY;
+
+  $tcolor1 = "#eeeeee"; $tcolor2 = "#dddddd"; $tcolor = $tcolor1;
+
+
+  $result = pg_query("SELECT * FROM maildata ORDER BY mlid DESC;");
+  while( $row = pg_fetch_array($result) ) {
+
+
+    $PAGEBODY .= <<<PAGEBODY
+
+  <tr valign=top bgcolor="$tcolor">
+  <td width=1><input type=checkbox name="marked[]" value="$row[mlid]"></td>
+  <td width=1>$row[mlid]</td> <td><a href="mailmanage.html?mlid=$row[mlid]">$row[mltitle]</a></td>
+  </tr>
+
+PAGEBODY;
+
+    $tcolor = $tcolor2; $tcolor2 = $tcolor1; $tcolor1 = $tcolor;
+  }
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+<input type="hidden" name="mlaction" value="">
+<input type="submit" name="delmarked" value="Delete marked" onClick="if ( confirm('Delete: are you sure?') ) { mailsform.mlaction.value='del'; mailsform.submit(); }">
+</form>
+
+PAGEBODY;
+
+
+$PAGEBODY .= <<<PAGEBODY
+<FORM nname=addmailform METHOD="POST">
+  Add new mail (enter title)
+  <input TYPE="text" NAME="mailtitle" SIZE=50 MAXLENGTH=150>
+  <input type="hidden" name="addmailflag" value="1">
+  <input type="submit" name="addmail" value="Submit">
+</FORM>
+
+PAGEBODY;
+
+
+
+include_once("finish.php");
+
+?>

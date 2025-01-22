@@ -1,0 +1,130 @@
+<?
+$PAGEID = 'retrieve';
+
+include_once("start.php");
+
+$PAGEBODY = "";
+
+$PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Retrieve password</span><!-- /center -->
+<p>
+
+PAGEBODY;
+
+$searchemail = "";
+$searchemail1 = "";
+$searchpin = "";
+$searchpin1 = "";
+
+if ( isset($_REQUEST['searchemail']) ) {
+  $searchemail = $_REQUEST['searchemail'];
+  $searchemail = trim($searchemail);
+  $searchemail1 = htmlspecialchars( stripslashes($searchemail) );
+}
+
+if ( isset($_REQUEST['searchpin']) ) {
+  $searchpin = trim( $_REQUEST['searchpin'] );
+  $searchpin1 = htmlspecialchars( stripslashes($searchpin) );
+}
+
+
+$flag = false;
+
+if ( $searchemail && $searchpin ) {
+
+  $result = @pg_query("SELECT * FROM userpin WHERE pin='$searchpin' AND enabled=true;");
+  if ( $row=@pg_fetch_array($result) ) {
+    $retrieve_userinfo = $row;
+    $sendemail = "";
+//    $email_arr = split("[;,]", $row['email']);
+    $email_arr = preg_split("[;,]", $row['email']);
+    foreach( $email_arr as $eml ) {
+      if ( trim($eml) == $searchemail ) {
+        $sendemail = trim($eml);
+//        $flag = true;
+        break;
+      }
+    }
+    if( $sendemail ) {
+      include_once( "../email/directmail.php" );
+//      $flag = mail_send_now("retrievepassword", $retrieve_userinfo, $sendemail);
+      $flag = mail_send_now("retrievepassword", $searchpin, $sendemail);
+
+      if( $flag )
+        $PAGEBODY .= <<<PAGEBODY
+<span class=error>Password is sent to "$sendemail".</span>
+<br>
+<br>
+
+PAGEBODY;
+      else
+        $PAGEBODY .= <<<PAGEBODY
+<span class=error>System failed to send e-mail to "$sendemail"!</span>
+<br>
+<br>
+
+PAGEBODY;
+
+    } else {
+      $PAGEBODY .= <<<PAGEBODY
+<span class=error>E-mail address does not belong to this account!</span>
+<br>
+<br>
+
+PAGEBODY;
+    }
+
+
+
+  } else
+      $PAGEBODY .= <<<PAGEBODY
+<span class=error>Incorrect PIN!</span>
+<br>
+<br>
+
+PAGEBODY;
+
+
+
+}
+
+
+if( !$flag )
+  $PAGEBODY .= <<<PAGEBODY
+
+If you forgot you password, the system will send it to your e-mail.
+<br>
+Enter your PIN and e-mail address used for registration.
+
+
+<FORM METHOD="POST" action="">
+<table>
+  <tr>
+    <td colspan=1>PIN</td>
+    <td colspan=3><input type=text class=logoninput name=searchpin value="$searchpin1" size=6></td>
+  </tr>
+  <tr>
+    <td colspan=1>E-mail</td>
+    <td colspan=3><input type="text" size=30 name="searchemail" value="$searchemail1"></td>
+  </tr>
+  <tr>
+    <td colspan=4>
+      <INPUT TYPE="submit" NAME="retrieve" VALUE="Retrieve">
+    </td>
+  </tr>
+</table>
+</FORM>
+
+
+PAGEBODY;
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+</center>
+
+PAGEBODY;
+
+include_once("finish.php");
+
+?>

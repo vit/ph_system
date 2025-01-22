@@ -1,0 +1,122 @@
+<?
+$subpageid = papers;
+
+include_once("start.php");
+
+
+  $flag = $_REQUEST[flag];
+//  $name = trim( $_REQUEST[name]);
+  $marked = &$_REQUEST[marked];
+  $title = trim( $_REQUEST[title] );
+
+  if ( $flag=="add" && $title ) {
+    $result = pg_query("INSERT INTO paper (context, papnum, title) VALUES ($contid, createnewpapnum($contid), '$title')");
+//    print pg_last_error()."<br>\n";
+  }
+
+
+/*
+  if ( $flag=="add" && isset($marked) ) {
+    foreach( $marked as $nomer ) {
+      @$result = pg_query("INSERT INTO cont_kw (context, keyword) VALUES ($contid, '$nomer')");
+//    print pg_last_error()."<br>\n";
+    }
+  }
+*/
+
+  if ( $flag=="delete" && isset($marked) ) {
+    foreach( $marked as $nomer ) {
+      $result = pg_query("DELETE FROM paper WHERE context=$contid AND papnum='$nomer'");
+//    print pg_last_error()."<br>\n";
+    }
+  }
+
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<center>
+<h2>Context's papers</h2>
+
+<p>
+
+<table>
+<td align=left>
+<b>Add paper</b>
+<form method=post>
+  <input type=hidden name="flag" value="add">
+  Title: <input type=text name="title" size=60><br>
+  <input type=submit value="Submit"><br>
+</form>
+</td>
+</table>
+
+
+<!-- /center -->
+
+PAGEBODY;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<p>
+
+<form method=post name=papform>
+<table align=center wwidth=100% border=1>
+<tr align=left>
+<th width=1>Mark</th>
+<th>Papnum</th>
+<th>Title</th>
+<th width=1></th>
+</tr>
+
+PAGEBODY;
+
+
+  $result = pg_query("
+SELECT * 
+FROM paper WHERE context=$contid 
+ORDER BY papnum DESC;
+");
+  while( $row = pg_fetch_array($result) ) {
+    $ptitle1 = htmlspecialchars($row[title]);
+
+    $PAGEBODY .= <<<PAGEBODY
+<tr>
+<td width=1><input type=checkbox name="marked[]" value=$row[papnum]></td>
+<td>$row[papnum]</td>
+<td>$ptitle1</td>
+<td><a href=editpaper.html?contid=$contid&papnum=$row[papnum]>edit</a></td>
+</tr>
+PAGEBODY;
+
+  }
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+
+PAGEBODY;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+  <input type=hidden name="flag" value="">
+  <input type=button value="Delete marked" onClick="if ( confirm('Delete marked - Are you sure?') ) { papform.flag.value='delete'; papform.submit(); }">
+<br>
+</form>
+
+<br>
+
+</center>
+
+PAGEBODY;
+
+
+
+
+include_once("finish.php");
+?>

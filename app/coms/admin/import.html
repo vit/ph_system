@@ -1,0 +1,121 @@
+<?
+
+include_once("start.php");
+
+
+  $DBLINK = mysql_connect($myHN, $myUL, $myUP);
+  mysql_selectdb($myDN);
+
+
+/*
+  $result = pg_query("SELECT * FROM userpin ORDER BY pin;");
+  while( $row = pg_fetch_array($result) ) {
+    $fname1 = htmlspecialchars($row['fname']);
+    $lname1 = htmlspecialchars($row['lname']);
+    $affiliation1 = nl2br( htmlspecialchars($row['affiliation']) );
+
+    $title1 = $TITLES[$row['title']];
+
+    $countryid = $row['country'];
+    $countryid = $countryid?$countryid:0;
+    $country1 = $COUNTRIES[$countryid];
+
+    $city1 = $row['city'];
+    $city1 = $city1?$city1:"Unknown city";
+    $address1 = nl2br( htmlspecialchars($row['address']) );
+
+    if( $row[enabled]=='t' )
+      $color=$enablecolor;
+    else
+      $color=$disablecolor;
+
+  }
+*/
+
+  $result = mysql_query("SELECT * FROM conf_user;");
+  while( $row = mysql_fetch_array($result) ) {
+//    print_r($row);
+//    print "<br>\n";
+
+    $usid = $row[usid];
+
+    $title = $row[title];
+
+    $fname = addslashes( $row[fname] );
+    $lname = addslashes( $row[lname] );
+
+    $gender = $row[gender];
+
+    $affiliation = addslashes( $row[affiliation] );
+
+    $countryid = $row[countryid];
+    $countryid = $countryid>0?$countryid+100:"NULL";
+
+    $city = addslashes( $row[city] );
+    $address = addslashes( $row[address] );
+
+    $phone = addslashes( $row[phone] );
+    $fax = addslashes( $row[fax] );
+    $email = addslashes( $row[email] );
+
+    $result2 = pg_query("
+INSERT INTO userpin (pin, pass, title, fname, lname, gender, country, affiliation, city, address, phone, fax, email, updtime) 
+VALUES ('$usid', create6digitsrandom(), $title, '$fname', '$lname', '$gender', $countryid, '$affiliation', '$city', '$address', '$phone', '$fax', '$email', NOW())
+");
+
+    print "!$usid!<br>\n";
+
+
+  }
+
+  $result = pg_query("SELECT MAX(pin) FROM userpin;");
+  if( $row = pg_fetch_array($result) ) {
+    $maxpin = $row[0]+1;
+    $result = pg_query("SELECT setval('userpin_pin_seq', $maxpin, true);");
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    print "<br>\n";
+
+
+  $result = mysql_query("SELECT * FROM conf_keyword;");
+  while( $row = mysql_fetch_array($result) ) {
+//    print_r($row);
+//    print "<br>\n";
+
+    $kwid = $row[kwid];
+    $keyword = $row[keyword];
+
+    $result2 = pg_query("INSERT INTO keyword (kwid, name) VALUES ('$kwid', '$keyword')");
+
+    print "!$kwid!$keyword!<br>\n";
+
+
+  }
+
+  $result = pg_query("SELECT MAX(kwid) FROM keyword;");
+  if( $row = pg_fetch_array($result) ) {
+    $maxkwid = $row[0]+1;
+    $result = pg_query("SELECT setval('keyword_kwid_seq', $maxkwid, true);");
+  }
+
+
+
+
+
+
+
+?>

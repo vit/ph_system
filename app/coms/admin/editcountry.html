@@ -1,0 +1,55 @@
+<?
+$pageid = countries;
+
+include_once("start.php");
+
+//include_once("mainmenu.php");
+
+
+  $countryflag = $_REQUEST[countryflag];
+  $cid = $_REQUEST[cid];
+  $name = $_REQUEST[name];
+
+
+  if ( $countryflag=="save" && trim($name) ) {
+    $result = pg_query("UPDATE country SET name='$name' WHERE cid='$cid'");
+  }
+
+
+
+$result = pg_query("SELECT * FROM country WHERE cid='$cid'");
+if( $row = pg_fetch_array($result) ) {
+
+  $row[name] = htmlspecialchars($row[name]);
+
+  $PAGEBODY .= <<<PAGEBODY
+
+<a href="countries.html">&lt;&lt; Back</a>
+
+<center>
+<h2>Edit Country</h2>
+
+<p>
+
+<table>
+<td align=left>
+<b>Country ID: $row[cid]</b>
+<form method=post>
+  <input type=hidden name="countryflag" value="save">
+  <input type=hidden name="cid" value="$row[cid]">
+  Name: <input type=text name="name" size=32 value="$row[name]"><br>
+<br>
+  <input type=submit value="Submit"><br>
+</form>
+</td>
+</table>
+</center>
+
+PAGEBODY;
+
+}
+
+
+
+include_once("finish.php");
+?>

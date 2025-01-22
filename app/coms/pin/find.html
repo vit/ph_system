@@ -1,0 +1,99 @@
+<?
+$PAGEID = 'find';
+
+include_once("start.php");
+
+$PAGEBODY = "";
+
+$PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Find user</span></center>
+<p>
+
+PAGEBODY;
+
+$searchlname = "";
+$searchlname1 = "";
+
+if ( isset($_REQUEST['searchlname']) ) {
+  $searchlname = $_REQUEST['searchlname'];
+  $searchlname = trim($searchlname);
+  $searchlname1 = htmlspecialchars( stripslashes($searchlname) );
+}
+
+$PAGEBODY .= <<<PAGEBODY
+<center>
+To find user enter last name and click "Find".
+
+<FORM METHOD="POST" action="">
+<table>
+  <tr>
+    <td colspan=1>Last Name</td>
+    <td colspan=3><input type="text" size=30 name="searchlname" value="$searchlname1"></td>
+  </tr>
+  <tr>
+    <td colspan=4>
+      <INPUT TYPE="submit" NAME="find" VALUE="Find">
+    </td>
+  </tr>
+</table>
+</FORM>
+
+PAGEBODY;
+
+
+if( $searchlname ) {
+
+  $result = pg_query("SELECT * FROM userpin WHERE UPPER(lname)=UPPER('$searchlname') AND enabled=true;");
+  $numrows = pg_num_rows($result);
+  if ( $numrows>0 ) {
+    $PAGEBODY .= <<<PAGEBODY
+<table border=0>
+<tr>
+<th align=center>
+Found $numrows record(s):
+</th>
+</tr>
+<tr>
+<td align=left>
+<ul>
+
+PAGEBODY;
+    while( $row=pg_fetch_array($result) ) {
+      $U = $row;
+      $PAGEBODY .= <<<PAGEBODY
+<li>
+PIN: $row[pin]<br>
+Title: {$TITLES[$row[title]]}<br>
+First name: $row[fname]<br>
+Last name: $row[lname]<br>
+</li>
+
+PAGEBODY;
+    }
+    $PAGEBODY .= <<<PAGEBODY
+</ul>
+</td>
+</tr>
+</table>
+
+PAGEBODY;
+  } else {
+
+    $PAGEBODY .= <<<PAGEBODY
+No records found.
+
+PAGEBODY;
+
+  }
+}
+
+
+$PAGEBODY .= <<<PAGEBODY
+</center>
+<p>
+
+PAGEBODY;
+
+include_once("finish.php");
+
+?>

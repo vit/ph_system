@@ -1,0 +1,194 @@
+<?
+$PAGEID = 'editorial';
+
+
+
+if (!$USERPIN)
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+You need to enter the system.
+<br>
+Use the form in the upper right corner of the page.
+</center>
+<p>
+
+PAGEBODY;
+
+else {
+
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Section reviews</span></center>
+<p>
+
+PAGEBODY;
+
+$PAGEBODY .= <<<PAGEBODY
+<a href="editorial.html">Return to editorial office</a>
+<p>
+
+PAGEBODY;
+
+
+if($PERMISSIONS['EDITOR_WIEW_REVIEWING_DATA'] && $iseditor) {
+
+
+$subjid = "";
+
+//$score = $_REQUEST[score]?(int)$_REQUEST[score]:"NULL";
+//$decision = $_REQUEST[decision]?(int)$_REQUEST[decision]:"NULL";
+
+$subjid0 = $_REQUEST['subjid'];
+
+
+//if( $subjid0 > 0 && $PERMISSIONS['SUBJADM_EDIT_SUBJECT'] ) {
+  $result = pg_query("SELECT * FROM subject WHERE context=$CURRENTCONT AND subjid=$subjid0 AND editor=$EDITORID");
+  if( $row = pg_fetch_array($result) ) {
+    $subjid = $row['subjid'];
+    $ctitle1 = htmlspecialchars($row[title]);
+    $cabstract1 = nl2br( htmlspecialchars($row['abstract']) );
+  }
+//}
+
+
+if( $subjid > 0 ) {
+  $flag = $_REQUEST[flag];
+
+  if($PERMISSIONS['EDITOR_EDIT_REVIEWS_LIST']) {
+
+    $marked = &$_REQUEST[marked];
+    $userpin = (int)$_REQUEST[userpin];
+
+    if ( $flag=="add" && $userpin ) {
+      $result = @pg_query("INSERT INTO subjectreview (context, subjid, revpin) VALUES ($CURRENTCONT, $subjid, $userpin)");
+//      print pg_last_error()."<br>\n";
+    }
+
+    if ( $flag=="delete" && isset($marked) ) {
+      foreach( $marked as $nomer ) {
+        $result = @pg_query("DELETE FROM subjectreview WHERE subjid=$subjid AND revpin=$nomer");
+//      print pg_last_error()."<br>\n";
+      }
+    }
+  }
+
+
+
+
+
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<center>
+
+<b>Section ID:</b> $subjid
+<br>
+<b>Section title:</b> $ctitle1
+<p>
+
+PAGEBODY;
+
+  if($PERMISSIONS['EDITOR_EDIT_REVIEWS_LIST']) {
+    $PAGEBODY .= <<<PAGEBODY
+<table>
+<td align=left>
+<b>Add reviewer</b>
+<form method=post style="margin:0;">
+  <input type=hidden name="flag" value="add">
+  PIN: <input type=text name="userpin" size=5> <input type=submit value="Submit"><br>
+</form>
+</td>
+</table>
+
+PAGEBODY;
+  }
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<p>
+
+<form method=post name=rvform style="margin:0;">
+<table align=center wwidth=100% border=1>
+<tr aalign=left>
+<th wwidth=1>Mark</th>
+<!-- th>PIN</th -->
+<th>Reviewer</th>
+</tr>
+
+PAGEBODY;
+
+
+  $result = pg_query("
+SELECT r.*, u.email, getfullnamewithpin(r.revpin) AS name
+FROM 
+  subjectreview AS r
+   INNER JOIN userpin AS u ON r.revpin=u.pin
+WHERE
+  r.context=$CURRENTCONT AND r.subjid=$subjid
+ORDER BY r.revpin
+");
+
+
+  while( $row = pg_fetch_array($result) ) {
+//    $uname1 = htmlspecialchars($row[fname]." ".$row[lname]);
+    $uname1 = htmlspecialchars($row[name]);
+
+    $PAGEBODY .= <<<PAGEBODY
+<tr>
+<td align=center width=1><input type=checkbox name="marked[]" value=$row[revpin]></td>
+<!-- td align=center>$row[revpin]</td -->
+<td>$uname1 <a href="mailto:$row[email]">$row[email]</a></td>
+</tr>
+
+PAGEBODY;
+  }
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+<br>
+
+PAGEBODY;
+
+
+  if($PERMISSIONS['EDITOR_EDIT_REVIEWS_LIST']) {
+    $PAGEBODY .= <<<PAGEBODY
+  <input type=hidden name="flag" value="">
+  <input type=button value="Delete marked" onClick="if ( confirm('Delete marked - Are you sure?') ) { rvform.flag.value='delete'; rvform.submit(); }">
+<br>
+
+PAGEBODY;
+  }
+
+$PAGEBODY .= <<<PAGEBODY
+</form>
+<br>
+</center>
+
+PAGEBODY;
+
+
+
+
+}
+
+
+//  }
+
+
+
+}
+
+
+
+
+
+}
+
+
+?>

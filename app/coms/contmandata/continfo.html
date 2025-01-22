@@ -1,0 +1,99 @@
+<?
+$PAGEID = 'continfo';
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Context info</span></center>
+<p>
+
+PAGEBODY;
+
+
+  $contextflag = $_REQUEST['contextflag'];
+//  $contid = $_REQUEST['contid'];
+  $title = trim( $_REQUEST['title'] );
+  $shorttitle = trim( $_REQUEST['shorttitle'] );
+  $homepage = trim( $_REQUEST['homepage'] );
+  $email = trim( $_REQUEST['email'] );
+//  $manager = trim( $_REQUEST['manager'] );
+  $description = trim( $_REQUEST['description'] );
+  $review_deadline = trim( $_REQUEST['review_deadline'] );
+  $status = trim( $_REQUEST['status'] );
+
+
+  if ( $contextflag=="save" && $title ) {
+    @$result = pg_query("UPDATE context SET title='$title', shorttitle='$shorttitle', description='$description', homepage='$homepage', email='$email', review_deadline='$review_deadline', status='$status' WHERE contid='$CURRENTCONT'");
+  }
+
+
+
+$result = @pg_query("SELECT * FROM context WHERE contid='$CURRENTCONT'");
+if( $row = pg_fetch_array($result) ) {
+
+  $ctitle1 = htmlspecialchars($row['title']);
+  $cshorttitle1 = htmlspecialchars($row['shorttitle']);
+  $chomepage1 = htmlspecialchars($row['homepage']);
+  $cemail1 = htmlspecialchars($row['email']);
+//  $cdescr1 = nl2br( htmlspecialchars($row['description']) );
+  $cdescr1 = htmlspecialchars($row['description']);
+
+  $creview_deadline1 = htmlspecialchars($row['review_deadline']);
+
+  $cstatus = "<select name=status>";
+  foreach($CONTSTATUS as $key => $val) {
+    $selected = $key==$row['status']?" selected":"";
+    $cstatus .= "<option value=$key $selected>$val</option>";
+  }
+
+  $cstatus .= "</select>";
+
+
+  $PAGEBODY .= <<<PAGEBODY
+
+<center>
+
+<!-- table border=1>
+<td align=left -->
+<form method=post>
+  <input type=hidden name="contextflag" value="save">
+<table>
+<tr>
+  <td align=right><b>Context ID:</b></td><td><b>$row[contid]</b></td>
+</tr>
+<tr>
+  <td align=right>Title:</td><td><input type=text name="title" size=60 value="$ctitle1"></td>
+</tr>
+<tr>
+  <td align=right>Short title:</td><td><input type=text name="shorttitle" size=60 value="$cshorttitle1"></td>
+</tr>
+<tr>
+  <td align=right>Homepage:</td><td><input type=text name="homepage" size=60 value="$chomepage1"></td>
+</tr>
+<tr>
+  <td align=right>Email:</td><td><input type=text name="email" size=60 value="$cemail1"></td>
+</tr>
+<tr>
+  <td align=right valign=top>Description:</td><td><textarea name="description" cols=60 rows=5>$cdescr1</textarea></td>
+</tr>
+<tr>
+  <td align=right>Review deadline:</td><td><input type=text name="review_deadline" size=60 value="$creview_deadline1"></td>
+</tr>
+<tr>
+  <td align=right>Status:</td><td>$cstatus</td>
+</tr>
+<tr>
+  <td></td><td><input type=submit value="Save"></td>
+</tr>
+</table>
+</form>
+<!-- /td>
+</table -->
+</center>
+
+PAGEBODY;
+
+}
+
+
+
+
+?>

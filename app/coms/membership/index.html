@@ -1,0 +1,172 @@
+<?
+//$PARTID = 'pin';
+$PAGEID = 'main';
+
+include_once("start.php");
+//include("start.php");
+
+//$PAGETITLE = "Account management";
+
+
+$accept = isset( $_REQUEST['accept'] ) ? (bool)$_REQUEST['accept'] : false; 
+
+$IS_MEMBER = false;
+$CAN_BE_MEMBER = false;
+$JUST_ACCEPTED = false;
+
+$PAGEBODY = "";
+
+if( $USERPIN ) {
+  $result = pg_query("SELECT * FROM ipacs_member WHERE userpin='$USERPIN'");
+  $IS_MEMBER = ( $row = pg_fetch_array($result) );
+
+  $QUERY = <<<ENDQUERY
+    SELECT
+      u.pin AS pin
+    FROM 
+      (paper AS p LEFT JOIN userpin AS u ON p.registrator=u.pin)
+      LEFT JOIN title AS t ON u.title=t.titleid
+    WHERE (p.finaldecision>=2 AND p.finaldecision<=4)
+        and u.pin='$USERPIN'
+    UNION
+    SELECT
+      u.pin AS pin
+    FROM 
+      (
+       (
+        paper AS p
+          INNER JOIN
+            author AS a
+            ON p.context=a.context AND p.papnum=a.papnum
+       )
+         LEFT JOIN userpin AS u ON a.autpin=u.pin
+      )
+      LEFT JOIN title AS t ON u.title=t.titleid
+    WHERE (p.finaldecision>=2 AND p.finaldecision<=4)
+        and u.pin='$USERPIN'
+ENDQUERY;
+
+//    WHERE (p.context=1 OR p.context=2 OR p.context=6) AND (p.finaldecision>=2 AND p.finaldecision<=4)
+
+
+  $result = pg_query( $QUERY );
+  $CAN_BE_MEMBER = (bool)( $row = pg_fetch_array($result) );
+
+  if( ! $IS_MEMBER && $CAN_BE_MEMBER && $accept ) {
+    $result = pg_query("insert into ipacs_member (userpin) values ($USERPIN)");
+    $IS_MEMBER = (bool)$result;
+    $JUST_ACCEPTED = (bool)$result;
+    //***
+    include_once( "../email/directmail.php" );
+    $flag = mail_send_now("memberwelcome", $USERPIN);
+    if( $GLOBALS['MEMBER_LOG_EMAIL'] )
+      $flag = mail_send_now("memberwelcome", $USERPIN, $GLOBALS['MEMBER_LOG_EMAIL']);
+//      echo "!$flag!";
+    //***
+  }
+
+}
+
+
+//$IS_MEMBER = 0;
+//$JUST_ACCEPTED = 1;
+//$CAN_BE_MEMBER = 1;
+
+/*
+$PAGEBODY = <<<PAGEBODY
+<p>
+IPACS society is...
+See IPACS site...
+</p>
+
+PAGEBODY;
+*/
+
+if( $USERPIN ) {
+  if( $IS_MEMBER ) {
+    if( $JUST_ACCEPTED ) {
+      $PAGEBODY .= <<<PAGEBODY
+Congratulations, new IPACS member {$USERTITLE}!
+<br>
+You may submit papers to the IPACS Archive and ongoing IPACS conferences.
+<br>
+See more about the Society at <a href="http://physcon.ru/ipacs/about.html">http://physcon.ru/ipacs/about.html</a>.
+
+PAGEBODY;
+    } else {
+      $PAGEBODY .= <<<PAGEBODY
+Welcome, IPACS member {$USERTITLE}!
+<br>
+You may submit papers to the IPACS Archive or ongoing IPACS conferences.
+<br>
+See more about the Society at <a href="http://physcon.ru/ipacs/about.html">http://physcon.ru/ipacs/about.html</a>.
+
+PAGEBODY;
+    }
+  } else if( $CAN_BE_MEMBER ) {
+    $PAGEBODY .= <<<PAGEBODY
+
+You are eligible to become the IPACS member as an author
+ of one of the IPACS sponsored or co-sponsored conferences.
+
+<br>
+Information about IPACS membership can be found <a href="http://physcon.ru/ipacs/about.html">here</a>.
+<br>
+You can become a member by pressing 'Submit' button. 
+<br>
+Before pressing 'Submit' you need to check the box confirming that you wish to become a member and accept <a href="http://physcon.ru/ipacs/regulations.html">IPACS Regulations</a>. 
+<br>
+<form method=post>
+<input type=checkbox name=accept value=1> I wish to become the IPACS member, I accept the IPACS Regulations 
+<br>
+<input type=submit value="Submit">
+</form>
+
+PAGEBODY;
+  } else {
+    $PAGEBODY .= <<<PAGEBODY
+To become an IPACS member, you need to submit a paper to the IPACS Archive or ongoing IPACS conferences.
+<br>
+Information about IPACS membership can be found <a href="http://physcon.ru/ipacs/membership.html">here</a>.
+
+PAGEBODY;
+  }
+} else {
+  $PAGEBODY .= <<<PAGEBODY
+<p>
+This page provides information how to become a member of the  IPACS &mdash; The International Physics And Control Society. More information about the IPACS see at  <a href="http://physcon.ru/ipacs/about.html">http://physcon.ru/ipacs/about.html</a>.
+</p>
+
+<p>
+Anyone can become a member of the IPACS if he/she  will contribute to the Society Electronic Library (Archive) located on the Society website. Any member will have access to the Society Archive. To be included into the Society Archive, the paper should receive positive reviews from two Society members or external experts.
+</p>
+
+<p>
+To become a member, one needs to register, to submit a paper and to confirm acceptance of the IPACS Regulations.
+The membership certificate will be sent as soon as two positive reviews from the Society members are received. To submit a paper to the IPACS Archive the conference management system CoMS is to be used.
+If you are not registered yet, you need register first at the page “<a href="../pin/">User info</a>”.
+As soon as you register, enter your virtual office and follow instructions for submission to Archive.
+</p>
+
+<p>
+The authors  of the papers accepted to the IPACS sponsored or co-sponsored
+conferences
+ are eligible to become members without submitting extra papers since their
+ papers have already passed peer reviewing.
+All such authors are invited to join IPACS by the following procedure: enter your
+ virtual office by typing your PIN and password in the form in the upper right 
+corner of the page. Then confirm your wish to become an IPACS member and acceptance
+ of the IPACS regulation by checking the box and press the button "Submit".
+You will get access to the IPACS archive immediately and receive 
+your membership certificate in a few weeks. IPACS Regulations can be accessed <a href="http://physcon.ru/ipacs/regulations.html">here</a>.
+</p>
+
+PAGEBODY;
+}
+
+
+
+
+include_once("finish.php");
+
+?>

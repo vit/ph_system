@@ -1,0 +1,157 @@
+<?
+$pageid = 'contexts';
+
+include_once("start.php");
+
+include_once("../contstatus.php");
+
+
+
+
+
+  $contextflag = isset($_REQUEST['contextflag']) ? $_REQUEST['contextflag'] : null;
+  $title = isset($_REQUEST['title']) ? trim( $_REQUEST['title'] ) : '';
+  $shorttitle = isset($_REQUEST['shorttitle']) ? trim( $_REQUEST['shorttitle'] ) : '';
+  $homepage = isset($_REQUEST['homepage']) ? trim( $_REQUEST['homepage'] ) : '';
+  $email = isset($_REQUEST['email']) ? trim( $_REQUEST['email'] ) : '';
+  $description = isset($_REQUEST['description']) ? trim( $_REQUEST['description'] ) : '';
+//  $name = $_REQUEST['name'];
+  $marked = &$_REQUEST['marked'];
+
+  if ( $contextflag=="add" && $title ) {
+    $result = pg_query("INSERT INTO context (title, shorttitle, description, homepage, email, status) VALUES ('$title', '$shorttitle', '$description', '$homepage', '$email', 0)");
+//    print pg_last_error()."<br>\n";
+  }
+
+  if ( $contextflag=="delete" && isset($marked) ) {
+    foreach( $marked as $nomer ) {
+      $result = pg_query("DELETE FROM context WHERE contid='$nomer'");
+//    print pg_last_error()."<br>\n";
+    }
+  }
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<center>
+<h2>Contexts</h2>
+
+</center>
+
+PAGEBODY;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<center>
+<p>
+
+<form method=post name=contextsform>
+<table align=center wwidth=100% border=1>
+<tr align=left>
+<th rowspan=3 width=1>Mark</th>
+<th rowspan=3>Id</th>
+<th>Title</th>
+<th>Short title</th>
+<th>status</th>
+<th width=1></th>
+</tr>
+
+<tr align=left>
+<th>Homepage</th>
+<th>Email</th>
+<th width=1></th>
+<th width=1></th>
+</tr>
+
+
+<tr>
+<th colspan=4>Description</th>
+</tr>
+
+PAGEBODY;
+
+  $result = pg_query("SELECT * FROM context ORDER BY contid DESC;");
+  while( $row = pg_fetch_array($result) ) {
+
+
+$ctitle1 = htmlspecialchars($row['title']);
+$cshorttitle1 = htmlspecialchars($row['shorttitle']);
+$chomepage1 = htmlspecialchars($row['homepage']);
+$cemail1 = htmlspecialchars($row['email']);
+$cdescr1 = nl2br( htmlspecialchars($row['description']) );
+
+    $PAGEBODY .= <<<PAGEBODY
+<tr>
+<td rowspan=3 width=1><input type=checkbox name="marked[]" value=$row[contid]></td>
+<td rowspan=3>$row[contid]</td>
+<td><a href="conf/?contid=$row[contid]">$ctitle1</a></td>
+<td>$cshorttitle1</td>
+<td>{$CONTSTATUS[$row['status']]}</td>
+<td width=1><a href=editcontext.html?contid=$row[contid]>edit</a></td>
+</tr>
+
+<tr>
+<td><a target=_blank href="$row[homepage]">$chomepage1</a></td>
+<td><a target=_blank href="mailto:$row[email]">$cemail1</a></td>
+<td></td>
+<td></td>
+</tr>
+
+
+<tr>
+<td colspan=4>$cdescr1</td>
+</tr>
+PAGEBODY;
+
+  }
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+
+PAGEBODY;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+  <input type=hidden name="contextflag" value="">
+  <input type=button value="Delete marked" onClick="if ( confirm('Delete marked - Are you sure?') ) { contextsform.contextflag.value='delete'; contextsform.submit(); }">
+<br>
+</form>
+
+<br>
+</center>
+
+PAGEBODY;
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<center>
+
+<p>
+
+<table>
+<td align=left>
+<b>Add context</b>
+<form method=post>
+  <input type=hidden name="contextflag" value="add">
+  Title: <input type=text name="title" size=60><br>
+  Short title: <input type=text name="shorttitle" size=60><br>
+  Homepage: <input type=text name="homepage" size=60><br>
+  Email: <input type=text name="email" size=60><br>
+  Description: <textarea name="description" cols=60 rows=5></textarea><br>
+  <input type=submit value="Submit"><br>
+</form>
+</td>
+</table>
+</center>
+
+PAGEBODY;
+
+
+include_once("finish.php");
+?>

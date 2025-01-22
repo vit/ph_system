@@ -1,0 +1,245 @@
+<?
+$pageid = 'users';
+
+include_once("start.php");
+
+//include_once("mainmenu.php");
+
+$state = '';
+
+/*
+$TITLES = array();
+$result = pg_query("SELECT * FROM title ORDER BY titleid;");
+while( $row = pg_fetch_array($result) ) {
+  $TITLES[$row['titleid']] = $row['shortstr'];
+}
+*/
+
+$COUNTRIES = array();
+$COUNTRIES[0] = "Unknown country";
+//$COUNTRIES[0] = "Unknown country";
+$result = pg_query("SELECT * FROM country ORDER BY cid;");
+while( $row = pg_fetch_array($result) ) {
+  $COUNTRIES[$row['cid']] = $row['name'];
+}
+
+
+  $userflag = $_REQUEST['userflag'];
+  $name = $_REQUEST['name'];
+  $marked = &$_REQUEST['marked'];
+
+//  if ( $countryflag=="add" && trim($name) ) {
+//    $result = pg_query("INSERT INTO country (name) VALUES ('$name')");
+////    print pg_last_error()."<br>\n";
+//  }
+
+  if ( $userflag=="delete" && isset($marked) ) {
+    foreach( $marked as $nomer ) {
+      $result = pg_query("DELETE FROM userpin WHERE pin='$nomer'");
+//    print pg_last_error()."<br>\n";
+    }
+  }
+
+  if ( $userflag=="disable" && isset($marked) ) {
+    foreach( $marked as $nomer ) {
+      $result = pg_query("UPDATE userpin SET enabled=FALSE WHERE pin='$nomer'");
+//    print pg_last_error()."<br>\n";
+    }
+  }
+
+  if ( $userflag=="enable" && isset($marked) ) {
+    foreach( $marked as $nomer ) {
+      $result = pg_query("UPDATE userpin SET enabled=TRUE WHERE pin='$nomer'");
+//    print pg_last_error()."<br>\n";
+    }
+  }
+
+
+
+
+$inpage = 50;
+
+if( isset($_REQUEST['page']) )
+  $page = $_REQUEST['page'];
+else
+  $page = 0;
+
+$result = pg_query("SELECT COUNT(*) FROM userpin;");
+if( $row = pg_fetch_array($result) ) {
+  $totalquantity = $row[0];
+}
+
+$pages = (int)($totalquantity / $inpage);
+$pagesrest = $totalquantity % $inpage;
+if($pagesrest>0)
+  $pages++;
+
+$PAGESMAP = makepagesmap($page, $pages);
+
+$offs = $inpage*$page;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<center>
+<h2>Users</h2>
+
+
+$PAGESMAP
+
+<p>
+
+<!-- table>
+<td align=left>
+<b>Add country</b>
+<form method=post>
+  <input type=hidden name="countryflag" value="add">
+  Name: <input type=text name="name" size=32><br>
+  <input type=submit value="Submit"><br>
+</form>
+</td>
+</table -->
+</center>
+
+PAGEBODY;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<p>
+
+<center>
+
+<form method=post name=usersform>
+<table align=center wwidth=100% border=1>
+<tr align=left>
+<th width=1 rowspan=4>Mark</th>
+<th width=1 rowspan=4>PIN</th>
+<th>Title, First name, Last name, Gender</th>
+<th width=1></th>
+</tr>
+<tr align=left>
+<th colspan=2>Organization</th>
+</tr>
+<tr align=left>
+<th colspan=2>Country, city, address</th>
+</tr>
+<tr align=left>
+<th colspan=2>Phone, fax, e-mail</th>
+</tr>
+
+PAGEBODY;
+
+  $color1 = "#eeeeee";
+  $color2 = "#ffffff";
+//  $color = $color1;
+  $enablecolor = "#99ff99";
+  $disablecolor = "#ff9999";
+
+//  $result = pg_query("SELECT * FROM userpin ORDER BY pin;");
+  $result = pg_query("SELECT * FROM userpin ORDER BY pin LIMIT $inpage OFFSET $offs;");
+
+  while( $row = pg_fetch_array($result) ) {
+    $pass1 = $row['pass'];
+
+
+//    $fname1 = htmlspecialchars($row['fname']);
+    $fname1 = ($row['fname']);
+//    $lname1 = htmlspecialchars($row['lname']);
+    $lname1 = ($row['lname']);
+//    $affiliation1 = nl2br( htmlspecialchars($row['affiliation']) );
+    $affiliation1 = nl2br( $row['affiliation'] );
+
+    $title1 = $TITLES[$row['title']];
+
+    $gender1 = $row['gender'];
+
+    $countryid = $row['country'];
+    $countryid = $countryid?$countryid:0;
+    $country1 = $COUNTRIES[$countryid];
+
+    $city1 = $row['city'];
+    $city1 = $city1?$city1:"Unknown city";
+    $address1 = nl2br( htmlspecialchars($row['address']) );
+
+    $email1 = htmlspecialchars($row['email']);
+
+    if( $row['enabled']=='t' )
+      $color=$enablecolor;
+    else
+      $color=$disablecolor;
+
+    $PAGEBODY .= <<<PAGEBODY
+<tr bgcolor="$color1">
+<td width=1 rowspan=4><input type=checkbox name="marked[]" value=$row[pin]></td>
+<td width=1 rowspan=4 bgcolor="$color"><b>$row[pin]</b></td>
+<td><b>$title1, $fname1, $lname1, $gender1</b></td>
+<td width=1><a href=manageuser.html?pin=$row[pin]&retpage=$page&retstate=$state>manage</a></td>
+</tr>
+<tr bgcolor="$color1">
+<td colspan=2>$affiliation1</td>
+</tr>
+<tr bgcolor="$color1">
+<td colspan=2><b>$country1, $city1</b><br>$address1</td>
+</tr>
+<tr bgcolor="$color1">
+<td colspan=2><b>Phone:</b> $row[phone], <b>Fax:</b> $row[fax], <b>E-mail:</b> $email1</td>
+</tr>
+PAGEBODY;
+    list($color1, $color2) = array($color2, $color1);
+
+  }
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+
+PAGEBODY;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+<br>
+  <input type=hidden name="userflag" value="">
+  <input type=button value="Delete marked" onClick="if ( confirm('Delete marked - Are you sure?') ) { usersform.userflag.value='delete'; usersform.submit(); }">
+  <input type=button value="Disable marked" onClick="if ( confirm('Disable marked - Are you sure?') ) { usersform.userflag.value='disable'; usersform.submit(); }">
+  <input type=button value="Enable marked" onClick="if ( confirm('Enable marked - Are you sure?') ) { usersform.userflag.value='enable'; usersform.submit(); }">
+<br>
+</form>
+
+<br>
+
+</center>
+
+PAGEBODY;
+
+
+function makepagesmap($page, $pages) {
+
+  $PAGESMAP = <<<PAGESMAP
+<b>Pages ($pages in all):</b>
+
+PAGESMAP;
+
+  for ($i=0, $ii=$i+1; $i<$pages; $i++, $ii++)
+    if($i==$page)
+      $PAGESMAP .= <<<PAGESMAP
+<b><a href="?page=$i&state=$GLOBALS[state]">$ii</a></b>
+
+PAGESMAP;
+    else
+      $PAGESMAP .= <<<PAGESMAP
+<a href="?page=$i&state=$GLOBALS[state]">$ii</a>
+
+PAGESMAP;
+
+  return $PAGESMAP;
+}
+
+
+
+include_once("finish.php");
+?>

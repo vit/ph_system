@@ -1,0 +1,143 @@
+<?
+
+$SUBPAGEID = 'tasks';
+
+  include_once("contmandata/po_start.php");
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Tasks</span></center>
+<p>
+
+PAGEBODY;
+
+
+
+
+
+$tasktitle = trim( isset($_REQUEST['tasktitle']) ? $_REQUEST['tasktitle'] : "" );
+$taskaction = isset($_REQUEST['taskaction']) ? $_REQUEST['taskaction'] : null;
+$marked = isset($_REQUEST['marked']) ? $_REQUEST['marked'] : null;
+$producerid = isset($_REQUEST['producerid']) ? $_REQUEST['producerid'] : null;
+$letterid = isset($_REQUEST['letterid']) ? $_REQUEST['letterid'] : null;
+
+
+//print "$mailtitle|$mlaction<br>";
+
+if ( $taskaction=="add" && $tasktitle && $producerid && $letterid) {
+  $result = pg_query("INSERT INTO mltask (context, title, updtime, mail, producer) VALUES ($CURRENTCONT, '$tasktitle', NOW(), $letterid, $producerid)");
+//print pg_last_error() ."<br>";
+}
+
+
+if ( $taskaction=="del" && isset($marked) ) {
+  foreach( $marked as $nomer ) {
+    $result = pg_query("DELETE FROM mltask WHERE tid = '$nomer' AND context=$CURRENTCONT");
+  }
+}
+
+
+
+$cellclass1 = "cell1";
+$cellclass2 = "cell2";
+$cellclass = $cellclass1;
+
+$PAGEBODY .= <<<PAGEBODY
+
+<form method=post name=tasksform sstyle="margin: 0;">
+
+<table border=0 width=100%>
+  <tr class=$cellclass2>
+  <th width=1 rowspan=2></th>
+  <th width=1 rowspan=2>ID</th>
+  <th>Title</th>
+  </tr>
+  <tr valign=top class=$cellclass2>
+  <th>producer =&gt; letter</th>
+  </tr>
+
+PAGEBODY;
+
+  $result = pg_query("
+SELECT t.*, p.title AS ptitle, d.title AS dtitle
+FROM
+  (mltask AS t LEFT JOIN mlproducer AS p ON t.producer=p.prid)
+  LEFT JOIN mldata AS d ON t.mail=d.mlid
+WHERE t.context=$CURRENTCONT ORDER BY t.tid DESC
+");
+
+  while( $row = pg_fetch_array($result) ) {
+
+
+    $PAGEBODY .= <<<PAGEBODY
+
+  <tr valign=top class=$cellclass>
+  <td width=1 rowspan=2><input type=checkbox name="marked[]" value="$row[tid]"></td>
+  <td width=1 rowspan=2 align=center>$row[tid]</td>
+  <td><a href="po_managetask.html?tid=$row[tid]">$row[title]</a></td>
+  </tr>
+  <tr valign=top class=$cellclass>
+  <td>$row[ptitle]  =&gt;  $row[dtitle]</td>
+  </tr>
+
+PAGEBODY;
+
+    $cellclass1 = $cellclass2; $cellclass2 = $cellclass; $cellclass = $cellclass1;
+  }
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+<input type="hidden" name="taskaction" value="">
+<input type="button" name="delmarked" value="Delete marked" onClick="if ( confirm('Delete: are you sure?') ) { tasksform.taskaction.value='del'; tasksform.submit(); }">
+</form>
+
+PAGEBODY;
+
+
+
+$selected = "";
+
+$prodlist = "<SELECT name=\"producerid\" size=1>\n";
+$result = pg_query("SELECT * FROM mlproducer ORDER BY prid");
+while($row = pg_fetch_array($result) ) {
+//  $selected = "";
+//  if ($personaldata['title'] == $row['titleid'])
+//    $selected = " SELECTED";
+  $prodlist .= "<OPTION value={$row['prid']}$selected>{$row['title']}</OPTION>\n";
+}
+$prodlist .= "</SELECT>\n";
+
+$lettlist = "<SELECT name=\"letterid\" size=1>\n";
+$result = pg_query("SELECT * FROM mldata WHERE context=$CURRENTCONT ORDER BY mlid DESC");
+while($row = pg_fetch_array($result) ) {
+  $lettlist .= "<OPTION value={$row['mlid']}$selected>{$row['title']}</OPTION>\n";
+}
+$lettlist .= "</SELECT>\n";
+
+
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+<FORM nname=addmailform METHOD="POST">
+  <input type="hidden" name="taskaction" value="add">
+  Add new task (enter the title and select producer and letter)
+  <br>
+  <input type="text" name="tasktitle" size=50 mmaxlength=150>
+  <br>
+  $prodlist
+  $lettlist
+  <br>
+  <input type="submit" value="Submit">
+</FORM>
+
+PAGEBODY;
+
+
+
+
+
+
+
+
+?>

@@ -1,0 +1,153 @@
+<?
+$PARTID = 'home';
+
+include_once("start.php");
+
+include_once("contstatus.php");
+
+
+
+if($USERPIN)
+  $PAGEBODY = <<<PAGEBODY
+
+<p>
+
+<ul>
+<li>
+Having entered CoMS you will be able to perform paper submission
+and other actions for active conferences.
+<br>
+Click to "<b>My&nbsp;virtual&nbsp;office</b>" for a conference below.
+<p />
+</li>
+<li>
+After entering the system you may change your personal data at
+"<a href="{$ROOT}pin/"><b>User&nbsp;info</b></a>".
+<p />
+</li>
+</ul>
+
+PAGEBODY;
+
+else
+  $PAGEBODY = <<<PAGEBODY
+
+<p>
+
+<ul>
+<li>
+If you already have your PIN and password, enter the system
+using the form in the upper right corner of the page.
+<p />
+</li>
+<li>
+If you are not registered yet or forgot your PIN or password, use the
+link "<a href="{$ROOT}pin/"><b>User&nbsp;info</b></a>".
+<p />
+</li>
+<li>
+Having entered CoMS you will be able to perform paper submission
+and other actions for active conferences.
+<br>
+Click to "<b>My&nbsp;virtual&nbsp;office</b>" for a conference below.
+<p />
+</li>
+<li>
+After entering the system you may change your personal data at
+"<a href="{$ROOT}pin/"><b>User&nbsp;info</b></a>".
+<p />
+</li>
+</ul>
+
+PAGEBODY;
+
+
+$PAGEBODY .= <<<PAGEBODY
+<hr>
+
+PAGEBODY;
+
+
+/*
+$PAGEBODY = <<<PAGEBODY
+<!-- br / -->
+<!-- center><span class=subtitle>Active conferences:</span></center -->
+
+PAGEBODY;
+*/
+
+
+$result = pg_query("SELECT * FROM context WHERE status>100 and cont_type=1 ORDER BY contid DESC;");
+if( pg_num_rows($result) > 0 ) {
+  $PAGEBODY .= <<<PAGEBODY
+<ul>
+
+PAGEBODY;
+
+    while( $row = pg_fetch_array($result) ) {
+
+$ctitle1 = htmlspecialchars($row['title']);
+$chomepage1 = htmlspecialchars($row['homepage']);
+$cdescr1 = nl2br( htmlspecialchars($row['description']) );
+
+      $PAGEBODY .= <<<PAGEBODY
+<li>
+<b>$ctitle1 / <a href="{$ROOT}conf/$row[contid]/">My virtual office</a></b><br />
+Home page (not for submission, info only): <a target=_blank href="$row[homepage]">$row[homepage]</a>
+<br>
+$cdescr1
+<p />
+</li>
+PAGEBODY;
+
+    }
+
+  $PAGEBODY .= <<<PAGEBODY
+</ul>
+
+PAGEBODY;
+
+}
+
+    $PAGEBODY .= <<<PAGEBODY
+<hr>
+
+PAGEBODY;
+
+
+$result2 = pg_query("SELECT * FROM context WHERE status>100 and cont_type=2 ORDER BY contid DESC;");
+if( pg_num_rows($result2) > 0 ) {
+    $PAGEBODY .= <<<PAGEBODY
+<ul>
+
+PAGEBODY;
+
+    while( $row = pg_fetch_array($result2) ) {
+      $ctitle1 = htmlspecialchars($row['title']);
+      $chomepage1 = htmlspecialchars($row['homepage']);
+      $cdescr1 = nl2br( htmlspecialchars($row['description']) );
+
+      $PAGEBODY .= <<<PAGEBODY
+<li>
+<b>$ctitle1 / <a href="{$ROOT}conf/$row[contid]/">My virtual office</a></b><br />
+Home page (not for submission, info only): <a target=_blank href="$row[homepage]">$row[homepage]</a>
+<br>
+$cdescr1
+<p />
+</li>
+PAGEBODY;
+
+    }
+
+  $PAGEBODY .= <<<PAGEBODY
+</ul>
+
+PAGEBODY;
+
+}
+
+
+
+include_once("finish.php");
+
+?>

@@ -1,0 +1,65 @@
+<?
+
+$SUBPAGEID = 'producers';
+
+  include_once("contmandata/po_start.php");
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Producers</span></center>
+<p>
+
+PAGEBODY;
+
+
+
+$cellclass1 = "cell1";
+$cellclass2 = "cell2";
+$cellclass = $cellclass1;
+
+$PAGEBODY .= <<<PAGEBODY
+
+<table border=0 width=100%>
+  <tr class=$cellclass2>
+  <th rowspan=2 width=1>ID</th>
+  <th>Title</th>
+  </tr>
+  <tr class=$cellclass2>
+  <th ccolspan=2>Description</th>
+  </tr>
+
+PAGEBODY;
+
+  $result = pg_query("SELECT * FROM mlproducer ORDER BY prid;");
+  while( $row = pg_fetch_array($result) ) {
+
+
+    $PAGEBODY .= <<<PAGEBODY
+
+  <tr valign=top class=$cellclass>
+  <td rowspan=2 width=1 align=center>$row[prid]</td>
+  <td>$row[title]</td>
+  </tr>
+  <tr valign=top class=$cellclass>
+  <td ccolspan=2>$row[description]</td>
+  </tr>
+
+PAGEBODY;
+
+    $cellclass1 = $cellclass2; $cellclass2 = $cellclass; $cellclass = $cellclass1;
+  }
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+
+PAGEBODY;
+
+
+
+
+
+
+
+
+
+?>

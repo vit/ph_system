@@ -1,0 +1,198 @@
+<?
+
+$SUBPAGEID = 'tasks';
+
+  include_once("contmandata/po_start.php");
+  include_once("email2/mail_func.php");
+
+
+$TASKSNAMES = array(0 => 'prepared(0)', 1 => 'processing...(1)', 2 => 'processed(3)', 3 => 'archived(4)');
+
+
+$tid = trim( $_REQUEST['tid'] );
+$taskaction = $_REQUEST['taskaction'];
+$marked = $_REQUEST['marked'];
+//$producerid = $_REQUEST['producerid'];
+//$letterid = $_REQUEST['letterid'];
+
+
+  $tasktitle = $mailtitle = $prodtitle = "";
+  $result = pg_query("
+SELECT t.*, p.title AS ptitle, d.title AS dtitle
+FROM
+  (mltask AS t LEFT JOIN mlproducer AS p ON t.producer=p.prid)
+  LEFT JOIN mldata AS d ON t.mail=d.mlid
+WHERE t.tid=$tid
+");
+  if ( $row = pg_fetch_array($result) ) {
+    $tasktitle = $row['title'];
+    $mailtitle = $row['dtitle'];
+    $prodtitle = $row['ptitle'];
+  }
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+<span class=subtitle>Tasks / $tasktitle<br>$prodtitle =&gt; $mailtitle</span>
+</center>
+<p>
+<a href="po_tasks.html">&lt;&lt; Back to list</a>
+<p>
+
+PAGEBODY;
+
+
+
+
+
+
+
+if ( $taskaction=="makeprep" && $tid ) {
+  $result = pg_query("SELECT treatMailPackage('$tid', 0)");
+//print pg_last_error()."";
+}
+
+if ( $taskaction=="makeproc" && $tid ) {
+  $result = pg_query("SELECT treatMailPackage('$tid', 1)");
+}
+
+
+
+if ( $taskaction=="del" && isset($marked) ) {
+  foreach( $marked as $nomer ) {
+//    $result = pg_query("DELETE FROM mlqueue WHERE qid = '$nomer' AND context=$CURRENTCONT");
+    $result = pg_query("DELETE FROM mlqueue WHERE qid = '$nomer' AND task='$tid'");
+  }
+}
+
+
+if ( $taskaction=="delprep" ) {
+  $result = pg_query("DELETE FROM mlqueue WHERE task='$tid' AND status=0");
+}
+
+
+if ( $taskaction=="delprocessing" ) {
+  $result = pg_query("DELETE FROM mlqueue WHERE task='$tid' AND status=1");
+}
+
+if ( $taskaction=="delprocessed" ) {
+  $result = pg_query("DELETE FROM mlqueue WHERE task='$tid' AND status=2");
+}
+
+
+if ( $taskaction=="delall" ) {
+  $result = pg_query("DELETE FROM mlqueue WHERE task='$tid'");
+}
+
+if ( $taskaction=="procprep" ) {
+  $result = pg_query("UPDATE mlqueue SET status=1 WHERE task='$tid' AND status=0");
+}
+
+if ( $taskaction=="procmarked" && isset($marked) ) {
+  foreach( $marked as $nomer ) {
+    $result = pg_query("UPDATE mlqueue SET status=1 WHERE qid='$nomer' AND task='$tid'");
+  }
+}
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+<FORM name=taskform METHOD="POST">
+  <input type="hidden" name="taskaction" value="">
+  <input type="button" value="Refresh" onClick="taskform.taskaction.value='refresh'; taskform.submit();">
+  <input type="button" value="Make list as prepared" onClick="if ( confirm('Make list: are you sure?') ) { taskform.taskaction.value='makeprep'; taskform.submit(); }">
+  <input type="button" value="Make list and process straightway" onClick="if ( confirm('Make list and send: are you sure?') ) { taskform.taskaction.value='makeproc'; taskform.submit(); }">
+</FORM>
+
+PAGEBODY;
+
+
+
+
+$cellclass1 = "cell1";
+$cellclass2 = "cell2";
+$cellclass = $cellclass1;
+
+$PAGEBODY .= <<<PAGEBODY
+
+<form method=post name=qform sstyle="margin: 0;">
+<input type="hidden" name="taskaction" value="">
+<input type="button" value="Delete marked" onClick="if ( confirm('Delete: are you sure?') ) { qform.taskaction.value='del'; qform.submit(); }">
+<input type="button" value="Delete all prepared" onClick="if ( confirm('Delete all prepared: are you sure?') ) { qform.taskaction.value='delprep'; qform.submit(); }">
+<input type="button" value="Delete all processing" onClick="if ( confirm('Delete all processing: are you sure?') ) { qform.taskaction.value='delprocessing'; qform.submit(); }">
+<input type="button" value="Delete all processed" onClick="if ( confirm('Delete all processed: are you sure?') ) { qform.taskaction.value='delprocessed'; qform.submit(); }">
+<input type="button" value="Delete all" onClick="if ( confirm('Delete all: are you sure?') ) { qform.taskaction.value='delall'; qform.submit(); }">
+<br>
+<input type="button" value="Process all prepared" onClick="if ( confirm('Process all prepared: are you sure?') ) { qform.taskaction.value='procprep'; qform.submit(); }">
+<input type="button" value="Process marked" onClick="if ( confirm('Process marked: are you sure?') ) { qform.taskaction.value='procmarked'; qform.submit(); }">
+
+<table border=0 width=100%>
+  <tr class=$cellclass2>
+  <th rowspan=2 width=1></th>
+  <th rowspan=2 width=1>ID</th>
+  <th rowspan=1 width=1>Status</th>
+  <th rowspan=2>Args</th>
+  <th rowspan=1 width=1></th>
+  </tr>
+  <tr class=$cellclass2>
+  <th width=1>Error</th>
+  <th width=1></th>
+  </tr>
+
+PAGEBODY;
+
+//  $result = pg_query("SELECT * FROM mlqueue WHERE task=$tid ORDER BY qid DESC");
+//  $result = pg_query("SELECT *, array_to_string(argname, '\\1') AS argname2, array_to_string(argvalue, '\\1') AS argvalue2  FROM mlqueue WHERE task=$tid ORDER BY qid DESC");
+  $result = pg_query("SELECT *, array_to_string(argname, chr(1)) AS argname2, array_to_string(argvalue, chr(1)) AS argvalue2  FROM mlqueue WHERE task=$tid ORDER BY qid DESC");
+
+
+  while( $row = pg_fetch_array($result) ) {
+//echo $row[argname2]." | " .$row[argvalue2];
+//echo "<br><br>";
+    $arr1 = explode("\1", $row[argname2]);
+    $arr2 = explode("\1", $row[argvalue2]);
+    $arr3 = array_combine1($arr1, $arr2);
+    $argstr = "";
+    foreach($arr3 as $key => $val) {
+      if( strpos($key, "PASSWORD")!==false )
+        $val = "******";
+      $argstr .= "/<b>$key</b>=".htmlspecialchars($val)." ";
+    }
+
+//print_r($arr1);
+//print "<br>";
+//print_r($arr2);
+//print "<br>";
+
+
+    $errtext = $row[error]==0?$row[error]:"<span style=\"color:red\">$row[error]</span>";
+    $PAGEBODY .= <<<PAGEBODY
+  <tr valign=top class=$cellclass>
+  <td rowspan=2 width=1><input type=checkbox name="marked[]" value="$row[qid]"></td>
+  <td rowspan=2 width=1 align=center>$row[qid]</td>
+  <td width=1 align=center>{$TASKSNAMES[$row[status]]}</td>
+  <td rowspan=2>$argstr</td>
+  <td width=1 align=center><a target=_blank href="po_preview.php?qid=$row[qid]">preview</a></td>
+  </tr>
+  <tr valign=top class=$cellclass>
+  <td width=1 align=center>$errtext</td>
+  <td width=1 align=center></td>
+  </tr>
+
+PAGEBODY;
+
+    $cellclass1 = $cellclass2; $cellclass2 = $cellclass; $cellclass = $cellclass1;
+  }
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+</form>
+
+PAGEBODY;
+
+
+
+
+
+?>

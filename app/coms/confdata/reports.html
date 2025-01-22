@@ -1,0 +1,49 @@
+<?
+$PAGEID = 'reports';
+
+/*
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Reports</span></center>
+<p>
+
+PAGEBODY;
+*/
+
+
+if (!$USERPIN)
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+You need to enter the system.
+<br>
+Use the form in the upper right corner of the page.
+</center>
+<p>
+
+PAGEBODY;
+
+else {
+
+
+
+
+
+
+
+//if( $PERMISSIONS['EDITOR_WIEW_REVIEWING_DATA'] && $iseditor ) {
+if( $iseditor ) {
+
+
+
+//  include_once("contmandata/reports.html");
+
+
+}
+
+
+
+
+
+
+}
+
+?>

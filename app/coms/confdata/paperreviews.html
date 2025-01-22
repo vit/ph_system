@@ -1,0 +1,493 @@
+<?
+$PAGEID = 'editorial';
+
+
+$PAGEBODY = "";
+
+
+if (!$USERPIN)
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+You need to enter the system.
+<br>
+Use the form in the upper right corner of the page.
+</center>
+<p>
+
+PAGEBODY;
+
+else {
+
+  $revdiagnosis = "";
+  $personaldata = array();
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>List of reviewers</span></center>
+<p>
+
+PAGEBODY;
+
+//    echo('QQQQQQQQQQQ'.$CURRENTCONT);
+
+  $PAGEBODY .= <<<PAGEBODY
+<table border=0 width=100%>
+<td valign=top>
+<a href="editorial.html">Return to editor's office</a>
+<!-- p -->
+</td>
+<td>
+
+PAGEBODY;
+
+  if($PERMISSIONS['EDITOR_WIEW_REVIEWING_DATA'] && $iseditor) {
+    $papid = "";
+    $papid0 = (int)$_REQUEST['papid'];
+
+    $result = pg_query(<<<ENDQUERY
+SELECT *,
+  concatpaperauthors(context, papnum) AS authors,
+  getfullnamewithpin(registrator) AS registratorname
+FROM paper
+WHERE context=$CURRENTCONT AND papnum=$papid0 AND editor=$EDITORID
+ENDQUERY
+);
+    if( $row = pg_fetch_array($result) ) {
+      $papid = $row['papnum'];
+      $ctitle1 = htmlspecialchars($row['title']);
+        $PAPERTITLE = $row['title'];
+        $PAPERREGISTRATOR = $row['registratorname'];
+        $PAPERAUTHORS = $row['authors'];
+      $cabstract1 = nl2br( htmlspecialchars($row['abstract']) );
+    }
+
+    if( $papid > 0 ) {
+      $flag = $_REQUEST['flag'];
+      $sendnotification = isset($_REQUEST['sendnotification']) ? (int)$_REQUEST['sendnotification']:0;
+
+      if($PERMISSIONS['EDITOR_EDIT_REVIEWS_LIST']) {
+
+        $marked = &$_REQUEST['marked'];
+        $revpin = (int)$_REQUEST['revpin'];
+
+        if ( $flag=="add" && $revpin ) {
+          $result = @pg_query("INSERT INTO review (context, papnum, revpin) VALUES ($CURRENTCONT, $papid, $revpin)");
+          include_once( "email/directmail.php" );
+          if( $sendnotification )
+            $mailflag = mail_send_now("assignasreviewer", $revpin, "", 
+                    array(
+                      'PAPERTITLE' => $PAPERTITLE,
+                      'PAPERID' => $papid,
+                      'PAPERREGISTRATOR' => $PAPERREGISTRATOR,
+                      'PAPERAUTHORS' => $PAPERAUTHORS,
+                      'CURRENTCONT' => $CURRENTCONT,
+                      'CURRENTCONTTITLE' => $CURRENTCONTTITLE,
+                      'CURRENTCONTSHORTTITLE' => $CURRENTCONTSHORTTITLE,
+                      'CURRENTCONTURL' => $CURRENTCONTURL,
+                      'CURRENTCONTEMAIL' => $CURRENTCONTEMAIL,
+                      'REVIEWDEADLINE' => $REVIEWDEADLINE,
+                      'EDITORNAME' => $USERTITLE,
+//                      'SUBJECT' => $CURRENTCONTTITLE.': Reviewing paper '.$papid
+//                      'SUBJECT' => $CURRENTCONTTITLE.': Invitation to reviewing (paper '.$papid.')'
+                      'SUBJECT' => 'Invitation to reviewing for ' .$CURRENTCONTTITLE. ': paper # ' .$papid
+                    )
+                  );
+        }
+
+        if ( $flag=="addbyinfo" ) {
+          if( isset( $_REQUEST['personaldata'] ) ) {
+            $personaldata = $_REQUEST['personaldata'];
+            foreach($personaldata as $key => $elm) {
+              $personaldata[$key] = trim($personaldata[$key]);
+            }
+
+            if( strlen($personaldata['lname']) == 0 ) {
+              $revdiagnosis .= "<br>'Last name' field cannot be empty";
+            }
+
+            if( strlen($personaldata['email']) == 0 ) {
+              $revdiagnosis .= "<br>'E-mail' field cannot be empty";
+            }
+
+            if( strlen($revdiagnosis) > 0 ) {
+              $revdiagnosis = "<div class=error>$revdiagnosis</div><br>";
+            }
+
+            if( strlen($revdiagnosis) == 0 ) {
+
+              $result = pg_query(<<<ENDQUERY
+SELECT addusershort(
+  '{$personaldata['title']}',
+  '{$personaldata['fname']}',
+  '{$personaldata['lname']}',
+  '{$personaldata['email']}'
+);
+ENDQUERY
+                        );
+
+              if( $row = pg_fetch_array($result) ) {
+                $NEWPIN = $row[0];
+                $result = @pg_query("INSERT INTO review (context, papnum, revpin) VALUES ($CURRENTCONT, $papid, $NEWPIN)");
+                $personaldata = array();
+                $revdiagnosis = <<<ENDTEXT
+<div class=error>
+New user has been added with PIN $NEWPIN.
+Please use this PIN next time for this person.
+</div><br>
+ENDTEXT;
+
+//                if( $_REQUEST['sendpassword']==1 ) {
+                  include_once( "email/directmail.php" );
+                  if( $sendnotification )
+                    $mailflag = mail_send_now("assignasreviewer", $NEWPIN, "", 
+                            array(
+				'PAPERTITLE' => $PAPERTITLE,
+				'PAPERID' => $papid,
+				'PAPERREGISTRATOR' => $PAPERREGISTRATOR,
+				'PAPERAUTHORS' => $PAPERAUTHORS,
+				'CURRENTCONT' => $CURRENTCONT,
+				'CURRENTCONTTITLE' => $CURRENTCONTTITLE,
+					'CURRENTCONTSHORTTITLE' => $CURRENTCONTSHORTTITLE,
+					'CURRENTCONTURL' => $CURRENTCONTURL,
+					'CURRENTCONTEMAIL' => $CURRENTCONTEMAIL,
+				'EDITORNAME' => $USERTITLE,
+//				'SUBJECT' => $CURRENTCONTTITLE.': Reviewing paper '.$papid
+//	                      'SUBJECT' => $CURRENTCONTTITLE.': Invitation to reviewing (paper '.$papid.')'
+	                      'SUBJECT' => 'Invitation to reviewing for ' .$CURRENTCONTTITLE. ': paper # ' .$papid
+                            )
+                          );
+//                }
+              }
+            }
+          }
+        } // Add by info - end
+
+        if ( $flag=="delete" && isset($marked) ) {
+          foreach( $marked as $nomer ) {
+            $result = @pg_query("DELETE FROM review WHERE context=$CURRENTCONT AND papnum=$papid AND revpin=$nomer");
+          }
+        }
+      }
+
+
+      $PAGEBODY .= <<<PAGEBODY
+<center>
+<b>Paper ID:</b> $papid
+<br>
+<b>Paper title:</b> $ctitle1
+<p>
+
+PAGEBODY;
+
+      $result = pg_query("
+SELECT r.*, u.email, getfullnamewithpin(r.revpin) AS name
+FROM 
+  review AS r
+   INNER JOIN userpin AS u ON r.revpin=u.pin
+WHERE
+  r.context=$CURRENTCONT AND r.papnum=$papid
+ORDER BY r.revpin
+");
+      if( pg_num_rows($result) ) {
+
+        $PAGEBODY .= <<<PAGEBODY
+<form method=post name=rvform style="margin:0;">
+<table align=center wwidth=100% border=1>
+<tr>
+<th width=1>Mark</th>
+<th>Reviewers</th>
+</tr>
+
+PAGEBODY;
+
+        while( $row = pg_fetch_array($result) ) {
+          $uname1 = htmlspecialchars($row['name']);
+          $PAGEBODY .= <<<PAGEBODY
+<tr>
+<td align=center width=1><input type=checkbox name="marked[]" value=$row[revpin]></td>
+<td>$uname1 <a href="mailto:$row[email]">$row[email]</a></td>
+</tr>
+
+PAGEBODY;
+      }
+
+        $PAGEBODY .= <<<PAGEBODY
+</table>
+<br>
+
+PAGEBODY;
+
+        if($PERMISSIONS['EDITOR_EDIT_REVIEWS_LIST']) {
+          $PAGEBODY .= <<<PAGEBODY
+</td>
+<td valign=bottom>
+<input type=hidden name="flag" value="">
+<input type=button value="Remove marked" onClick="if ( confirm('Remove marked - Are you sure?') ) { rvform.flag.value='delete'; rvform.submit(); }">
+<br>
+</form>
+
+PAGEBODY;
+        }
+
+      } else {
+        $PAGEBODY .= <<<PAGEBODY
+No reviewers assigned yet
+PAGEBODY;
+      }
+
+      $PAGEBODY .= <<<PAGEBODY
+</center>
+<br>
+</td>
+</table>
+
+PAGEBODY;
+
+
+
+
+      if($PERMISSIONS['EDITOR_EDIT_REVIEWS_LIST']) {
+        $utitle = "<SELECT name=\"personaldata[title]\" size=1>\n";
+        $result = pg_query("SELECT * FROM title ORDER BY titleid;");
+        while($row = pg_fetch_array($result) ) {
+          $selected = "";
+//          if ($personaldata['title'] == $row['titleid'])
+          if (isset($personaldata['title']) && $personaldata['title'] == $row['titleid'])
+            $selected = " SELECTED";
+          $utitle .= "<OPTION value={$row['titleid']}$selected>{$row['shortstr']}</OPTION>\n";
+        }
+        $utitle .= "</SELECT>\n";
+        $asterisk = '<span class=error>*</span>';
+
+        $PAGEBODY .= <<<PAGEBODY
+To assign a reviewer first find his/her PIN, using <b>"Find user's PIN"</b> option.
+Then enter one of his/her PINs and press the button <b>"Assign"</b>.
+The request for review will be sent by e-mail,
+mentioning that the request was initiated by you (sample message can be seen
+<a target=_blank href="{$ROOT}viewmailtemplate.php?contid=$CURRENTCONT&mailname=assignasreviewer">here</a>).
+<p>
+
+If your proposed reviewer does not have a PIN yet, register him/her, 
+entering first name, last name and e-mail into appropriate boxes.
+Then press the button <b>"Assign nonregistered reviewer"</b>.
+Repeat the procedure for all proposed reviewers. 
+<p>
+
+PAGEBODY;
+
+
+
+
+        $PAGEBODY .= <<<PAGEBODY
+<table border=0>
+<td valign=top>
+
+PAGEBODY;
+
+
+// Assign by PIN
+        $PAGEBODY .= <<<PAGEBODY
+<a name="assignbypin">
+<b>Assign reviewer by PIN</b>
+<form method=post style="margin:0;">
+  <input type=hidden name="flag" value="add">
+  PIN: <input type=text name="revpin" size=5> <input type=submit value="Assign"><br>
+  <input style="color: red;" type=checkbox value="1" name="sendnotification" checked> Send notification to the reviewer
+</form>
+<p>
+
+PAGEBODY;
+// Assign by PIN - END
+
+
+
+
+// Find PIN
+        $PAGEBODY .= <<<PAGEBODY
+<a name="finduser">
+<table class=cell1 border=0>
+<td cclass=cell1 valign=top>
+<b>Find user's PIN:</b><br>
+
+PAGEBODY;
+        $searchlname = "";
+        $searchlname1 = "";
+        if ( isset($_REQUEST['searchlname']) ) {
+          $searchlname = $_REQUEST['searchlname'];
+          $searchlname = trim($searchlname);
+          $searchlname1 = htmlspecialchars( stripslashes($searchlname) );
+        }
+        $PAGEBODY .= <<<PAGEBODY
+To find user PIN enter last name and click "Find".
+<form method=post style="margin:0;">
+Last Name: <input type="text" size=20 name="searchlname" value="$searchlname1">
+<input type="submit" name="find" value="Find">
+</form>
+
+PAGEBODY;
+
+        if( $searchlname ) {
+          $result = pg_query("SELECT * FROM userpin WHERE UPPER(lname)=UPPER('$searchlname') AND enabled=true;");
+          $numrows = pg_num_rows($result);
+          if ( $numrows>0 ) {
+            $PAGEBODY .= <<<PAGEBODY
+<b>Found $numrows record(s):</b>
+<ul>
+
+PAGEBODY;
+            while( $row=pg_fetch_array($result) ) {
+              $U = $row;
+              $PAGEBODY .= <<<PAGEBODY
+<li>
+PIN: $row[pin]<br>
+Title: {$TITLES[$row[title]]}<br>
+First name: $row[fname]<br>
+Last name: $row[lname]<br>
+</li>
+
+PAGEBODY;
+            }
+            $PAGEBODY .= <<<PAGEBODY
+</ul>
+
+PAGEBODY;
+          } else {
+            $PAGEBODY .= <<<PAGEBODY
+<b>No records found.</b>
+
+PAGEBODY;
+
+          }
+        }
+
+        $PAGEBODY .= <<<PAGEBODY
+</td>
+</table>
+
+PAGEBODY;
+
+// Find PIN - END
+
+
+
+
+        $PAGEBODY .= <<<PAGEBODY
+</td>
+<td vvalign=top class=cell1>
+$revdiagnosis
+If reviewer is not registered yet, you can enter information about him here.
+<br>
+New user will be registered in database and password will be generated automatically.
+<br>
+Please do not add information about the same person more then once, use his PIN instead.
+<form method=post style="margin:0;">
+<table class=cell1>
+  <tr>
+    <td colspan=2>
+    </td>
+  </tr>
+  <tr>
+    <td colspan=1></td>
+    <td colspan=1>$asterisk - field cannot be empty</td>
+  </tr>
+  <tr>
+    <td colspan=1>Title</td>
+    <td colspan=1>$utitle</td>
+  </tr>
+  <tr>
+    <td colspan=1>First Name</td>
+    <td colspan=1><input type="text" size=30 name="personaldata[fname]" value="{$personaldata['fname']}"></td>
+  </tr>
+  <tr>
+    <td colspan=1>Last Name $asterisk</td>
+    <td colspan=1><input type="text" size=30 name="personaldata[lname]" value="{$personaldata['lname']}"></td>
+  </tr>
+  <tr>
+    <td colspan=1>E-mail $asterisk</td>
+    <td colspan=1><input type="text" size=30 name="personaldata[email]" value="{$personaldata['email']}"></td>
+  </tr>
+  <!-- tr>
+    <td colspan=1>Send password<br>to e-mail</td>
+    <td colspan=3><input type="checkbox" name="sendpassword" value="1" style="border: none;"></td>
+  </tr -->
+  <tr>
+    <td colspan=1></td>
+    <td colspan=1><input style="color: red;" type=checkbox value="1" name="sendnotification" checked> Send notification to the reviewer</td>
+  </tr>
+  <tr>
+    <td colspan=1>
+    </td>
+    <td colspan=1>
+      <input type=hidden name="flag" value="addbyinfo">
+      <input type=submit value="Assign nonregistered reviewer">
+    </td>
+  </tr>
+</table>
+</form>
+
+PAGEBODY;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        $PAGEBODY .= <<<PAGEBODY
+</td>
+</table>
+
+PAGEBODY;
+
+      }
+    }
+  }
+  else
+    $PAGEBODY .= <<<PAGEBODY
+</td>
+</table>
+
+PAGEBODY;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+?>

@@ -1,0 +1,118 @@
+<?
+$PAGEID = 'editors';
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Editors</span></center>
+<p>
+
+PAGEBODY;
+
+
+
+  $flag = $_REQUEST['flag'];
+//  $name = trim( $_REQUEST[name]);
+  $marked = &$_REQUEST['marked'];
+  $userpin = $_REQUEST['userpin'];
+
+  if ( $flag=="add" && $userpin ) {
+    $result = @pg_query("INSERT INTO editor (context, userpin) VALUES ($CURRENTCONT, '$userpin')");
+//    print pg_last_error()."<br>\n";
+  }
+
+
+  if ( $flag=="delete" && isset($marked) ) {
+    foreach( $marked as $nomer ) {
+      $result = @pg_query("DELETE FROM editor WHERE context=$CURRENTCONT AND userpin='$nomer'");
+//    print pg_last_error()."<br>\n";
+    }
+  }
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<center>
+
+<table>
+<td align=left>
+<b>Add editor</b>
+<form method=post style="margin:0;">
+  <input type=hidden name="flag" value="add">
+  PIN: <input type=text name="userpin" size=5> <input type=submit value="Submit"><br>
+</form>
+</td>
+</table>
+
+PAGEBODY;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<p>
+
+<form method=post name=kwform style="margin:0;">
+<table align=center wwidth=100% border=1>
+<tr align=left>
+<th width=1>Mark</th>
+<!-- th>ID</th -->
+<th>PIN</th>
+<th>Name</th>
+</tr>
+
+PAGEBODY;
+
+
+/*
+  $result = pg_query("
+SELECT e.*, t.shortstr || ' ' || u.fname || ' ' || u.lname AS name
+FROM (editor AS e INNER JOIN userpin AS u ON e.userpin=u.pin AND e.context=$CURRENTCONT)
+  LEFT JOIN title AS t ON u.title=t.titleid
+ORDER BY e.userpin;
+");
+*/
+
+  $result = pg_query("
+SELECT e.*, getfullnamewithpin(e.userpin) AS name
+FROM editor AS e 
+WHERE e.context=$CURRENTCONT
+ORDER BY e.userpin;
+");
+
+  while( $row = pg_fetch_array($result) ) {
+//    $uname1 = htmlspecialchars($row[fname]." ".$row[lname]);
+    $uname1 = htmlspecialchars($row['name']);
+
+    $PAGEBODY .= <<<PAGEBODY
+<tr>
+<td width=1><input type=checkbox name="marked[]" value=$row[userpin]></td>
+<!-- td>$row[editorid]</td -->
+<td>$row[userpin]</td>
+<td>$uname1</td>
+</tr>
+
+PAGEBODY;
+  }
+
+
+$PAGEBODY .= <<<PAGEBODY
+</table>
+<br>
+
+PAGEBODY;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+  <input type=hidden name="flag" value="">
+  <input type=button value="Remove marked" onClick="if ( confirm('Remove marked - Are you sure?') ) { kwform.flag.value='delete'; kwform.submit(); }">
+<br>
+</form>
+
+<br>
+
+</center>
+
+PAGEBODY;
+
+
+?>

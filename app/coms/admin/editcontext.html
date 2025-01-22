@@ -1,0 +1,104 @@
+<?php
+$pageid = 'contexts';
+
+include_once("start.php");
+
+include_once("../contstatus.php");
+
+//include_once("mainmenu.php");
+
+
+  $contextflag = $_REQUEST['contextflag'];
+  $contid = $_REQUEST['contid'];
+  $title = trim( $_REQUEST['title'] );
+  $shorttitle = trim( $_REQUEST['shorttitle'] );
+  $homepage = trim( $_REQUEST['homepage'] );
+  $email = trim( $_REQUEST['email'] );
+  $manager = trim( $_REQUEST['manager'] );
+  $description = trim( $_REQUEST['description'] );
+  $status = (int)trim( $_REQUEST['status'] );
+  $cont_type = (int)trim( $_REQUEST['cont_type'] );
+
+
+  if ( $contextflag=="save" && $title ) {
+    if($manager)
+      @$result = pg_query("UPDATE context SET title='$title', shorttitle='$shorttitle', description='$description', homepage='$homepage', email='$email', status='$status', cont_type='$cont_type', manager='$manager' WHERE contid='$contid'");
+    else
+      @$result = pg_query("UPDATE context SET title='$title', shorttitle='$shorttitle', description='$description', homepage='$homepage', email='$email', status='$status', cont_type='$cont_type', manager=NULL WHERE contid='$contid'");
+  }
+
+
+
+$result = pg_query("SELECT * FROM context WHERE contid='$contid'");
+if( $row = pg_fetch_array($result) ) {
+
+//print_r($row);
+
+
+  $ctitle1 = htmlspecialchars($row['title']);
+  $cshorttitle1 = htmlspecialchars($row['shorttitle']);
+  $chomepage1 = htmlspecialchars($row['homepage']);
+  $cemail1 = htmlspecialchars($row['email']);
+//  $cdescr1 = nl2br( htmlspecialchars($row[description]) );
+  $cdescr1 = htmlspecialchars($row['description']);
+
+//  $cont_type = (int)$row['cont_type'];
+
+  $cstatus = "<select name=status>";
+  foreach($CONTSTATUS as $key => $val) {
+    $selected = $key==$row['status']?" selected":"";
+    $cstatus .= "<option value=$key $selected>$val</option>";
+  }
+  $cstatus .= "</select>";
+
+	$types = array(
+		0 => 'None',
+		1 => 'Conference',
+		2 => 'Archive'
+	);
+	$ctype = "<select name=cont_type>";
+	foreach($types as $key => $title) {
+		$selected = $key==$row['cont_type']?" selected":"";
+		$ctype .= "<option value=$key $selected>$title</option>";
+	}
+	$ctype .= "</select>";
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+
+<a href="contexts.html">&lt;&lt; Back</a>
+
+<center>
+<h2>Edit Context</h2>
+
+<p>
+
+<table>
+<td align=left>
+<b>Context ID: $row[contid]</b>
+<form method=post>
+  <input type=hidden name="contextflag" value="save">
+  Title: <input type=text name="title" size=60 value="$ctitle1"><br>
+  Short title: <input type=text name="shorttitle" size=60 value="$cshorttitle1"><br>
+  Homepage: <input type=text name="homepage" size=60 value="$chomepage1"><br>
+  Email: <input type=text name="email" size=60 value="$cemail1"><br>
+  Description: <textarea name="description" cols=60 rows=5>$cdescr1</textarea><br>
+  Status: $cstatus<br>
+  Context type: $ctype<br>
+  Manager: <input type=text name="manager" size=5 value="$row[manager]"><br>
+
+  <input type=submit value="Submit"><br>
+</form>
+</td>
+</table>
+</center>
+
+PAGEBODY;
+
+}
+
+
+
+include_once("finish.php");
+?>

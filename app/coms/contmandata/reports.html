@@ -1,0 +1,240 @@
+<?
+$PAGEID = 'reports';
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Reports</span></center>
+<p>
+
+PAGEBODY;
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+
+<a target=_blank href="rep_papers1.html">Papers list with full info</a>
+<br>
+<br>
+<a target=_blank href="rep_papers13.html">Paper files</a>
+<br>
+<br>
+<a target=_blank href="rep_papers2.html">Papers by registrator's countries</a>
+
+PAGEBODY;
+
+
+  $PAGEBODY .= <<<PAGEBODY
+
+<br>
+<br>
+<a target=_blank href="rep_papers9.html">Number of papers from each country</a>
+
+PAGEBODY;
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<br>
+<br>
+Papers by author's section:
+
+PAGEBODY;
+
+//print_r($SUBJECTS);
+
+foreach($SUBJECTS as $num => $val)
+  $PAGEBODY .= <<<PAGEBODY
+<li>$val <a target=_blank href="rep_papers8_1.html?subject=$num">detailed</a> / <a target=_blank href="rep_papers8_2.html?subject=$num">short</a></li>
+
+PAGEBODY;
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<br>
+<br>
+Papers by final section:
+
+PAGEBODY;
+
+foreach($SUBJECTS as $num => $val)
+  $PAGEBODY .= <<<PAGEBODY
+<li>$val <a target=_blank href="rep_papers10_1.html?subject=$num">detailed</a> / <a target=_blank href="rep_papers10_2.html?subject=$num">short</a></li>
+
+PAGEBODY;
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<br>
+<br>
+<a target=_blank href="rep_papers12_1.html">Author's section changes</a>
+
+PAGEBODY;
+
+
+
+
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<br>
+<br>
+<table align=center border=1>
+<tr>
+<th align=center colspan=2>
+Papers by editor
+</th>
+</tr>
+
+PAGEBODY;
+
+	$PAGEBODY .= <<<PAGEBODY
+<tr>
+<td align=left>NONE</td>
+<td align=center><a target=_blank href="rep_papers11_1.html?score=0">detailed</a> / <a target=_blank href="rep_papers11_2.html?score=0">short</a></td>
+</tr>
+
+PAGEBODY;
+
+
+$result = pg_query("
+SELECT
+  e.*,
+  getfullnamewithpin(e.userpin) AS editorname,
+  (select count(*) from paper as p where p.editor=e.editorid) AS cnt
+FROM
+  editor AS e 
+  WHERE e.context=$CURRENTCONT
+ORDER BY editorname
+");
+
+while( $row = pg_fetch_array($result) ) {
+//    $papid = $row['papnum'];
+	$editorname = htmlspecialchars($row['editorname']);
+	$cnt = (int)$row['cnt'];
+	$editorid = (int)$row['editorid'];
+	$PAGEBODY .= <<<PAGEBODY
+
+<tr>
+<td align=left>$editorname (Total: $cnt)</td>
+<td align=center><a target=_blank href="rep_papers11_1.html?editorid=$editorid">detailed</a> / <a target=_blank href="rep_papers11_2.html?editorid=$editorid">short</a></td>
+</tr>
+
+PAGEBODY;
+}
+
+
+  $PAGEBODY .= <<<PAGEBODY
+</table>
+
+PAGEBODY;
+
+
+
+
+
+
+
+
+
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<br>
+<br>
+Papers by editor's decision:
+<li>Uncertain <a target=_blank href="rep_papers3_1.html?decision=0">detailed</a> / <a target=_blank href="rep_papers3_2.html?decision=0">short</a></li>
+<li>Rejected <a target=_blank href="rep_papers3_1.html?decision=1">detailed</a> / <a target=_blank href="rep_papers3_2.html?decision=1">short</a></li>
+<li>Accepted as a regular paper <a target=_blank href="rep_papers3_1.html?decision=2">detailed</a> / <a target=_blank href="rep_papers3_2.html?decision=2">short</a></li>
+<li>Accepted as a poster <a target=_blank href="rep_papers3_1.html?decision=3">detailed</a> / <a target=_blank href="rep_papers3_2.html?decision=3">short</a></li>
+
+PAGEBODY;
+
+  $PAGEBODY .= <<<PAGEBODY
+<br>
+<br>
+Papers by editor's score:
+
+PAGEBODY;
+
+foreach($SCORES as $num => $val)
+  $PAGEBODY .= <<<PAGEBODY
+<li>$val <a target=_blank href="rep_papers4_1.html?score=$num">detailed</a> / <a target=_blank href="rep_papers4_2.html?score=$num">short</a></li>
+
+PAGEBODY;
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<br>
+<br>
+Papers by final decision:
+
+PAGEBODY;
+
+foreach($FINALPAPERDECISIONS as $num => $val)
+  $PAGEBODY .= <<<PAGEBODY
+<li>$val <a target=_blank href="rep_papers5_1.html?decision=$num">detailed</a> / <a target=_blank href="rep_papers5_2.html?decision=$num">short</a></li>
+
+PAGEBODY;
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<br>
+<br>
+Papers by final decision, ordered by subject, title, authors:
+
+PAGEBODY;
+
+foreach($FINALPAPERDECISIONS as $num => $val)
+  $PAGEBODY .= <<<PAGEBODY
+<li>$val <a target=_blank href="rep_papers6_1.html?decision=$num">with ID and registrator</a> / <a target=_blank href="rep_papers6_2.html?decision=$num">short</a></li>
+
+PAGEBODY;
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<br>
+<br>
+Papers by final decision, ordered by title, authors:
+
+PAGEBODY;
+
+foreach($FINALPAPERDECISIONS as $num => $val)
+  $PAGEBODY .= <<<PAGEBODY
+<li><a target=_blank href="rep_papers7_2.html?decision=$num">$val</a></li>
+
+PAGEBODY;
+
+
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<br>
+<br>
+<a target=_blank href="rep_reviewers1.html">Conscientious reviewers</a>
+
+PAGEBODY;
+
+
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+</center>
+<br>
+
+PAGEBODY;
+
+
+
+
+
+
+
+
+
+?>

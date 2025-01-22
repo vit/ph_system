@@ -1,0 +1,160 @@
+<?
+$PAGEID = 'editorial';
+
+
+
+if (!$USERPIN)
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+You need to enter the system.
+<br>
+Use the form in the upper right corner of the page.
+</center>
+<p>
+
+PAGEBODY;
+
+else {
+
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Edit paper recommendations</span></center>
+<p>
+
+PAGEBODY;
+
+$PAGEBODY .= <<<PAGEBODY
+<a href="editorial.html">Return to editor's office</a>
+<p>
+
+PAGEBODY;
+
+
+if($PERMISSIONS['EDITOR_WIEW_REVIEWING_DATA'] && $iseditor) {
+
+$papid = "";
+//$title = "";
+//$abstract = "";
+//$isinvited = "";
+$ed_ipccomments = "";
+$ed_authcomments = "";
+
+$score = $_REQUEST[score]?(int)$_REQUEST[score]:"NULL";
+$decision = $_REQUEST[decision]?(int)$_REQUEST[decision]:"NULL";
+$subject = $_REQUEST[subject]?(int)$_REQUEST[subject]:"NULL";
+
+$papid0 = (int)$_REQUEST['papid'];
+
+
+  $result = pg_query("SELECT * FROM paper WHERE context=$CURRENTCONT AND papnum=$papid0 AND editor=$EDITORID");
+  if( $row = pg_fetch_array($result) ) {
+    $papid = $row['papnum'];
+  }
+
+
+if( $papid > 0 ) {
+  $flag = $_REQUEST[flag];
+//  $title = trim( $_REQUEST[title]);
+//  $abstract = trim( $_REQUEST[abstract]);
+  $ed_ipccomments = trim( $_REQUEST[ed_ipccomments]);
+  $ed_authcomments = trim( $_REQUEST[ed_authcomments]);
+
+
+  if($PERMISSIONS['EDITOR_EDIT_RECOMMENDATIONS']) {
+    if ( $flag=="save" ) {
+      @$result = pg_query("UPDATE paper SET ed_ipccomments='$ed_ipccomments', ed_authcomments='$ed_authcomments', ed_score=$score, ed_recommendation=$decision, ed_subject=$subject WHERE context=$CURRENTCONT AND papnum=$papid AND editor=$EDITORID");
+//      print pg_last_error()."<br>\n";
+    }
+  }
+
+
+  $result = pg_query("SELECT * FROM paper WHERE context=$CURRENTCONT AND papnum=$papid AND editor=$EDITORID");
+  if( $row = pg_fetch_array($result) ) {
+    $papid = $row['papnum'];
+//    $title = $row['title'];
+//    $abstract = $row['abstract'];
+////    $isinvited = $row['isinvited']=='t'?true:false;
+
+//    $ed_ipccomments = $row['abstract'];
+    $ed_ipccomments = $row['ed_ipccomments'];
+    $ed_authcomments = $row['ed_authcomments'];
+
+
+
+    $pscore = "<select name=score>";
+    foreach($SCORES as $key => $val) {
+//      $selected = "";
+      $selected = $key==$row['ed_score']?" selected":"";
+      $pscore .= "<option value=$key $selected>$val</option>";
+    }
+    $pscore .= "</select>";
+
+    $pdec = "<select name=decision>";
+    foreach($EDITORPAPERDECISIONS as $key => $val) {
+//      $selected = "";
+      $selected = $key==$row['ed_recommendation']?" selected":"";
+      $pdec .= "<option value=$key $selected>$val</option>";
+    }
+    $pdec .= "</select>";
+
+    $psubj = "<select name=subject>";
+    foreach($SUBJECTS as $key => $val) {
+//      $selected = "";
+      $selected = $key==$row['ed_subject']?" selected":"";
+      $psubj .= "<option value=$key $selected>$val</option>";
+    }
+    $psubj .= "</select>";
+
+
+  }
+
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+<form method=post style="margin:0;">
+<input type=hidden name="flag" value="save">
+<table>
+  <tr><td align=right><b>Paper ID:</b></td><td><b>$papid</b></td></tr>
+  <tr><td align=right valign=top>Comments to IPC:</td><td><textarea cols=50 rows=5 name="ed_ipccomments">$ed_ipccomments</textarea></td></tr>
+  <tr><td align=right valign=top>Comments to Authors:</td><td><textarea cols=50 rows=5 name="ed_authcomments">$ed_authcomments</textarea></td></tr>
+  <tr><td align=right>Score:</td><td>$pscore</td></tr>
+  <tr><td align=right>Recommended decision:</td><td>$pdec</td></tr>
+  <tr><td align=right>Recommended section:</td><td>$psubj</td></tr>
+
+PAGEBODY;
+
+
+  if($PERMISSIONS['EDITOR_EDIT_RECOMMENDATIONS']) {
+    $PAGEBODY .= <<<PAGEBODY
+  <tr><td></td><td><input type=submit value="Submit"></td></tr>
+
+PAGEBODY;
+  }
+
+
+  $PAGEBODY .= <<<PAGEBODY
+</table>
+</form>
+</center>
+<p>
+
+PAGEBODY;
+
+
+
+
+}
+
+
+}
+
+
+
+}
+
+
+?>

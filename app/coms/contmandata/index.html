@@ -1,0 +1,60 @@
+<?
+$PAGEID = 'main';
+
+
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Context summary</span></center>
+
+PAGEBODY;
+
+
+$PAPCNT = 0;
+$result = @pg_query("SELECT COUNT(*) FROM paper WHERE context='$CURRENTCONT'");
+if( $row = pg_fetch_array($result) ) {
+  $PAPCNT = $row[0];
+}
+
+$COUNTRYCNT = 0;
+$result = @pg_query("
+SELECT COUNT(*) 
+FROM country 
+WHERE cid IN 
+  (SELECT u.country FROM paper AS p INNER JOIN userpin AS u ON p.registrator=u.pin AND p.context='$CURRENTCONT')
+");
+if( $row = pg_fetch_array($result) ) {
+  $COUNTRYCNT = $row[0];
+}
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<p>
+<center>
+
+<table>
+<tr>
+<td align=left><b>Context ID:</b></td><td align=left><b>$CURRENTCONT</b></td>
+</tr>
+<tr>
+<td align=left><b>Context title:</b></td><td align=left><b>$CURRENTCONTTITLE</b></td>
+</tr>
+<tr>
+<td align=left><b>Home page:</b></td><td align=left><b><a target=_blank href="$CURRENTCONTURL">$CURRENTCONTURL</a></b></td>
+</tr>
+<tr>
+<td align=left><b>Registered papers:</b></td><td align=left><b>$PAPCNT</b></td>
+</tr>
+<tr>
+<td align=left><b>From countries:</b></td><td align=left><b>$COUNTRYCNT</b></td>
+</tr>
+</table>
+
+</center>
+<p>
+
+PAGEBODY;
+
+
+?>

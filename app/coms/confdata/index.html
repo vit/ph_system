@@ -1,0 +1,160 @@
+<?
+$PAGEID = 'main';
+
+if( $CURRENTCONT > 0 ) {
+
+  if($USERPIN) {
+    $PAGEBODY = "";
+
+    $PAGEBODY .= <<<PAGEBODY
+<p>
+<ul>
+
+PAGEBODY;
+
+    $textarr = array();
+    $flag = 
+      $PERMISSIONS['USER_REGISTER_NEW_PAPER'] ||
+      $ispapreg && (
+        $PERMISSIONS['PAPREG_DELETE_REGISTERED_PAPER'] ||
+        $PERMISSIONS['PAPREG_EDIT_REGISTERED_PAPER'] ||
+        $PERMISSIONS['PAPREG_UPLOAD_REGISTERED_PAPER'] ||
+        $PERMISSIONS['PAPREG_REUPLOAD_REGISTERED_PAPER'] ||
+        $PERMISSIONS['PAPREG_REMOVE_UPLOADED_PAPER']
+      );
+
+    if($flag)
+      $textarr[] = "You may submit your paper or update your submission";
+
+    if( $ispapreg )
+      $textarr[] = "You may view your papers info and download paper files";
+
+    $text = join(";<br>", $textarr);
+
+    if($text)
+      $PAGEBODY .= <<<PAGEBODY
+<li>
+$text.<br>
+Click here: "<a href="mypapers.html"><b>My&nbsp;papers</b></a>".
+<p />
+</li>
+
+PAGEBODY;
+
+
+
+    if( $PERMISSIONS['USER_REGISTER_NEW_SUBJECT'] || $issubjman )
+      $PAGEBODY .= <<<PAGEBODY
+<li>
+You may submit or manage your sections.<br>
+Click here: "<a href="mysubjects.html"><b>My&nbsp;subjects</b></a>".
+<p />
+</li>
+
+PAGEBODY;
+
+
+
+    $textarr = array();
+
+    $flag = 
+      $PERMISSIONS['EDITOR_WIEW_REVIEWING_DATA'] && $iseditor;
+    if($flag)
+      $textarr[] = "You may view reviewing data";
+
+    $flag = 
+      $PERMISSIONS['EDITOR_EDIT_REVIEWS_LIST'] && $iseditor;
+    if($flag)
+      $textarr[] = "You may edit reviews list and add new reviewers";
+
+    $flag = 
+      $PERMISSIONS['EDITOR_EDIT_RECOMMENDATIONS'] && $iseditor;
+    if($flag)
+      $textarr[] = "You may edit your recommendations";
+
+    $text = join(";<br>", $textarr);
+
+    if($text)
+      $PAGEBODY .= <<<PAGEBODY
+<li>
+$text.<br>
+Click here: "<a href="editorial.html"><b>Editor's&nbsp;office</b></a>".
+<p />
+</li>
+
+PAGEBODY;
+
+
+
+
+    $textarr = array();
+
+    $flag = 
+      $PERMISSIONS['REVIEWER_WIEW_REVIEWING_DATA'] && $isreviewer;
+    if($flag)
+      $textarr[] = "You may view reviewing data";
+
+    $flag = 
+      $PERMISSIONS['REVIEWER_EDIT_REVIEWS'] && $isreviewer;
+    if($flag)
+      $textarr[] = "You may edit your reviews";
+
+
+    $text = join(";<br>", $textarr);
+
+    if($text)
+      $PAGEBODY .= <<<PAGEBODY
+<li>
+$text.<br>
+Click here: "<a href="revoffice.html"><b>Reviewer's&nbsp;office</b></a>".
+<p />
+</li>
+
+PAGEBODY;
+
+
+
+
+
+    $PAGEBODY .= <<<PAGEBODY
+</ul>
+
+PAGEBODY;
+
+  } else
+    $PAGEBODY = <<<PAGEBODY
+<p>
+
+<ul>
+<li>
+To submit the paper enter the system, using the form in the upper right corner
+of the page.
+<br>
+Then go to "<b>My&nbsp;papers</b>" => "<b>Submit&nbsp;new&nbsp;paper</b>";
+<p />
+</li>
+<li>
+If you are not registered yet or forgot your PIN or password, use the
+link "<a href="{$ROOT}pin/"><b>User&nbsp;info</b></a>".
+<p />
+</li>
+<!-- li>
+If you enter the system you may submit you paper or update your submission. Click here:
+"<a href="mypapers.html"><b>My&nbsp;papers</b></a>".
+<p />
+</li -->
+</ul>
+
+PAGEBODY;
+
+
+//1If you already have your PIN and password, enter the system
+//using the form in the upper right corner of the page.
+
+//3If you enter the system you may submit you paper or update your submission. Click here:
+//"<a href="mypapers.html"><b>My&nbsp;papers</b></a>".
+
+
+}
+
+?>

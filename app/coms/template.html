@@ -1,0 +1,170 @@
+<?
+header ("Content-Type: text/html; charset=utf-8");
+if( isset($ERROR404) )
+  header("HTTP/1.0 404 Not Found");
+//  header ("Status: 404 Not Found");
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+
+<META name="keywords" content="conferences, coms, submission, submit, papers, reviews, register, users database">
+<META name="description" content="Conference management system (CoMS). Online paper submission and reviewing.">
+
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<?
+include_once("style.php");
+?>
+
+<title>Conference Management System (CoMS)</title>
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-6329613-6', 'auto');
+  ga('send', 'pageview');
+
+  ga('create', 'UA-6329613-1', 'auto', {'name': 'ph'});
+  ga('ph.send', 'pageview');
+
+</script>
+
+</head>
+<body>
+
+
+<?php
+  include_once("ipacs_header.php");
+?>
+  
+
+<?php /* ?>
+
+
+<table border="0" cellpadding="1" cellspacing="0" width="100%">
+<tr>
+
+  <td align=right valign=middle class=topmenu1>
+    &nbsp;<a href="http://physcon.ru" title="Physics and Control Portal"><b>PhysCon</b></a>&nbsp;<b>::</b>&nbsp;
+  </td>
+
+  <td align=left width="100%" class=topmenu>
+
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <td align=left wwidth="100%" valign=middle>
+
+        <table border="0" cellpadding="0" cellspacing="2" wwidth="100%">
+        <tr>
+          <td>
+          &nbsp;&nbsp;&#149;&nbsp;<a href="http://physcon.ru" title="Physics and Control Portal">Home</a>
+          </td>
+          <td>
+          &nbsp;&nbsp;&#149;&nbsp;<a href="http://physcon.ru/ipacs/" title="International Physics and Control Society">IPACS</a>
+          </td>
+          <td>
+          &nbsp;&nbsp;&#149;&nbsp;<a href="http://physcon.ru/dir/" title="PhysCon Directory">Directory</a>
+          </td>
+          <td>
+          &nbsp;&nbsp;&#149;&nbsp;<a href="http://physcon.ru/news/" title="PhysCon News">News</a>
+          </td>
+        </tr>
+        <tr>
+          <td>
+          &nbsp;&nbsp;&#149;&nbsp;<a href="http://coms.physcon.ru" title="Conference Management System"><b>CoMS</b></a>
+          </td>
+          <td>
+          &nbsp;&nbsp;&#149;&nbsp;<a href="http://lib.physcon.ru" title="Electronic Library">Library</a>
+          </td>
+          <td>
+          &nbsp;&nbsp;&#149;&nbsp;<a href="http://conf.physcon.ru" title="PhysCon Conferences">Conferences</a>
+          </td>
+          <td>
+          &nbsp;&nbsp;&#149;&nbsp;<a href="http://album.physcon.ru" title="PhysCon Album">Album</a>
+          </td>
+        </tr>
+        </table>
+      </td>
+      <td align=right>
+
+<?
+if( $USERPIN ) {
+
+  if( isset($JUSTLOGGED) )
+    $USERERROR = "Welcome $USERTITLE!<br>You are logged in.";
+
+  $MEMBERTEXT = "";
+  if( $IS_MEMBER ) {
+  	$MEMBERTEXT = ", IPACS member";
+  }
+
+  print <<<ENDTEXT
+<div class=userwelcome>
+Welcome <span class=username>$USERTITLE</span><span class=name>$MEMBERTEXT</span>, PIN: <span class=name>$USERPIN</span>
+</div>
+$LOGOUTFORM
+
+ENDTEXT;
+
+} else {
+  print $LOGONFORM;
+  if ( $USERERROR ) {
+  }
+}
+?>
+
+
+      </td>
+    </table>
+
+  </td>
+
+</tr>
+<tr>
+  <!-- td align=right valign=middle class=topmenu1>&nbsp;<b>&#9654;</b>&nbsp;</td -->
+  <td align=right valign=middle class=topmenu>&nbsp;&nbsp;</td>
+  <td class=topmenu1><span cclass=cmstitle>&nbsp;<b>Conference Management System (CoMS)</b></span></td>
+
+</tr>
+</table>
+
+
+<?php */ ?>
+
+
+
+
+
+
+
+
+<?
+if ( $USERERROR ) {
+  print <<<ENDTEXT
+<div class=error align=center>
+$USERERROR
+</div>
+
+ENDTEXT;
+}
+
+include_once("showmenu.php");
+
+?>
+
+<?= $PAGEBODY?>
+
+
+<?php
+  include_once("ipacs_footer.php");
+?>
+
+
+</body>
+</html>

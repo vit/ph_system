@@ -1,0 +1,138 @@
+<?
+$subpageid = papers;
+
+include_once("start.php");
+
+
+  $flag = $_REQUEST[flag];
+  $papnum = $_REQUEST[papnum];
+  $title = trim( $_REQUEST[title] );
+  $abstract = trim( $_REQUEST[abstract] );
+
+  $registrator = $_REQUEST[registrator];
+  $editor = $_REQUEST[editor];
+
+
+  if ( $flag=="save" && $title ) {
+    $result = pg_query("UPDATE paper SET title='$title', abstract='$abstract' WHERE context=$contid AND papnum='$papnum'");
+  }
+
+  if ( $flag=="savepins" ) {
+    if ( ! $registrator )
+      $registrator = "NULL";
+    if ( ! $editor )
+      $editor = "NULL";
+    $result = pg_query("UPDATE paper SET registrator=$registrator, editor=$editor WHERE context=$contid AND papnum='$papnum'");
+  }
+
+
+
+$editors = array();
+
+$result = pg_query("
+SELECT e.*, t.shortstr || ' ' || u.fname || ' ' || u.lname || ' (PIN:' || e.userpin || ')' AS name
+FROM (editor AS e INNER JOIN userpin AS u ON e.userpin=u.pin AND e.context=$contid)
+  LEFT JOIN title AS t ON u.title=t.titleid
+ORDER BY name;
+");
+while( $row = pg_fetch_array($result) ) {
+  $editors[$row[editorid]] = $row[name];
+}
+
+//print_r($editors);
+
+$result = pg_query("SELECT * FROM paper WHERE context=$contid AND papnum='$papnum'");
+if( $row = pg_fetch_array($result) ) {
+
+  $EDLIST = "<SELECT name=editor>";
+  $EDLIST .= "<OPTION value=0> -- Not defined -- </OPTION>";
+  foreach($editors AS $num => $name) {
+    $selflag = $num==$row[editor]?"SELECTED":"";
+    $EDLIST .= "<OPTION value=$num $selflag>$name</OPTION>";
+  }
+  $EDLIST .= "</SELECT>";
+
+
+
+  $row[title] = htmlspecialchars($row[title]);
+  $row[abstract] = htmlspecialchars($row[abstract]);
+
+  $PAGEBODY .= <<<PAGEBODY
+
+<a href="papers.html?contid=$contid">&lt;&lt; Back</a>
+
+<center>
+<h2>Edit Paper</h2>
+
+<p>
+
+<table>
+<td align=left>
+<b>Paper Num: $row[papnum]</b>
+
+<br>
+<hr>
+<br>
+
+<form method=post>
+  <input type=hidden name="flag" value="save">
+  Title: <input type=text name="title" size=60 value="$row[title]"><br>
+  Abstract: <textarea name="abstract" cols=60 rows=5>$row[abstract]</textarea><br>
+<br>
+  <input type=submit value="Save"><br>
+</form>
+
+PAGEBODY;
+
+  $registratorname = "";
+//  $editorname = "";
+  if( $row[registrator] ) {
+    $result1 = pg_query("SELECT * FROM userpin WHERE pin=$row[registrator]");
+    if( $row1 = pg_fetch_array($result1) ) {
+      $registratorname = $row1['fname'] ." ". $row1['lname'];
+    }
+  }
+//  if( $row[editor] ) {
+//    $result1 = pg_query("SELECT * FROM userpin WHERE pin=$row[editor]");
+//    if( $row1 = pg_fetch_array($result1) ) {
+//      $editorname = $row1['fname'] ." ". $row1['lname'];
+//    }
+//  }
+
+  $PAGEBODY .= <<<PAGEBODY
+<br>
+<hr>
+<br>
+
+<form method=post>
+  <input type=hidden name="flag" value="savepins">
+  Registrator PIN: <input type=text name="registrator" size=10 value="$row[registrator]">
+  $registratorname
+<br>
+  Editor: $EDLIST
+ <!-- input type=text name="editor" size=10 value="$row[editor]" -->
+<br>
+  <input type=submit value="Save"><br>
+</form>
+
+PAGEBODY;
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+<br>
+<hr>
+<br>
+
+</td>
+</table>
+</center>
+
+PAGEBODY;
+
+}
+
+
+
+include_once("finish.php");
+?>

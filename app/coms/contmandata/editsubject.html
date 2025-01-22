@@ -1,0 +1,120 @@
+<?
+$PAGEID = 'subjects';
+
+  $PAGEBODY .= <<<PAGEBODY
+<center><span class=subtitle>Edit section</span></center>
+<p>
+
+PAGEBODY;
+
+$PAGEBODY .= <<<PAGEBODY
+<a href="subjects.html">Return to sections list</a>
+<p>
+
+PAGEBODY;
+
+
+$subjid = "";
+$title = "";
+$abstract = "";
+$isinvited = "";
+$managerpin = "";
+$editorid = "";
+
+$badsubjid = false;
+
+$subjid0 = $_REQUEST['subjid'];
+
+$editors = array();
+
+$result = pg_query("
+SELECT e.*, t.shortstr || ' ' || u.fname || ' ' || u.lname || ' (PIN:' || e.userpin || ')' AS name
+FROM (editor AS e INNER JOIN userpin AS u ON e.userpin=u.pin AND e.context=$CURRENTCONT)
+  LEFT JOIN title AS t ON u.title=t.titleid
+ORDER BY name;
+");
+while( $row = pg_fetch_array($result) ) {
+  $editors[$row[editorid]] = $row[name];
+}
+
+
+if( $subjid0 > 0 ) {
+  $result = pg_query("SELECT * FROM subject WHERE context=$CURRENTCONT AND subjid=$subjid0");
+  if( $row = pg_fetch_array($result) ) {
+    $subjid = $row['subjid'];
+  }
+}
+
+
+if( $subjid > 0 ) {
+  $flag = $_REQUEST['flag'];
+  $title = trim( $_REQUEST['title']);
+  $abstract = trim( $_REQUEST['abstract']);
+  $isinvited = $_REQUEST['isinvited']?"TRUE":"FALSE";
+  $managerpin = trim( $_REQUEST['managerpin']);
+  $managerpin = $managerpin>0?$managerpin:"NULL";
+  $editorid = trim( $_REQUEST['editorid']);
+  $editorid = $editorid>0?$editorid:"NULL";
+
+  if ( $flag=="save" ) {
+//    @$result = pg_query("UPDATE subject SET context=$CURRENTCONT, manager=$managerpin, title='$title', abstract='$abstract', isinvited=$isinvited, editor=$editorid WHERE context=$CURRENTCONT AND subjid=$subjid");
+    @$result = pg_query("UPDATE subject SET manager=$managerpin, title='$title', abstract='$abstract', isinvited=$isinvited, editor=$editorid WHERE context=$CURRENTCONT AND subjid=$subjid");
+//    print pg_last_error()."<br>\n";
+  }
+
+
+  $result = pg_query("SELECT * FROM subject WHERE context=$CURRENTCONT AND subjid=$subjid");
+  if( $row = pg_fetch_array($result) ) {
+    $subjid = $row['subjid'];
+    $title = $row['title'];
+    $abstract = $row['abstract'];
+    $isinvited = $row['isinvited']=='t'?true:false;
+    $managerpin = $row['manager'];
+
+  $EDLIST = "<SELECT name=editorid>";
+  $EDLIST .= "<OPTION value=0> -- Not defined -- </OPTION>";
+  foreach($editors AS $num => $name) {
+    $selflag = $num==$row[editor]?"SELECTED":"";
+    $EDLIST .= "<OPTION value=$num $selflag>$name</OPTION>";
+  }
+  $EDLIST .= "</SELECT>";
+
+  }
+
+  $managername = "";
+  if( $managerpin ) {
+    $result1 = pg_query("
+SELECT t.shortstr || ' ' || u.fname || ' ' || u.lname AS name
+FROM userpin AS u LEFT JOIN title AS t ON u.title=t.titleid
+WHERE u.pin=$managerpin;
+");
+    if( $row1 = pg_fetch_array($result1) ) {
+      $managername = $row1[0];
+    }
+  }
+
+  $isinvitedchecked = $isinvited?"CHECKED":"";
+
+  $PAGEBODY .= <<<PAGEBODY
+<center>
+<table>
+<td align=left>
+<form method=post style="margin:0;">
+  <b>Section ID: $subjid</b><br>
+  <input type=hidden name="flag" value="save">
+  Title: <input type=text name="title" size=50 value="$title"><br>
+  Abstract: <textarea cols=50 rows=5 name="abstract">$abstract</textarea><br>
+  Invited: <input type=checkbox name="isinvited" value=1 $isinvitedchecked><br>
+  Section manager PIN: <input type=text name="managerpin" size=5 value="$managerpin"> $managername<br>
+  Section editor : $EDLIST<br>
+  <input type=submit value="Submit"><br>
+</form>
+</td>
+</table>
+</center>
+
+PAGEBODY;
+
+}
+
+?>

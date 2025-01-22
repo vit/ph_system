@@ -1,0 +1,344 @@
+<?
+$pageid = users;
+
+include_once("start.php");
+
+//include_once("mainmenu.php");
+
+
+  $countryflag = $_REQUEST[countryflag];
+  $USERPIN = $_REQUEST[pin];
+//  $name = $_REQUEST[name];
+
+
+    $result = pg_query("SELECT * FROM userpin WHERE pin='$USERPIN';");
+    if( $row=pg_fetch_array($result) ) {
+      $personaldata = $row;
+    }
+
+
+
+  $PAGEBODY .= <<<PAGEBODY
+
+<a href="users.html?page={$_REQUEST[retpage]}&state={$_REQUEST[retstate]}">&lt;&lt; Back</a>
+
+<center>
+<h2>Manage User</h2>
+
+<p>
+
+
+PAGEBODY;
+
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<center><b>User info</b></center>
+<p>
+
+PAGEBODY;
+
+
+
+
+
+$diagnosis = "";
+//$NEWPIN = 0;
+
+$asterisk = '<span style="color: #FF0000">*</span>';
+
+
+
+if( isset( $_REQUEST['personaldata'] ) ) {
+  $personaldata = $_REQUEST['personaldata'];
+
+  foreach($personaldata as $key => $elm) {
+    $personaldata[$key] = trim($personaldata[$key]);
+  }
+  foreach($personaldata as $key => $elm) {
+    $personaldata[$key] = stripslashes($personaldata[$key]);
+  }
+
+
+  if( strlen($personaldata['lname']) == 0 ) {
+    $diagnosis .= "'Last name' field cannot be empty<br>";
+  }
+
+  if( strlen($personaldata['email']) == 0 ) {
+    $diagnosis .= "'E-mail' field cannot be empty<br>";
+  }
+
+  if( strlen($personaldata['pass']) == 0 ) {
+    $diagnosis .= "'Password' field cannot be empty<br>";
+  }
+
+  if( strlen($diagnosis) == 0 ) {
+
+    foreach($personaldata as $key => $elm) {
+      $personaldata[$key] = addslashes($personaldata[$key]);
+    }
+
+    $result = pg_query(<<<ENDQUERY
+SELECT saveuserinfo(
+  '$USERPIN',
+  '{$personaldata['pass']}',
+  '{$personaldata['title']}',
+  '{$personaldata['gender']}',
+  '{$personaldata['fname']}',
+  '{$personaldata['lname']}',
+  '{$personaldata['affiliation']}',
+  '{$personaldata['country']}',
+  '{$personaldata['city']}',
+  '{$personaldata['address']}',
+  '{$personaldata['phone']}',
+  '{$personaldata['fax']}',
+  '{$personaldata['email']}'
+);
+ENDQUERY
+    );
+
+    if( $result ) {
+      $diagnosis = "User information updated successfully<br>";
+    }
+
+    $result = pg_query("SELECT * FROM userpin WHERE pin='$USERPIN';");
+    if( $row=pg_fetch_array($result) ) {
+      $personaldata = $row;
+//      $USERINFO = $row;
+//      $personaldata = $USERINFO;
+    }
+
+  }
+
+}
+
+
+if( strlen($diagnosis) > 0 ) {
+  $diagnosis = "<div style=\"color: #FF0000\">$diagnosis</div><br>";
+}
+
+
+
+$country = "<SELECT name=\"personaldata[country]\" size=1>\n";
+$country .= "<OPTION value=0>(choose one from the list)</OPTION>\n";
+//$result = pg_query("SELECT * FROM country ORDER BY cid;");
+$result = pg_query("SELECT * FROM country WHERE cid>100 ORDER BY name;");
+while($row = pg_fetch_array($result) ) {
+  $selected = "";
+  if ($personaldata['country'] == $row['cid'])
+    $selected = " SELECTED";
+  $country .= "<OPTION value={$row['cid']}$selected>{$row['name']}</OPTION>\n";
+}
+$country .= "<OPTION value=1>other</OPTION>\n";
+$country .= "</SELECT>\n";
+
+
+$title = "<SELECT name=\"personaldata[title]\" size=1>\n";
+$result = pg_query("SELECT * FROM title ORDER BY titleid;");
+while($row = pg_fetch_array($result) ) {
+  $selected = "";
+  if ($personaldata['title'] == $row['titleid'])
+    $selected = " SELECTED";
+  $title .= "<OPTION value={$row['titleid']}$selected>{$row['shortstr']}</OPTION>\n";
+}
+$title .= "</SELECT>\n";
+
+
+$selectedf = $selectedm = "";
+if ($personaldata['gender'] == "Female")
+  $selectedf = " SELECTED";
+else
+  $selectedm = " SELECTED";
+
+$gender = "<SELECT name=\"personaldata[gender]\" size=1>\n";
+$gender .= "<OPTION value=\"Female\" $selectedf>Female</OPTION>\n";
+$gender .= "<OPTION value=\"Male\" $selectedm>Male</OPTION>\n";
+$gender .= "</SELECT>\n";
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<center>
+
+$diagnosis
+
+You can edit data in this form and click "Submit".
+<br>
+Fields, marked by the asterisk ($asterisk) cannot be empty.
+
+
+<FORM METHOD="POST">
+<table>
+  <tr>
+    <td colspan=1><b>PIN</b></td>
+    <td colspan=3><b>$USERPIN</b></td>
+  </tr>
+  <tr>
+    <td colspan=1><b>Last updated</b></td>
+    <td colspan=3><b>{$personaldata['updtime']}</b></td>
+  </tr>
+  <tr>
+    <td colspan=1>Title</td>
+    <td colspan=1>$title</td>
+    <td colspan=1>Gender</td>
+    <td colspan=1>$gender</td>
+  </tr>
+  <tr>
+    <td colspan=1>First Name</td>
+    <td colspan=3><input type="text" size=30 name="personaldata[fname]" value="{$personaldata['fname']}"></td>
+  </tr>
+  <tr>
+    <td colspan=1>Last Name $asterisk</td>
+    <td colspan=3><input type="text" size=30 name="personaldata[lname]" value="{$personaldata['lname']}"></td>
+  </tr>
+  <tr>
+    <td colspan=1>Organization</td>
+    <td colspan=3><textarea rows=6 cols=30 name="personaldata[affiliation]" wrap=virtual>{$personaldata['affiliation']}</textarea></td>
+  </tr>
+  <tr>
+    <td colspan=1>Country</td>
+    <td colspan=3>$country</td>
+  </tr>
+  <tr>
+    <td colspan=1>City</td>
+    <td colspan=3><input type="text" size=30 name="personaldata[city]" value="{$personaldata['city']}"></td>
+  </tr>
+  <tr>
+    <td colspan=1>Address</td>
+    <td colspan=3><textarea rows=6 cols=30 name="personaldata[address]" wrap=virtual>{$personaldata['address']}</textarea></td>
+  </tr>
+  <tr>
+    <td colspan=1>Phone</td>
+    <td colspan=3><input type="text" size=30 name="personaldata[phone]" value="{$personaldata['phone']}"></td>
+  </tr>
+  <tr>
+    <td colspan=1>Fax</td>
+    <td colspan=3><input type="text" size=30 name="personaldata[fax]" value="{$personaldata['fax']}"></td>
+  </tr>
+  <tr>
+    <td colspan=1>E-mail $asterisk</td>
+    <td colspan=3><input type="text" size=30 name="personaldata[email]" value="{$personaldata['email']}"></td>
+  </tr>
+  <tr>
+    <td colspan=4>&nbsp;
+    </td>
+  </tr>
+  <tr>
+    <td colspan=1>Password $asterisk</td>
+    <td colspan=3><input type="text" size=30 name="personaldata[pass]" value="{$personaldata['pass']}"></td>
+  </tr>
+  <tr>
+    <td colspan=4>
+      <input type="hidden" name="saveinfoflag" value="1">
+      <INPUT TYPE="submit" NAME="saveinfo" VALUE="Submit">
+    </td>
+  </tr>
+</table>
+</FORM>
+
+</center>
+
+PAGEBODY;
+
+
+
+
+
+
+$diagnosis = "";
+
+if( $_REQUEST['disablepin']=='disable' ) {
+  $result = pg_query("UPDATE userpin SET enabled=FALSE WHERE pin='$USERPIN';");
+  if( $result ) {
+    $diagnosis = "Account is disabled successfully<br>";
+    $result = pg_query("SELECT * FROM userpin WHERE pin='$USERPIN';");
+    if( $row=pg_fetch_array($result) ) {
+      $personaldata = $row;
+    }
+  }
+} else if( $_REQUEST['enablepin']=='enable' ) {
+  $result = pg_query("UPDATE userpin SET enabled=TRUE WHERE pin='$USERPIN';");
+  if( $result ) {
+    $diagnosis = "Account is enabled successfully<br>";
+    $result = pg_query("SELECT * FROM userpin WHERE pin='$USERPIN';");
+    if( $row=pg_fetch_array($result) ) {
+      $personaldata = $row;
+    }
+  }
+}
+
+if( strlen($diagnosis) > 0 ) {
+  $diagnosis = "<div style=\"color: #FF0000\">$diagnosis</div><br>";
+}
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<p>
+<center><b>Enable/disable account</b></center>
+<p>
+$diagnosis
+
+PAGEBODY;
+
+
+
+if($personaldata['enabled']=='f')
+    $PAGEBODY .= <<<PAGEBODY
+
+<center>
+
+<FORM METHOD="POST" name=enableform>
+<table wwidth="80%" border=0 sstyle="border-color:red; border-style:solid; border-width:thin">
+  <tr>
+    <td colspan=2 align=center>Account is disabled now</td>
+    </td>
+    <td>
+    <input type=hidden name="enablepin" value="enable">
+    <input type=submit value="Enable account">
+    </td>
+  </tr>
+</table>
+</FORM>
+
+</center>
+
+PAGEBODY;
+
+else if($personaldata['enabled']=='t')
+    $PAGEBODY .= <<<PAGEBODY
+
+<center>
+
+<FORM METHOD="POST" name=disableform>
+<table wwidth="80%" border=0 sstyle="border-color:red; border-style:solid; border-width:thin">
+  <tr>
+    <td colspan=2 align=center>Account is enabled now</td>
+    </td>
+    <td>
+    <input type=hidden name="disablepin" value="disable">
+    <input type=submit value="Disable account">
+    </td>
+  </tr>
+</table>
+</FORM>
+
+</center>
+
+PAGEBODY;
+
+
+
+$PAGEBODY .= <<<PAGEBODY
+
+<p>
+
+PAGEBODY;
+
+
+
+include_once("finish.php");
+?>
