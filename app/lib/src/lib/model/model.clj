@@ -102,9 +102,14 @@
 
 
 (defn call-rpc [conn method payload]
-  (let [rpc-map {"get_doc_data" (fn []
-                                  (let [doc (find-doc conn {:_id (get payload "id")})]
-                                    (when (some? doc) doc)))
+  (let [rpc-map {
+                 "get_doc_data" (fn []
+                 (let [doc (find-doc conn {:_id (get payload "id")})]
+                   (when (some? doc) doc)))
+                 "set_doc_data" (fn []
+                                  (println "set_doc_data: " payload)
+                                  {}
+                                  )
                  "get_doc_path" (fn []
                                   (let [rez (get-doc-breadcrumbs-by-id conn (get payload "id"))]
                                     (when (some? rez) rez)))

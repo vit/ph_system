@@ -37,3 +37,6 @@ admin_nginx
 app/admin/
 
 
+/api
+/app/api
+
