@@ -45,7 +45,8 @@ services:
       ALBUM_DOMAIN_NAME: ${ALBUM_DOMAIN_NAME}
       VIRTUAL_HOST:
         ${LIB_DOMAIN_NAME},
-        # lib.physcon.my, lib.physcon.ru,
+      LETSENCRYPT_HOST:
+        ${LIB_DOMAIN_NAME},
     networks:
       - frontend
       - mongo
@@ -69,6 +70,8 @@ services:
       - htpasswd-coms
     environment:
       VIRTUAL_HOST:
+        ${COMS_DOMAIN_NAME},
+      LETSENCRYPT_HOST:
         ${COMS_DOMAIN_NAME},
     networks:
       - frontend
