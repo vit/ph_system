@@ -27,8 +27,8 @@ config:
 	cp .env ./nginx/.env
 	cd nginx && make config && cd ..
 
-	cp .env ./admin_nginx/.env
-	cd admin_nginx && make config && cd ..
+	# cp .env ./admin_nginx/.env
+	# cd admin_nginx && make config && cd ..
 
 	cp .env ./php/.env
 	cd php && make config && cd ..
