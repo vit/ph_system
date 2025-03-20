@@ -136,7 +136,7 @@ services:
     expose:
       - "25"
     environment:
-      maildomain: ${IPACS_DOMAIN_NAME}
+      maildomain: ${IPACS_MAIL_DOMAIN_NAME}
       smtp_user: sender:love
     secrets:
       - mail.private
