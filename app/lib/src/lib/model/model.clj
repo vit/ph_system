@@ -35,7 +35,8 @@
 
 (defn find-doc [conn query] (mongo-find-one conn "docs" query))
 (defn find-file-info [conn query] (mongo-find-one conn "docs.files" query))
-(defn find-docs [conn query] (mongo-find conn "docs" query {:sort {:_meta.ctime -1}}))
+(defn find-docs [conn query] (mongo-find conn "docs" query))
+(defn find-docs-ex [conn query] (mongo-find conn "docs" query {:sort {:_meta.ctime -1}}))
 
 
 (defn get-file-by-id [conn id]
@@ -72,20 +73,20 @@
           (conj parent-rez d)))))
 
 
-(defn get-doc-children-by-id [conn id]
-  (map
-   (fn [doc] (let [info (doc "info")
-                   doc-id (doc "_id")
-                   title (info "title")
-                   subtitle (info "subtitle")
-                   d {:id doc-id :title title :subtitle subtitle}]
-               d
-               )
-     )
-   (find-docs conn {"_meta.parent" id})
-   )
+;; (defn get-doc-children-by-id [conn id]
+;;   (map
+;;    (fn [doc] (let [info (doc "info")
+;;                    doc-id (doc "_id")
+;;                    title (info "title")
+;;                    subtitle (info "subtitle")
+;;                    d {:id doc-id :title title :subtitle subtitle}]
+;;                d
+;;                )
+;;      )
+;;    (find-docs-ex conn {"_meta.parent" id})
+;;    )
   
-  )
+;;   )
 
 
 
@@ -96,7 +97,7 @@
       (assoc
        doc
        "file-info" (find-file-info conn {"_meta.parent" id})
-       "children" (find-docs conn {"_meta.parent" id}
+       "children" (find-docs-ex conn {"_meta.parent" id}
 
                             ;;  @docs.find(
                             ;;  				{'_meta.class' => LIB_DOC_CLASS, '_meta.parent' => id}
@@ -118,25 +119,25 @@
 
 
 
-(defn call-rpc [conn method payload]
-  (let [rpc-map {
-                 "get_doc_data" (fn []
-                 (let [doc (find-doc conn {:_id (get payload "id")})]
-                   (when (some? doc) doc)))
-                 "set_doc_data" (fn []
-                                  (println "set_doc_data: " payload)
-                                  {}
-                                  )
-                 "get_doc_path" (fn []
-                                  (let [rez (get-doc-breadcrumbs-by-id conn (get payload "id"))]
-                                    (when (some? rez) rez)))
-                 "get_doc_children" (fn []
-                                      (let [rez (get-doc-children-by-id conn (get payload "id"))]
-                                        (when (some? rez) rez)))}
-        fn-to-call (get rpc-map method)
-        result (fn-to-call)]
-    (println result)
-    result))
+;; (defn call-rpc [conn method payload]
+;;   (let [rpc-map {
+;;                  "get_doc_data" (fn []
+;;                  (let [doc (find-doc conn {:_id (get payload "id")})]
+;;                    (when (some? doc) doc)))
+;;                  "set_doc_data" (fn []
+;;                                   (println "set_doc_data: " payload)
+;;                                   {}
+;;                                   )
+;;                  "get_doc_path" (fn []
+;;                                   (let [rez (get-doc-breadcrumbs-by-id conn (get payload "id"))]
+;;                                     (when (some? rez) rez)))
+;;                  "get_doc_children" (fn []
+;;                                       (let [rez (get-doc-children-by-id conn (get payload "id"))]
+;;                                         (when (some? rez) rez)))}
+;;         fn-to-call (get rpc-map method)
+;;         result (fn-to-call)]
+;;     (println result)
+;;     result))
 
 
 
