@@ -7,7 +7,15 @@
 (defn mongo-string [s] (org.bson.BsonString. s))
 (defn mongo-grid-fs [db coll-name] (GridFSBuckets/create db coll-name))
 
-(defn mongo-find [conn coll-name query] (mc/find (conn :db) coll-name query {:keywordize? false}))
+;; (defn mongo-find [conn coll-name query] (mc/find (conn :db) coll-name query {:keywordize? false}))
+
+(defn mongo-find [conn coll-name query]
+  (mc/find (conn :db)
+           coll-name
+           query
+           {:keywordize? false
+            :sort {:_meta.ctime -1}}))
+
 (defn mongo-find-one [conn coll-name query] (mc/find-one (conn :db) coll-name query {:keywordize? false}))
 
 (defn mongo-write-file-to-stream [conn id ostream]
@@ -56,7 +64,6 @@
 (defn get-doc-children-by-id [conn id]
   (map
    (fn [doc] (let [info (doc "info")
-                  ;;  doc-id (doc "_id")
                    doc-id (doc "_id")
                    title (info "title")
                    subtitle (info "subtitle")
@@ -65,7 +72,6 @@
                )
      )
    (find-docs conn {"_meta.parent" id})
-  ;;  (find-docs conn {"_meta.parent" nil})
    )
   
   )
