@@ -9,12 +9,23 @@
 
 ;; (defn mongo-find [conn coll-name query] (mc/find (conn :db) coll-name query {:keywordize? false}))
 
-(defn mongo-find [conn coll-name query]
+;; (defn mongo-find [conn coll-name query]
+;;   (mc/find (conn :db)
+;;            coll-name
+;;            query
+;;            {:keywordize? false
+;;             :sort {:_meta.ctime -1}}))
+
+(defn mongo-find [conn coll-name query & [opts]]
   (mc/find (conn :db)
            coll-name
            query
-           {:keywordize? false
-            :sort {:_meta.ctime -1}}))
+           (merge {:keywordize? false
+                  ;;  :sort {:_meta.ctime -1}
+                   }
+                  opts)))
+
+
 
 (defn mongo-find-one [conn coll-name query] (mc/find-one (conn :db) coll-name query {:keywordize? false}))
 
@@ -24,7 +35,7 @@
 
 (defn find-doc [conn query] (mongo-find-one conn "docs" query))
 (defn find-file-info [conn query] (mongo-find-one conn "docs.files" query))
-(defn find-docs [conn query] (mongo-find conn "docs" query))
+(defn find-docs [conn query] (mongo-find conn "docs" query {:sort {:_meta.ctime -1}}))
 
 
 (defn get-file-by-id [conn id]
