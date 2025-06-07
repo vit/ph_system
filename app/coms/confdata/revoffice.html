@@ -208,7 +208,7 @@ PAGEBODY;
 
 PAGEBODY;
 
-      if( $PERMISSIONS['SYS_USE_AUTHORS_PAPER_SUBJECT'] )
+      if( isset($PERMISSIONS['SYS_USE_AUTHORS_PAPER_SUBJECT']) && $PERMISSIONS['SYS_USE_AUTHORS_PAPER_SUBJECT'] )
         $PAGEBODY .= <<<PAGEBODY
  <b>Section:</b> $subject1_str
 <br>
@@ -422,9 +422,9 @@ PAGEBODY;
     while( $row = pg_fetch_array($result) ) {
       $subjid = $row['subjid'];
 
-      $ctitle1 = htmlspecialchars($row[title]);
+      $ctitle1 = htmlspecialchars($row['title']);
       $cabstract1 = nl2br( htmlspecialchars($row['abstract']) );
-      $invited1 = $row[isinvited]=='t'?"Yes":"No";
+      $invited1 = $row['isinvited']=='t'?"Yes":"No";
       $managername = $row['managername'];
 
 /*
@@ -443,8 +443,8 @@ PAGEBODY;
       $r_decision = (int)$row['r_recommendation'];
       $r_decision_str = $REVIEWERSUBJDECISIONS[$r_decision];
 
-      $rcipccomments = nl2br( htmlspecialchars($row[r_ipccomments]) );
-      $rcauthcomments = nl2br( htmlspecialchars($row[r_authcomments]) );
+      $rcipccomments = nl2br( htmlspecialchars($row['r_ipccomments']) );
+      $rcauthcomments = nl2br( htmlspecialchars($row['r_authcomments']) );
 
 
 

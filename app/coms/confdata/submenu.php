@@ -10,7 +10,8 @@ $SUBMENU[] = array('id'=>'main', 'url'=>'./', 'title'=>'Main');
 if( $PERMISSIONS['USER_REGISTER_NEW_PAPER'] || $ispapreg )
   $SUBMENU[] = array('id'=>'mypapers', 'url'=>'./mypapers.html', 'title'=>'My&nbsp;papers');
 
-if( $USERPIN && ($PERMISSIONS['USER_REGISTER_NEW_SUBJECT'] || $issubjman) )
+//if( $USERPIN && ($PERMISSIONS['USER_REGISTER_NEW_SUBJECT'] || $issubjman) )
+if( $USERPIN && ( (isset($PERMISSIONS['USER_REGISTER_NEW_SUBJECT']) && $PERMISSIONS['USER_REGISTER_NEW_SUBJECT']) || $issubjman) )
   $SUBMENU[] = array('id'=>'mysubjects', 'url'=>'./mysubjects.html', 'title'=>'My&nbsp;sections');
 
 

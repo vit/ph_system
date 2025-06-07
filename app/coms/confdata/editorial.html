@@ -167,7 +167,7 @@ PAGEBODY;
         $fileext = $fnparse[2];
         $externfname = "c{$CURRENTCONT}p{$row['papnum']}r{$row['registrator']}.$fileext";
         $papfilesize = filesize( $myfilename );
-        $ftime = paper_getFileTimeEx( $CURRENTCONT, $row[papnum] );
+        $ftime = paper_getFileTimeEx( $CURRENTCONT, $row['papnum'] );
 
         $downloadtext = <<<downloadtext
     <b>File:</b> $papfilesize bytes, $ftime (<a href="{$ROOT}getpaper/$externfname">Download</a>)
@@ -220,7 +220,7 @@ PAGEBODY;
 PAGEBODY;
 
 
-        if( $PERMISSIONS['SYS_USE_AUTHORS_PAPER_SUBJECT'] )
+        if( isset($PERMISSIONS['SYS_USE_AUTHORS_PAPER_SUBJECT']) && $PERMISSIONS['SYS_USE_AUTHORS_PAPER_SUBJECT'] )
           $PAGEBODY .= <<<PAGEBODY
  <b>Section:</b> $subject1_str
 <br>
@@ -499,7 +499,7 @@ PAGEBODY;
 
       $ctitle1 = htmlspecialchars($row['title']);
       $cabstract1 = nl2br( htmlspecialchars($row['abstract']) );
-      $invited1 = $row[isinvited]=='t'?"Yes":"No";
+      $invited1 = $row['isinvited']=='t'?"Yes":"No";
       $managername = $row['managername'];
 
       $ed_score = (int)$row['ed_score'];
