@@ -143,29 +143,29 @@ services:
     networks:
       - smtp
 
-  # api:
-  #   restart: always
-  #   container_name: ph_system_api_${ENV_NAME}
-  #   build: 
-  #     context: ./api
-  #     dockerfile: Dockerfile_API
-  #   stdin_open: true # docker run -i
-  #   tty: true        # docker run -t
-  #   volumes:
-  #     - ./app/api:/app
-  #   expose:
-  #     - "5000"
-  #   environment:
-  #     VIRTUAL_HOST:
-  #       ${API_DOMAIN_NAME}
-  #     POSTGRES_USER: "root"
-  #     POSTGRES_PASSWORD: "root"
-  #   # ports:
-  #   #   - "5000:5000"
-  #   networks:
-  #     - frontend
-  #     - pg
-  #     - mongo
+  api:
+    restart: always
+    container_name: ph_system_api_${ENV_NAME}
+    build: 
+      context: ./api
+      dockerfile: Dockerfile_API
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    volumes:
+      - ./app/api:/app
+    expose:
+      - "5000"
+    environment:
+      VIRTUAL_HOST:
+        ${API_DOMAIN_NAME}
+      POSTGRES_USER: "root"
+      POSTGRES_PASSWORD: "root"
+    # ports:
+    #   - "5000:5000"
+    networks:
+      - frontend
+      - pg
+      - mongo
 
 # <<<
 
