@@ -77,9 +77,9 @@
 
 
 
-(defn call-rpc [req]
-  
-)
+;;(defn call-rpc [req]
+;;  
+;;)
 
 
 
@@ -102,9 +102,9 @@
 ;;    :request {:method method
 ;;              :payload payload}})
 
-(defn call-rpc [method payload]
-  (let [result (dbc/call-rpc conn method payload)]
-    result))
+;;(defn call-rpc [method payload]
+;;  (let [result (dbc/call-rpc conn method payload)]
+;;    result))
 
 
 
