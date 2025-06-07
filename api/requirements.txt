@@ -1,0 +1,8 @@
+# Flask
+# flask-cors
+fastapi
+uvicorn
+pydantic
+pymongo == 4.0.1
+psycopg2
+SQLAlchemy

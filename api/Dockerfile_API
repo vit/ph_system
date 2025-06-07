@@ -1,0 +1,51 @@
+
+# FROM python:3.11-slim
+
+# COPY requirements.txt requirements.txt
+# RUN pip install -r requirements.txt
+# RUN pip install gunicorn
+
+# COPY app app
+# COPY migrations migrations
+# COPY microblog.py config.py boot.sh ./
+# RUN chmod a+x boot.sh
+
+# ENV FLASK_APP microblog.py
+# RUN flask translate compile
+
+# EXPOSE 5000
+# ENTRYPOINT ["./boot.sh"]
+
+# ENTRYPOINT ["/bin/bash"]
+
+
+
+FROM python:3
+
+WORKDIR /app
+
+# COPY requirements.txt ./
+# RUN pip install --no-cache-dir -r requirements.txt
+
+# COPY . .
+
+# CMD [ "python", "./your-daemon-or-script.py" ]
+# CMD [ "python" ]
+
+
+# CMD [ "bash" ]
+# CMD [ "/bin/bash" ]
+
+
+# RUN pip install Flask
+
+RUN pip install --upgrade pip
+
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+
+
+ENTRYPOINT ["/bin/bash"]
+
+

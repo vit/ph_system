@@ -37,6 +37,6 @@ admin_nginx
 app/admin/
 
 
-/api
+# /api
 /app/api
 
