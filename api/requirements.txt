@@ -4,5 +4,6 @@ fastapi
 uvicorn
 pydantic
 pymongo == 4.0.1
+# pymongo
 psycopg2
 SQLAlchemy

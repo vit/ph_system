@@ -38,5 +38,7 @@ app/admin/
 
 
 # /api
-/app/api
+# /app/api
+
+__pycache__
 

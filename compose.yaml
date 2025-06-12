@@ -153,6 +153,7 @@ services:
     tty: true        # docker run -t
     volumes:
       - ./app/api:/app
+      - coms-papers:/data/papers
     expose:
       - "5000"
     environment:
