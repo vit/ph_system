@@ -63,7 +63,7 @@ class Coms:
             return conferences
 
     def get_conf_accepted_papers_list(self, contid):
-        print(">>>>> get_conf_accepted_papers_list")
+        # print(">>>>> get_conf_accepted_papers_list")
         with Session(autoflush=False, bind=self.engine) as db:
             # papers = db.query(Conference).all()
             # papers = db.query(Paper).limit(10).all()
@@ -89,8 +89,8 @@ class Coms:
                 enriched_papers.append(paper_obj)
             papers = enriched_papers
 
-            print("get_conf_accepted_papers_list result:")
-            print(papers)
+            # print("get_conf_accepted_papers_list result:")
+            # print(papers)
             return papers
 
     def get_conf_paper_info(self, contid, papnum):
