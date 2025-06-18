@@ -77,6 +77,40 @@ class Lib:
         await self.docs.update_one({"_id": id}, newvalues)
         return {'saved': True}
 
+    async def new_doc_data(self, parent, data: DocDataUpdate, args=None):
+        args = args or {}
+
+        _id = SEQ()
+        ts = TS()
+
+        meta = {
+            "class": LIB_DOC_CLASS,
+            "parent": parent,
+            "ctime": ts,
+            "mtime": ts
+        }
+
+        if args.get("origin"):
+            meta["origin"] = args["origin"]
+
+        # authors = args.get("authors", [])
+
+        document = {
+            "_id": _id,
+            "_meta": meta,
+            **data.model_dump()
+            # "info": info,
+            # "authors": authors
+        }
+
+        print("document: ", document)
+
+        await self.docs.insert_one(document)
+        return _id
+
+
+
+
     async def new_doc(self, parent, info, args=None):
         args = args or {}
 

@@ -119,3 +119,11 @@ class DocDataUpdate(BaseModel):
     # info: dict
     # authors: dict
 
+class DocDataCreate(BaseModel):
+    # id: str = Field(alias="_id", serialization_alias="id")
+    # meta: DocMeta = Field(alias="_meta", serialization_alias="meta")
+    info: DocInfo
+    authors: Optional[List[DocAuthor]] = None
+    # info: dict
+    # authors: dict
+

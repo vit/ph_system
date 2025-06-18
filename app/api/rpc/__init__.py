@@ -5,7 +5,7 @@ import asyncio
 
 import inspect
 
-from db.mongo.data import DocDataUpdate
+from db.mongo.data import DocDataUpdate, DocDataCreate
 
 
 from db.usecases.import_docs_from_coms import ImportDocsFromComsUseCase
@@ -16,6 +16,7 @@ async def call_rpc(conn, method, payload):
         "get_doc_data": lambda payload: conn.lib.get_data( payload.get("id") or None ),
         # "set_doc_data": lambda payload: conn.lib.set_data(payload.get("id"), payload.get("data")),
         "set_doc_data": lambda payload: conn.lib.set_data(payload.get("id"), DocDataUpdate( **payload.get("data") )),
+        "new_doc_data": lambda payload: conn.lib.new_doc_data(payload.get("parent"), DocDataCreate( **payload.get("data") )),
         "get_doc_path": lambda payload: conn.lib.get_path(payload.get("id")),
         "get_doc_children": lambda payload: conn.lib.get_children(payload.get("id")),
         "get_confs_list": lambda payload: conn.coms.get_confs_list(),
