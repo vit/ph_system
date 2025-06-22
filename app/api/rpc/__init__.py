@@ -9,6 +9,7 @@ from db.mongo.data import DocDataUpdate, DocDataCreate
 
 
 from db.usecases.import_docs_from_coms import ImportDocsFromComsUseCase
+from db.usecases.update_imported_files_from_coms import UpdateImportedFilesFromComs
 
 async def call_rpc(conn, method, payload):
     # print("call_rpc 001: ", method)
@@ -22,6 +23,8 @@ async def call_rpc(conn, method, payload):
         "get_confs_list": lambda payload: conn.coms.get_confs_list(),
         "get_papers_list": lambda payload: conn.coms.get_conf_accepted_papers_list(payload.get("contid")),
         "import_docs_from_coms": lambda payload: ImportDocsFromComsUseCase(conn.coms, conn.lib).execute(payload.get("id"), payload.get("list")),
+        "update_imported_files": lambda payload: UpdateImportedFilesFromComs(conn.coms, conn.lib).execute(payload.get("parent"), payload.get("list")),
+        "remove_docs": lambda payload: conn.lib.remove_docs(payload.get("list")),
     }
     # rez = rpc_map.get(method, lambda payload: {})(payload)
     # return rez

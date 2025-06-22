@@ -33,32 +33,43 @@ class Lib:
         return [DocData(**c) for c in children]
 
     # async def get_path(self, id: str | None):
+    # async def get_path(self, id: str):
+    #     # print("get_path 001: ", id)
+    #     rez = []
+    #     current_id = id
+    #     while current_id:
+    #         d = await self.get_data(current_id)
+    #         if d and d.meta and d.meta.parent:
+    #             rez.insert(0, d)
+    #             current_id = d.meta.parent
+    #         else:
+    #             current_id = None
+    #     return rez
+
     async def get_path(self, id: str):
-        # print("get_path 001: ", id)
         rez = []
         current_id = id
         while current_id:
             d = await self.get_data(current_id)
-            if d and d.meta and d.meta.parent:
+            current_id = None
+            if d:
                 rez.insert(0, d)
-                current_id = d.meta.parent
-            else:
-                current_id = None
+                current_id = d.meta.parent if d.meta and d.meta.parent else None
         return rez
 
     # async def get_data(self, id: str | None):
     async def get_data(self, id: str):
         # pprint.pprint(">>>>>>>>>>")
-        pprint.pprint("get_data:")
+        # pprint.pprint("get_data:")
         # pprint.pprint("id:")
         # pprint.pprint(id)
         if id is not None:
             doc = await self.docs.find_one({"_id": id})
-            pprint.pprint("doc:")
-            pprint.pprint(doc)
+            # pprint.pprint("doc:")
+            # pprint.pprint(doc)
             rez = DocData(**doc) if doc else None
-            pprint.pprint("rez:")
-            pprint.pprint(rez)
+            # pprint.pprint("rez:")
+            # pprint.pprint(rez)
         else:
             rez = None
         # pprint.pprint("<<<<<<<<<<")
@@ -139,3 +150,17 @@ class Lib:
         await self.docs.insert_one(document)
         return _id
     
+    async def remove_doc(self, id: str):
+        # print("remove_doc")
+        await self.lib_files.remove_doc_file(id)
+        if len( await self.get_children(id) ) == 0:
+            await self.docs.delete_one({"_id": id, '_meta.class': LIB_DOC_CLASS})
+        return id
+
+    async def remove_docs(self, list: list):
+        # print("remove_docs")
+        for id in list:
+            # print(id)
+            await self.remove_doc(id)
+        rez = list
+        return rez

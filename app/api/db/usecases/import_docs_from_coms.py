@@ -9,7 +9,7 @@ class ImportDocsFromComsUseCase:
         self.coms = coms
         self.lib = lib
 
-    def import_one_doc(self, id, context, papnum):
+    async def import_one_doc(self, id, context, papnum):
         doc_id = None
 
         # print("import_doc_from_coms")
@@ -30,7 +30,7 @@ class ImportDocsFromComsUseCase:
                 for row in self.coms.get_conf_paper_authors(context, papnum)
             ]
 
-            doc_id = self.lib.new_doc(
+            doc_id = await self.lib.new_doc(
                 id,
                 {'title': d.title, 'abstract': d.abstract},
                 {
@@ -47,27 +47,14 @@ class ImportDocsFromComsUseCase:
             if file_info:
                 with open(file_info['file_path'], 'rb') as f:
                     # self.lib.put_doc_file(doc_id, f, file_info)
-                    self.lib.lib_files.put_doc_file(doc_id, f, file_info)
-            
-            # authors = [
-            #     {
-            #         'fname': row.fname,
-            #         'lname': row.lname,
-            #         'pin': row.pin
-            #     }
-            #     for row in self.coms.get_conf_paper_authors(context, papnum)
-            # ]
-            # print("!!!!! get_conf_paper_authors")
-            # print(authors)
-
-            # self.lib.set_doc_authors(doc_id, authors)
+                    await self.lib.lib_files.put_doc_file(doc_id, f, file_info)
 
         return doc_id
 
-    def execute(self, id: str, docs_list: list):
+    async def execute(self, id: str, docs_list: list):
         for doc in docs_list:
             # print(doc)
-            self.import_one_doc(id, doc['context'], doc['papnum'])
+            await self.import_one_doc(id, doc['context'], doc['papnum'])
 
 
 
