@@ -61,8 +61,8 @@ class Coms:
 
             papers = db.query(
                 Paper,
-                text("''")
-                # text("concatpaperauthors(:param1, paper.papnum) as authors").params(param1=contid)
+                # text("''")
+                text("concatpaperauthors(:param1, paper.papnum) as authors").params(param1=contid)
             ).filter(
                 Paper.context == contid,
                 Paper.finaldecision > 1
