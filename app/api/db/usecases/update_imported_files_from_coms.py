@@ -17,8 +17,11 @@ class UpdateImportedFilesFromComs:
         if doc and doc.meta and doc.meta.origin and doc.meta.origin.name=='coms':
             context = doc.meta.origin.context
             papnum = doc.meta.origin.papnum
-            # print(context, papnum)
+            print(context, papnum)
             if context and papnum:
+                paper_info = self.coms.get_conf_paper_info(context, papnum)
+                print(paper_info)
+
                 file_info = self.coms.get_conf_paper_file(context, papnum)
                 # print(file_info)
 

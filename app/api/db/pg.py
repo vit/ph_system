@@ -9,113 +9,78 @@ import pydantic
 import typing
 
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import Session
-from sqlalchemy import  Column, Integer, String
-
-
+from sqlalchemy import  Column, Integer #, String
 
 from sqlalchemy import func, desc
 from sqlalchemy.sql import text
 
-
-
+# from sqlalchemy.types import TypeDecorator, String
+from sqlalchemy import TypeDecorator, String
 
 class Coms:
 
     def __init__(self, **kwargs):
-        # self.data = []
-        # self.conn = psycopg2.connect('postgresql://db00060892:rjulfytjn[elfbytjnlj,hf@postgres/db00060892')
-        # cur = self.conn.cursor()
-
         host = kwargs.get("host", "postgres")
         user = kwargs.get("user")
         password = kwargs.get("password", "")
         db = kwargs.get("db", "postgres")
 
-        # self.engine = create_engine("postgresql://db00060892:rjulfytjn[elfbytjnlj,hf@postgres/db00060892")
         self.engine = create_engine(
             f'postgresql+psycopg2://{user}:{password}@{host}/{db}',
-            connect_args={'options': '-csearch_path={}'.format('userschema,cmsmlschema,comsml01,coms01,membership01,public')}
-            )
-        # self.engine = create_engine(
-        #     'postgresql+psycopg2://db00060892:rjulfytjn[elfbytjnlj,hf@postgres/db00060892',
-        #     connect_args={'options': '-csearch_path={}'.format('userschema,cmsmlschema,comsml01,coms01,membership01,public')}
-        #     )
-                        # connect_args={'options': '-csearch_path={}'.format('userschema, cmsmlschema, comsml01, coms01, membership01, public')})
-                        # connect_args={'options': '-csearch_path={}'.format('coms01,public')})
-
-        # confs = self.get_confs_list()
-        # pprint.pprint("confs:")
-        # pprint.pprint(confs)
+            # f'postgresql+psycopg2://{user}:{password}@{host}/{db}?client_encoding=utf8',
+            # f'postgresql+psycopg2://{user}:{password}@{host}/{db}?client_encoding=WIN1251',
+            connect_args={
+                'options': '-csearch_path={}'.format('userschema,cmsmlschema,comsml01,coms01,membership01,public'),
+                # 'client_encoding': 'UTF8'
+                'client_encoding': 'WIN1251'
+                # 'options': '-csearch_path={}'.format('userschema,cmsmlschema,comsml01,coms01,membership01,public'),
+                # 'client_encoding': 'WIN1251'
+            },
+            # Add this to handle encoding issues at connection pool level
+            pool_pre_ping=True#,
+            # json_serializer=lambda obj: json.dumps(obj, ensure_ascii=False)
+        )
 
     def get_confs_list(self):
-
         with Session(autoflush=False, bind=self.engine) as db:
             conferences = db.query(Conference).order_by(desc(Conference.contid)).all()
-            # for c in conferences:
-            #     print(f"{c.contid}.{c.title}")
-
-            # print("get_confs_list result:")
-            # print(conferences)
-
             return conferences
 
     def get_conf_accepted_papers_list(self, contid):
-        # print(">>>>> get_conf_accepted_papers_list")
-        with Session(autoflush=False, bind=self.engine) as db:
-            # papers = db.query(Conference).all()
-            # papers = db.query(Paper).limit(10).all()
-            # papers = db.query(
-            #     Paper #,
-            #     # text("concatpaperauthors(:param1, paper.papnum) as authors").params(param1=contid)
-            # ).limit(10).all()
 
+        # with self.engine.connect() as conn:
+        #     encoding = conn.scalar(text("SHOW client_encoding;"))
+        #     print("Client encoding:", encoding)  # WIN1251
+
+        with Session(autoflush=False, bind=self.engine) as db:
+            encoding = db.scalar(text("SHOW client_encoding;"))
+            print("Client encoding:", encoding)
 
             papers = db.query(
                 Paper,
-                text("concatpaperauthors(:param1, paper.papnum) as authors").params(param1=contid)
+                text("''")
+                # text("concatpaperauthors(:param1, paper.papnum) as authors").params(param1=contid)
             ).filter(
                 Paper.context == contid,
                 Paper.finaldecision > 1
             ).order_by(desc(Paper.papnum)).all()
 
-            # papers =  [PaperWithAuthors(paper=paper, authors=authors) for (paper, authors) in papers]
-
             enriched_papers = []
             for paper_obj, authors_str in papers:
-                paper_obj.authors = authors_str  # Добавляем новое поле
+                paper_obj.authors = authors_str
                 enriched_papers.append(paper_obj)
             papers = enriched_papers
 
-            # print("get_conf_accepted_papers_list result:")
-            # print(papers)
             return papers
 
     def get_conf_paper_info(self, contid, papnum):
         contid = int(contid)
         papnum = int(papnum)
 
-        print(">>>>> get_conf_paper_info")
         with Session(autoflush=False, bind=self.engine) as db:
-            # query = text("""
-            #     SELECT p.*, concatpaperauthors(:contid, p.papnum) as authors 
-            #     FROM paper AS p 
-            #     WHERE p.context = :contid AND p.papnum = :papnum AND p.finaldecision > 1
-            # """).params(contid=contid, papnum=papnum)
-
-            # result = db.execute(query).mappings().fetchone()
-
-            # if not result:
-            #     return None
-
-            # paper_data = dict(result)
-            # authors = paper_data.pop("authors")
-
-            # paper = Paper(**paper_data)
-            # paper.authors = authors
-
             (paper, authors) = db.query(
                 Paper,
                 text("concatpaperauthors(:contid, paper.papnum) as authors").params(contid=contid)
@@ -124,10 +89,7 @@ class Coms:
                 Paper.papnum == papnum,
             ).one()
             paper.authors = authors
-
             return paper
-
-
 
     def get_conf_paper_authors(self, context, papnum):
         context = int(context)
@@ -149,9 +111,6 @@ class Coms:
 				ORDER BY u.pin
                      """).params(context=context, papnum=papnum)
             ).mappings().fetchall()
-
-            print("!!!!! get_conf_paper_authors")
-            print(authors)
 
             authors_ext = []
             for a in authors:
@@ -184,13 +143,42 @@ class Coms:
 
 
 
+
+
+class Win1251ToUTF8(TypeDecorator):
+    """Converts WIN1251-stored-but-actually-UTF8 strings to proper UTF8"""
+    impl = String
+    
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return None
+        # return value.encode('windows-1251').decode('utf-8')
+        return value.encode('windows-1251', errors='replace').decode('utf-8', errors='replace')
+
+    # def process_result_value(self, value, dialect):
+    #     if value is None:
+    #         return None
+    #     # return ""
+    #     try:
+    #         # First try to decode as UTF-8 directly (might work for some entries)
+    #         return value.encode('utf-8').decode('utf-8')
+    #     except UnicodeError:
+    #         try:
+    #             # If that fails, try the Windows-1251 to UTF-8 conversion
+    #             return value.encode('windows-1251').decode('utf-8')
+    #         except UnicodeError:
+    #             # If all else fails, replace invalid characters
+    #             return value.encode('windows-1251', errors='replace').decode('utf-8', errors='replace')
+
+
 class Base(DeclarativeBase): pass
+
 class Conference(Base):
-    # __tablename__ = "coms01.context"
     __tablename__ = "context"
  
     contid = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
+    # title = Column(String)
+    title = Column(Win1251ToUTF8)
     # age = Column(Integer)
 
 class Paper(Base):
@@ -200,12 +188,14 @@ class Paper(Base):
     context = Column(Integer, primary_key=True, index=True)
     registrator = Column(Integer)
     editor = Column(Integer)
-    title = Column(String)
+    title = Column(Win1251ToUTF8)
+    abstract = Column(Win1251ToUTF8)
+    # title = Column(String)
     finaldecision = Column(Integer)
-    abstract = Column(String)
-    filename = Column(String)
+    # abstract = Column(String)
+    # filename = Column(String)
+    filename = Column(Win1251ToUTF8)
     filetype = Column(String)
-
 
 class AuthorExt(Base):
     __tablename__ = 'author'
@@ -220,76 +210,4 @@ class AuthorExt(Base):
 
 
 
-# class PaperWithAuthors:
-#     def __init__(self, paper, authors):
-#         self.context = paper.context
-#         self.papnum = paper.papnum
-#         self.title = paper.title
-#         self.abstract = paper.abstract
-#         self.authors = authors
-#         self.finaldecision = paper.finaldecision
-
-
-# Base.metadata.create_all(bind=engine)
- 
-
-
-
-
-
-
-
-
-
-
-        # self.db = self.client.ph3
-        # self.docs = self.db["docs"]
-
-    # def transform_doc(self, doc):
-    #     doc_id = doc["_id"]
-    #     info = doc["info"]
-    #     meta = doc["_meta"]
-    #     parent_id = meta.get("parent", None)
-    #     title = info["title"]
-    #     subtitle = info.get("subtitle")
-    #     return {"id": doc_id, "title": title, "subtitle": subtitle, "parent": parent_id}
-
-    # def get_children(self, id: str | None):
-    #     rez = list(map(self.transform_doc, self.docs.find({"_meta.parent": id})))
-    #     # pprint.pprint(rez)
-    #     return rez
-
-    # def get_path(self, id: str | None):
-    #     rez = []
-    #     current_id = id
-    #     while current_id:
-    #         doc = self.docs.find_one({"_id": current_id})
-    #         d = self.transform_doc(doc)
-    #         rez.insert(0, d)
-    #         current_id = d.get("parent", None)
-    #     # pprint.pprint(rez)
-    #     return rez
-
-    # def get_data(self, id: str | None):
-    #     doc = self.docs.find_one({"_id": id})
-    #     pprint.pprint(">>>>>>>>>>")
-    #     pprint.pprint("get_data:")
-    #     pprint.pprint("doc:")
-    #     pprint.pprint(doc)
-    #     pprint.pprint("<<<<<<<<<<")
-    #     rez = DocData(**doc)
-    #     # pprint.pprint(rez)
-    #     return rez
-    
-    # def set_data(self, id: str | None, data: dict):
-    #     pprint.pprint("set_data:")
-
-    #     pprint.pprint(data)
-    #     newvalues = { "$set": {
-    #         'info': data.get('info'),
-    #         'authors': data.get('authors'),
-    #     }}
-    #     self.docs.update_one({"_id": id}, newvalues)
-    #     rez = {'saved': True}
-    #     return rez
 

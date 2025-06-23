@@ -46,6 +46,9 @@ RUN pip install -r requirements.txt
 
 
 
-ENTRYPOINT ["/bin/bash"]
+# ENTRYPOINT ["/bin/bash"]
 
+CMD ["python", "api.py"]
 
+# ENTRYPOINT ["/usr/local/bin/python"]
+# CMD ["api.py"]

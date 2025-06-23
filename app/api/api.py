@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import uvicorn
 
+import os
+
 import rpc
 import db
 
@@ -22,8 +24,11 @@ from dataclasses import dataclass
 class Connections:
     coms = db.Coms(user="db00060892", password="rjulfytjn[elfbytjnlj,hf", host="postgres", db="db00060892")
     # lib = db.Lib("mongodb://root:example@mongo:27017/admin")
-    lib = None
+    # lib = None
+    lib = db.Lib(os.environ.get('MONGO_URI'))
 
+    async def close(self):
+        await self.lib.close()
 
 
 @asynccontextmanager
@@ -38,7 +43,9 @@ async def lifespan(app: FastAPI):
 
     # Подключение при старте
     conn = Connections()
-    conn.lib = db.Lib("mongodb://root:example@mongo:27017/admin")
+    # conn.lib = db.Lib("mongodb://root:example@mongo:27017/admin")
+    # conn.lib = db.Lib(os.environ.get('MONGO_URI'))
+    # MONGO_URI
     app.state.conn = conn
 
     # print("===========================================")
@@ -49,7 +56,8 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    await conn.lib.close()
+    await conn.close()
+    # await conn.lib.close()
     # print("Соединения закрыты")
 
 
