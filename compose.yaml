@@ -151,16 +151,17 @@ services:
     volumes:
       - ./app/api:/app
       - coms-papers:/data/papers
+    secrets:
+      - htpasswd-coms
+      - jwt-secret-key
     expose:
       - "5000"
     environment:
-      VIRTUAL_HOST:
-        ${API_DOMAIN_NAME}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      VIRTUAL_HOST: ${API_DOMAIN_NAME}
       POSTGRES_USER: "root"
       POSTGRES_PASSWORD: "root"
       MONGO_URI: "mongodb://root:example@ph_system_mongo_${ENV_NAME}:27017"
-      # MONGO_URI: "mongodb://root:example@ph_system_mongo_${ENV_NAME}:27017/admin"
-      # MONGO_URI: "mongodb://root:example@mongo:27017/admin"
     # ports:
     #   - "5000:5000"
     networks:
@@ -190,6 +191,8 @@ secrets:
     file: .secrets/domainkeys/mail.private
   htpasswd-coms:
     file: .secrets/web/htpasswd-coms
+  jwt-secret-key:
+    file: .secrets/api/jwt_secret_key
 
 volumes:
   mongo-data:

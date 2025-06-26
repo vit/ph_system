@@ -10,3 +10,9 @@ motor
 # pymongo == 4.0.1
 psycopg2
 SQLAlchemy
+
+python-jose[cryptography]
+passlib
+
+python-multipart
+# fastapi.security

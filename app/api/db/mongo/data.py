@@ -1,6 +1,7 @@
 
 # from pydantic import BaseModel, Field, validator
-from pydantic import BaseModel, Field, model_validator, field_validator
+# from pydantic import BaseModel, Field, model_validator, field_validator
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
 from datetime import datetime, timezone
 
