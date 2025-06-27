@@ -26,37 +26,18 @@ async def call_rpc(conn, method, payload):
         "update_imported_files": lambda payload: UpdateImportedFilesFromComs(conn.coms, conn.lib).execute(payload.get("parent"), payload.get("list")),
         "remove_docs": lambda payload: conn.lib.remove_docs(payload.get("list")),
     }
-    # rez = rpc_map.get(method, lambda payload: {})(payload)
-    # return rez
 
     result = {}
 
-    # result = await conn.lib.get_path(payload.get("id"))
-
-    # handler = rpc_map.get(method, lambda p: {})
     handler = rpc_map.get(method)
-    # print("call_rpc 002")
     if(handler) != None:
-        # print("call_rpc 003")
-        # result = await handler(payload) #if asyncio.iscoroutinefunction(handler) else handler(payload)
         result = handler(payload)
         if inspect.isawaitable(result):
             result = await result
-    #     print("call_rpc 004")
-    # print("call_rpc 005")
-
-    # handler = rpc_map.get(method, lambda p: {})
-    # handler = rpc_map.get(method, lambda p: {})
-    # print("call_rpc 002")
-    # result = await handler(payload) if asyncio.iscoroutinefunction(handler) else handler(payload)
-    # print("call_rpc 003")
 
     return result
-    # return []
 
 async def entry(conn, r: RpcRequest):
-    # print(r)
     return await call_rpc(conn, r.method, r.payload)
-    # return []
 
 

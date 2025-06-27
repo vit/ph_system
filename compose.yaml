@@ -169,23 +169,6 @@ services:
       - pg
       - mongo
 
-  # admin-nginx:
-  #   restart: always
-  #   container_name: ph_system_admin_${ENV_NAME}
-  #   build: 
-  #     context: ./admin_nginx
-  #     dockerfile: Dockerfile_Nginx
-  #   expose:
-  #     - "80"
-  #   volumes:
-  #     - ./app/admin:/var/www/html
-  #     - backup:/data/backup
-  #   environment:
-  #     VIRTUAL_HOST:
-  #       ${ADMIN_DOMAIN_NAME},
-  #   networks:
-  #     - frontend
-
 secrets:
   mail.private:
     file: .secrets/domainkeys/mail.private
