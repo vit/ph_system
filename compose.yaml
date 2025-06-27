@@ -159,6 +159,7 @@ services:
     environment:
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
       VIRTUAL_HOST: ${API_DOMAIN_NAME}
+      LETSENCRYPT_HOST: ${API_DOMAIN_NAME}
       POSTGRES_USER: "root"
       POSTGRES_PASSWORD: "root"
       MONGO_URI: "mongodb://root:example@ph_system_mongo_${ENV_NAME}:27017"
