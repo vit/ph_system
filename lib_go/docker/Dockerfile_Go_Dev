@@ -1,0 +1,7 @@
+
+FROM golang:1.24 AS builder
+WORKDIR /app
+
+# CMD ["bash"]
+# ENTRYPOINT ["/bin/bash"]
+CMD ["sleep", "infinity"]

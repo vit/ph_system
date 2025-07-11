@@ -10,10 +10,11 @@ data/export
 .secrets
 
 
-nginx/default.conf
+coms_php/nginx/default.conf
 
 config.php
-app/coms/papers
+# app/coms/papers
+coms_php/app/papers
 
 # admin/conf.php
 

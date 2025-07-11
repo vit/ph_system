@@ -1,0 +1,21 @@
+    <div>
+        <ul sstyle="list-style-type: none; padding-left: 0;">
+            {{ range . }}
+            <li style="margin-top: 0.3rem;">
+                <div style="font-family: serif; font-weight: 900; font-size: 0.85em;">
+                    {{ range $index, $author := .Authors }}
+                        {{- if $index -}}, {{ end }}
+                        {{ $author.Fname }} {{ $author.Lname -}}
+                    {{ end }}
+                </div>
+                <div>
+                    <a href="/doc?id={{ .ID }}">{{ .Info.Title }}</a>
+                </div>
+                <div>
+                    <i>{{ .Info.Subtitle }}</i>
+                </div>
+            </li>
+            {{ end }}
+        </ul>
+    </div>
+

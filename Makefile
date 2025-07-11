@@ -24,11 +24,10 @@ help:	## Show this help
 # from coms
 config:
 
-	cp .env ./nginx/.env
-	cd nginx && make config && cd ..
-
-	# cp .env ./admin_nginx/.env
-	# cd admin_nginx && make config && cd ..
+	# cp .env ./nginx/.env
+	# cd nginx && make config && cd ..
+	cp .env ./coms_php/nginx/.env
+	cd coms_php/nginx && make config && cd ../..
 
 	cp .env ./php/.env
 	cd php && make config && cd ..
@@ -45,17 +44,16 @@ stop: down
 
 
 
-
-
+# build:
+# 	docker build \
+# 		-t my_clojure \
+# 		-f ./docker/lib_clojure/Dockerfile_Clojure \
+# 		./docker/lib_clojure/
 
 build:
-	docker build \
-		-t my_clojure \
-		-f clojure/Dockerfile_Clojure \
-		clojure/
-
-# from coms
 	docker compose build
+	# docker compose build lib_go
+	# docker compose build clojure
 
 
 
@@ -76,14 +74,21 @@ c:
 
 
 
+lib-dev:
+	docker compose --project-directory . -f compose/lib_go_dev.yaml -f compose.yaml up
+lib-dev-stop:
+	docker compose --project-directory . -f compose/lib_go_dev.yaml -f compose.yaml stop
+lib-dev-build:
+	docker compose --project-directory . -f compose/lib_go_dev.yaml -f compose.yaml build lib_go_dev
 
 
 
-clojure:
-	docker run --rm -it \
-		-v ./app/lib:/usr/src/app \
-		--expose 8080 -p 8080:8080 \
-		my_clojure
+
+# clojure:
+# 	docker run --rm -it \
+# 		-v ./app/lib:/usr/src/app \
+# 		--expose 8080 -p 8080:8080 \
+# 		my_clojure
 
 
 backup:

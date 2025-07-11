@@ -1,0 +1,39 @@
+
+name: ph_system_${ENV_NAME}
+
+services:
+
+  lib_go_dev:
+    restart: always
+    container_name: ph_system_lib_go_dev_${ENV_NAME}
+    build: 
+      # context: .
+      # dockerfile: ./docker/lib_go/Dockerfile_Go_Dev
+      context: ./lib_go
+      dockerfile: ./docker/Dockerfile_Go_Dev
+    tty: true
+    stdin_open: true
+    volumes:
+      # - ./app/lib_go:/app
+      - ./lib_go/app:/app
+    # expose:
+    #   - "8080"
+    ports:
+      - "8000:8080"
+    environment:
+      # GIN_MODE: release
+      IPACS_DOMAIN_NAME: ${IPACS_DOMAIN_NAME}
+      COMS_DOMAIN_NAME: ${COMS_DOMAIN_NAME}
+      CAP_DOMAIN_NAME: ${CAP_DOMAIN_NAME}
+      LIB_DOMAIN_NAME: ${LIB2_DOMAIN_NAME}
+      # LIB2_DOMAIN_NAME: ${LIB2_DOMAIN_NAME}
+      CONF_DOMAIN_NAME: ${CONF_DOMAIN_NAME}
+      ALBUM_DOMAIN_NAME: ${ALBUM_DOMAIN_NAME}
+      # VIRTUAL_HOST: ${LIB2_DOMAIN_NAME},
+      # LETSENCRYPT_HOST: ${LIB2_DOMAIN_NAME},
+      MONGO_URI: "mongodb://root:example@ph_system_mongo_${ENV_NAME}:27017"
+    networks:
+      # - frontend
+      - mongo
+    links:
+      - mongo

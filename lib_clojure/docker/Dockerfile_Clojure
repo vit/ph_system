@@ -10,5 +10,3 @@ WORKDIR /usr/src/app
 # ENTRYPOINT ["lein" "ring" "server-headless" "8080"]
 ENTRYPOINT lein ring server-headless 9000
 
-
-

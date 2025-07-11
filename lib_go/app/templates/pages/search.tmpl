@@ -1,0 +1,34 @@
+
+{{ template "header.tmpl" .}}
+
+<div class="doc-page">
+    <h2 style="text-align: center;">Search results</h2>
+    {{ template "_docs_list.tmpl" .SearchResults }}
+    {{/* <div sstyle="text-align: center;">
+        <ul style="list-style-type: none; padding-left: 0;">
+            {{ range .SearchResults }}
+            <li style="margin-top: 0.3rem;">
+                <!-- Авторы -->
+                <div style="font-family: serif; font-weight: 900; font-size: 0.85em;">
+                    {{ range $index, $author := .Authors }}
+                        {{ if $index }}, {{ end }}
+                        {{ $author.Fname }} {{ $author.Lname }}
+                    {{ end }}
+                </div>
+                
+                <!-- Заголовок -->
+                <div>
+                    <a href="/doc?id={{ .ID }}">{{ .Info.Title }}</a>
+                </div>
+                
+                <!-- Подзаголовок -->
+                <div>
+                    <i>{{ .Info.Subtitle }}</i>
+                </div>
+            </li>
+            {{ end }}
+        </ul>
+    </div> */}}
+</div>
+
+{{ template "footer.tmpl" .}}

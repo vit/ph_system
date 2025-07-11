@@ -19,48 +19,51 @@ services:
     volumes:
       - mongo-data:/data/db
     networks:
-      # - frontend
       - mongo
 
-  clojure:
-    restart: always
-    container_name: ph_system_clojure_${ENV_NAME}
-    build: 
-      context: ./clojure
-      dockerfile: Dockerfile_Clojure
-    # ports:
-    #   - '9000:9000'
-    expose:
-      - "9000"
-    volumes:
-      - ./app/lib:/usr/src/app
-    environment:
-      IPACS_DOMAIN_NAME: ${IPACS_DOMAIN_NAME}
-      COMS_DOMAIN_NAME: ${COMS_DOMAIN_NAME}
-      CAP_DOMAIN_NAME: ${CAP_DOMAIN_NAME}
-      LIB_DOMAIN_NAME: ${LIB_DOMAIN_NAME}
-      CONF_DOMAIN_NAME: ${CONF_DOMAIN_NAME}
-      ALBUM_DOMAIN_NAME: ${ALBUM_DOMAIN_NAME}
-      VIRTUAL_HOST:
-        ${LIB_DOMAIN_NAME},
-      LETSENCRYPT_HOST:
-        ${LIB_DOMAIN_NAME},
-    networks:
-      - frontend
-      - mongo
-    links:
-      - mongo
+  # lib_clojure:
+  #   restart: always
+  #   container_name: ph_system_lib_clojure_${ENV_NAME}
+  #   build: 
+  #     # context: ./clojure
+  #     # dockerfile: Dockerfile_Clojure
+  #     # context: ./docker/lib_clojure/
+  #     # dockerfile: Dockerfile_Clojure
+  #     context: ./lib_clojure/
+  #     dockerfile: ./docker/Dockerfile_Clojure
+  #   expose:
+  #     - "9000"
+  #   volumes:
+  #     # - ./app/lib:/usr/src/app
+  #     - ./lib_clojure/app:/usr/src/app
+  #   environment:
+  #     IPACS_DOMAIN_NAME: ${IPACS_DOMAIN_NAME}
+  #     COMS_DOMAIN_NAME: ${COMS_DOMAIN_NAME}
+  #     CAP_DOMAIN_NAME: ${CAP_DOMAIN_NAME}
+  #     LIB_DOMAIN_NAME: ${LIB_DOMAIN_NAME}
+  #     CONF_DOMAIN_NAME: ${CONF_DOMAIN_NAME}
+  #     ALBUM_DOMAIN_NAME: ${ALBUM_DOMAIN_NAME}
+  #     VIRTUAL_HOST:
+  #       ${LIB2_DOMAIN_NAME},
+  #     LETSENCRYPT_HOST:
+  #       ${LIB2_DOMAIN_NAME},
+  #   networks:
+  #     - frontend
+  #     - mongo
+  #   links:
+  #     - mongo
 
   nginx:
     restart: always
     container_name: ph_system_web_${ENV_NAME}
     build: 
-      context: ./nginx
+      context: ./coms_php/nginx
       dockerfile: Dockerfile_Nginx
     expose:
       - "80"
     volumes:
-      - ./app/coms:/var/www/html
+      # - ./app/coms:/var/www/html
+      - ./coms_php/app:/var/www/html
       - backup:/data/backup
     secrets:
       - htpasswd-coms
@@ -84,7 +87,8 @@ services:
     expose:
       - "9000"
     volumes:
-      - ./app/coms:/var/www/html
+      # - ./app/coms:/var/www/html
+      - ./coms_php/app:/var/www/html
       - coms-papers:/data/papers
       - backup:/data/backup
     networks:
@@ -99,7 +103,8 @@ services:
       context: ./php
       dockerfile: Dockerfile_PhpCron
     volumes:
-      - ./app/coms:/var/www/html
+      # - ./app/coms:/var/www/html
+      - ./coms_php/app:/var/www/html
       - coms-papers:/data/papers
     networks:
       - php
@@ -143,13 +148,16 @@ services:
     restart: always
     container_name: ph_system_api_${ENV_NAME}
     build: 
-      context: ./api
-      dockerfile: Dockerfile_API
+      # context: ./docker/api_python
+      # dockerfile: Dockerfile_API_Python
+      context: ./api_python
+      dockerfile: ./docker/Dockerfile_API_Python
     # command: ["python", "api.py"]
     stdin_open: true # docker run -i
     tty: true        # docker run -t
     volumes:
-      - ./app/api:/app
+      # - ./app/api:/app
+      - ./api_python/app:/app
       - coms-papers:/data/papers
     secrets:
       - htpasswd-coms
@@ -169,6 +177,40 @@ services:
       - frontend
       - pg
       - mongo
+
+  lib_go:
+    restart: always
+    container_name: ph_system_lib_go_${ENV_NAME}
+    build: 
+      # context: .
+      # dockerfile: ./docker/lib_go/Dockerfile_Go
+      context: ./lib_go
+      dockerfile: ./docker/Dockerfile_Go
+    expose:
+      - "8080"
+    # volumes:
+    #   - ./app/lib:/usr/src/app
+    environment:
+      GIN_MODE: release
+      IPACS_DOMAIN_NAME: ${IPACS_DOMAIN_NAME}
+      COMS_DOMAIN_NAME: ${COMS_DOMAIN_NAME}
+      CAP_DOMAIN_NAME: ${CAP_DOMAIN_NAME}
+      LIB_DOMAIN_NAME: ${LIB_DOMAIN_NAME}
+      # LIB2_DOMAIN_NAME: ${LIB2_DOMAIN_NAME}
+      CONF_DOMAIN_NAME: ${CONF_DOMAIN_NAME}
+      ALBUM_DOMAIN_NAME: ${ALBUM_DOMAIN_NAME}
+      VIRTUAL_HOST:
+        ${LIB_DOMAIN_NAME},
+      LETSENCRYPT_HOST:
+        ${LIB_DOMAIN_NAME},
+      MONGO_URI: "mongodb://root:example@ph_system_mongo_${ENV_NAME}:27017"
+    networks:
+      - frontend
+      - mongo
+    links:
+      - mongo
+
+
 
 secrets:
   mail.private:

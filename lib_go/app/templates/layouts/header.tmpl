@@ -1,0 +1,61 @@
+
+{{/* <!DOCTYPE html> */}}
+<html style="line-height: 1.15;">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <title>{{if .PageTitle}}{{.PageTitle}} | {{end}}IPACS Electronic Library</title>
+    {{if .PageDescription}}
+    <meta name="description" content="{{.PageDescription}}">
+    {{end}}
+    {{/* {{.MetaTags}} */}}
+    {{ if .CitationMetatags }}
+        {{ template "_meta_tags.tmpl" .CitationMetatags }}
+    {{ end }}
+</head>
+<body style="margin: 0; background-color: #f4f4f4; font-family: avenir next, avenir, sans-serif;">
+    <header>
+        <div style="background-color: #fff;">
+            <nav>
+                <div style="display: flex; justify-content: space-between; margin-right: auto; margin-left: auto; align-items: center;">
+                    <div style="display: flex; align-items: center;">
+                        <ul style="margin: 10px; padding-left: 0;">
+                            {{- range .MenuItems -}}
+                            <li style="margin: 0px; padding: 10px; display: inline-block; font-weight: 400; font-size: 1.25rem; {{if eq .ID "lib"}}background-color: #357edd;{{end}}"
+                            ><a style="text-decoration: none; font-size: 1.25rem; color: rgba(0, 0, 0, .9); {{if eq .ID "lib"}}color: rgba(255, 255, 255, .9);{{end}}" href="{{.URL}}">{{- .Name -}}</a
+                            ></li>
+                            {{- end -}}
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        
+        <div style="background-color: #357edd;">
+            <nav style="padding-left: 2rem; padding-right: 2rem; padding-top: 1rem; padding-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; margin-right: auto; margin-left: auto; align-items: center;">
+                    <a href="/" style="font-size: 1.5rem; text-decoration: none; font-weight: 200; display: inline-block; color: rgba(255, 255, 255, .9);">
+                        IPACS Electronic library
+                    </a>
+                    
+                    <div style="display: flex; align-items: center; justify-content: center; width: 50%;">
+                        <form action="/search" method="get" style="display: flex; align-items: center; justify-content: center; margin: 0; width: 100%;">
+                            <input name="q" placeholder="Search" style="font-size: 1.25rem; display: flex; align-items: center; justify-content: center; width: 100%; min-width: 100px;" value="{{.SearchQuery}}">
+                        </form>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center;"></div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main style="padding-bottom: 1rem;">
+        <div style="display: flex; margin-right: auto; margin-left: auto; margin-top: .5rem; max-width: 64rem;">
+            <article style="margin-right: auto; margin-left: auto; padding-left: 2rem; padding-right: 2rem; ppadding-top: 4rem; padding-bottom: 4rem; max-width: 48rem;">
+                <div style="font-size: 1.25rem;">
+
+
+
+

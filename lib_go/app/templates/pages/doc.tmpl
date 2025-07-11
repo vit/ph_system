@@ -1,0 +1,76 @@
+{{ template "header.tmpl" .}}
+
+
+<div class="doc-page" sstyle="text-align: center;">
+    <p>
+        <a href="/">Root</a>
+        {{ range .doc.Breadcrumbs }}
+        <span> / </span>
+        <a href="/doc?id={{ .ID }}">{{ .Title }}</a>
+        {{ end }}
+    </p>
+
+    <h2 style="text-align: center;">{{ .doc.Info.Title }}</h2>
+    <p style="font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 0.85em; text-align: center;">
+        {{ .doc.Info.Subtitle }}
+    </p>
+    
+    <!-- Авторы -->
+    <p style="font-family: serif; font-weight: 900; font-size: 0.85em; text-align: center;">
+        {{ range $index, $author := .doc.Authors }}
+            {{- if $index }}, {{ end -}}
+            {{ $author.Fname }} {{ $author.Lname -}}
+        {{ end }}
+    </p>
+
+    <!-- Абстракт -->
+    <p style="font-family: Verdana, Arial, Helvetica, sans-serif;">
+        {{ .doc.Info.Abstract | nl2br }}
+    </p>
+
+    {{/* <p style="font-family: Verdana, Arial, Helvetica, sans-serif;">
+        {{ .doc.Meta }}
+    </p> */}}
+
+    <!-- Ссылка на файл -->
+    {{ if .doc.FileInfo.ID }}
+    <p style="font-family: Verdana, Arial, Helvetica, sans-serif;">
+        File: <a href="/file?id={{ .doc.FileInfo.ID }}">download</a>
+    </p>
+    {{/* <p>
+    {{ .doc.FileInfo }}
+    </p> */}}
+    {{/* <p style="font-family: Verdana, Arial, Helvetica, sans-serif;">
+        {{ .doc.FileInfo.Meta }}
+    </p> */}}
+
+
+    {{ end }}
+
+    <!-- Дочерние элементы -->
+    {{ template "_docs_list.tmpl" .doc.Children }}
+    {{/* <div>
+        <ul sstyle="list-style-type: none; padding-left: 0;">
+            {{ range .doc.Children }}
+            <li style="margin-top: 0.3rem;">
+                <div style="font-family: serif; font-weight: 900; font-size: 0.85em;">
+                    {{ range $index, $author := .Authors }}
+                        {{- if $index -}}, {{ end }}
+                        {{ $author.Fname }} {{ $author.Lname -}}
+                    {{ end }}
+                </div>
+                <div>
+                    <a href="/doc?id={{ .ID }}">{{ .Info.Title }}</a>
+                </div>
+                <div>
+                    <i>{{ .Info.Subtitle }}</i>
+                </div>
+            </li>
+            {{ end }}
+        </ul>
+    </div> */}}
+</div>
+
+
+{{ template "footer.tmpl" .}}
+
