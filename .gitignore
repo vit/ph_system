@@ -20,7 +20,8 @@ coms_php/app/papers
 
 # pg_*.sql
 
-pg/init/01_create
+# pg/init/01_create
+coms_php/pg/init/01_create
 # data/pg
 data/domainkeys
 # data/log

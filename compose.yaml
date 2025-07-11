@@ -82,7 +82,7 @@ services:
     restart: always
     container_name: ph_system_php_${ENV_NAME}
     build: 
-      context: ./php
+      context: ./coms_php/php
       dockerfile: Dockerfile_PhpFpm
     expose:
       - "9000"
@@ -100,7 +100,7 @@ services:
     restart: always
     container_name: ph_system_cron_${ENV_NAME}
     build: 
-      context: ./php
+      context: ./coms_php/php
       dockerfile: Dockerfile_PhpCron
     volumes:
       # - ./app/coms:/var/www/html
@@ -115,7 +115,9 @@ services:
     restart: always
     container_name: ph_system_pg_${ENV_NAME}
     build: 
-      context: ./pg
+      # context: ./pg
+      # dockerfile: Dockerfile_Pg
+      context: ./coms_php/pg
       dockerfile: Dockerfile_Pg
     volumes:
       - pg-data:/var/lib/postgresql/data

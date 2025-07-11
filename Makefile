@@ -29,11 +29,14 @@ config:
 	cp .env ./coms_php/nginx/.env
 	cd coms_php/nginx && make config && cd ../..
 
-	cp .env ./php/.env
-	cd php && make config && cd ..
+	# cp .env ./php/.env
+	# cd php && make config && cd ..
+	cp .env ./coms_php/php/.env
+	cd coms_php/php && make config && cd ../..
 
 	# cp .env ./pg/.env
-	cd pg && make config && cd ..
+	# cd pg && make config && cd ..
+	cd coms_php/pg && make config && cd ../..
 
 	# cp .env ./postfix/.env
 
@@ -95,8 +98,11 @@ backup:
 	docker exec ph_system_mongo_$(ENV_NAME) bash -c 'mongodump --username=root --password=example --archive | gzip -c | cat' > ./data/export/mongo_dump_$(ENV_NAME)_`date +%Y-%m-%d"_"%H_%M_%S`.gz
 
 # from coms
-	cd pg && make backup && cd ..
-	cd php && make backup && cd ..
+	# cd pg && make backup && cd ..
+	cd coms_php/pg && make backup && cd ../..
+
+	# cd php && make backup && cd ..
+	cd coms_php/php && make backup && cd ../..
 
 
 # from coms
