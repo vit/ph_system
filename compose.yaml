@@ -134,7 +134,7 @@ services:
     restart: always
     container_name: ph_system_mail_${ENV_NAME}
     build: 
-      context: ./postfix
+      context: ./coms_php/postfix
       dockerfile: Dockerfile
     expose:
       - "25"
