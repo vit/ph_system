@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'info';
 
 include_once("start.php");
@@ -36,7 +36,7 @@ $asterisk = '<span class=error>*</span>';
 
 
 $personaldata = $USERINFO;
-$personaldata[pass2] = $personaldata[pass];
+$personaldata['pass2'] = $personaldata['pass'];
 
 if( $_REQUEST['disablemypin']=='disable' ) {
   $result = pg_query("UPDATE userpin SET enabled=FALSE WHERE pin='$USERPIN';");
@@ -45,7 +45,7 @@ if( $_REQUEST['disablemypin']=='disable' ) {
     if( $row=pg_fetch_array($result) ) {
       $USERINFO = $row;
       $personaldata = $USERINFO;
-      $personaldata[pass2] = $personaldata[pass];
+      $personaldata['pass2'] = $personaldata['pass'];
     }
   }
 } else if( $_REQUEST['enablemypin']=='enable' ) {
@@ -57,7 +57,7 @@ if( $_REQUEST['disablemypin']=='disable' ) {
     if( $row=pg_fetch_array($result) ) {
       $USERINFO = $row;
       $personaldata = $USERINFO;
-      $personaldata[pass2] = $personaldata[pass];
+      $personaldata['pass2'] = $personaldata['pass'];
     }
   }
 } else if( isset( $_REQUEST['personaldata'] ) ) {
@@ -121,7 +121,7 @@ ENDQUERY
     if( $row=pg_fetch_array($result) ) {
       $USERINFO = $row;
       $personaldata = $USERINFO;
-      $personaldata[pass2] = $personaldata[pass];
+      $personaldata['pass2'] = $personaldata['pass'];
     }
 
   }

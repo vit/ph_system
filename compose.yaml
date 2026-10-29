@@ -4,10 +4,6 @@ name: ph_system_${ENV_NAME}
 services:
 
   mongo:
-    # image: mongo:3.2
-    # image: mongo:3.4
-    # image: mongo:3.6
-    # image: mongo:4.0
     image: mongo:4.2
     restart: always
     container_name: ph_system_mongo_${ENV_NAME}
@@ -24,7 +20,7 @@ services:
   # lib_clojure:
   #   restart: always
   #   container_name: ph_system_lib_clojure_${ENV_NAME}
-  #   build: 
+  #   build:
   #     # context: ./clojure
   #     # dockerfile: Dockerfile_Clojure
   #     # context: ./docker/lib_clojure/
@@ -56,7 +52,7 @@ services:
   nginx:
     restart: always
     container_name: ph_system_web_${ENV_NAME}
-    build: 
+    build:
       context: ./coms_php/nginx
       dockerfile: Dockerfile_Nginx
     expose:
@@ -78,10 +74,28 @@ services:
     links:
       - php-fpm
 
+
+  # coms_maintenance:
+  #   image: nginx:alpine
+  #   restart: always
+  #   container_name: ph_system_maintenance_${ENV_NAME}
+  #   expose:
+  #     - "80"
+  #   volumes:
+  #     - ./maintenance/html:/usr/share/nginx/html:ro
+  #     - ./maintenance/default.conf:/etc/nginx/conf.d/default.conf:ro
+  #   environment:
+  #     VIRTUAL_HOST: ${COMS_DOMAIN_NAME}
+  #     LETSENCRYPT_HOST: ${COMS_DOMAIN_NAME}
+  #   networks:
+  #     - frontend
+
+
+
   php-fpm:
     restart: always
     container_name: ph_system_php_${ENV_NAME}
-    build: 
+    build:
       context: ./coms_php/php
       dockerfile: Dockerfile_PhpFpm
     expose:
@@ -99,7 +113,7 @@ services:
   php-cron:
     restart: always
     container_name: ph_system_cron_${ENV_NAME}
-    build: 
+    build:
       context: ./coms_php/php
       dockerfile: Dockerfile_PhpCron
     volumes:
@@ -114,7 +128,7 @@ services:
   postgres:
     restart: always
     container_name: ph_system_pg_${ENV_NAME}
-    build: 
+    build:
       # context: ./pg
       # dockerfile: Dockerfile_Pg
       context: ./coms_php/pg
@@ -133,7 +147,7 @@ services:
   postfix:
     restart: always
     container_name: ph_system_mail_${ENV_NAME}
-    build: 
+    build:
       context: ./coms_php/postfix
       dockerfile: Dockerfile
     expose:
@@ -149,7 +163,7 @@ services:
   api:
     restart: always
     container_name: ph_system_api_${ENV_NAME}
-    build: 
+    build:
       # context: ./docker/api_python
       # dockerfile: Dockerfile_API_Python
       context: ./api_python
@@ -183,7 +197,7 @@ services:
   lib_go:
     restart: always
     container_name: ph_system_lib_go_${ENV_NAME}
-    build: 
+    build:
       # context: .
       # dockerfile: ./docker/lib_go/Dockerfile_Go
       context: ./lib_go
@@ -231,8 +245,8 @@ volumes:
 
 networks:
   frontend:
-    external: true 
-    name: frontend 
+    external: true
+    name: frontend
   mongo:
   php:
   pg:

@@ -1,4 +1,4 @@
-<?
+<?php
 
 // Rename this config_safe.php to config.php and add password
 

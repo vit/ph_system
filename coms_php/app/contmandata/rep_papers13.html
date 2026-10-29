@@ -1,4 +1,4 @@
-<?
+<?php
 //$PAGEID = 'papers';
 
   $PAGEBODY .= <<<PAGEBODY
@@ -38,7 +38,7 @@ SELECT
 --  concatpaperkeywords(p.context, p.papnum, 2) AS keywords2,
 --  r.revpin AS revpin, r.score AS r_score, r.subject AS r_subject, r.ipccomments AS r_ipccomments, r.authcomments AS r_authcomments, r.recommendation AS r_recommendation,
   getfullnamewithpin(p.registrator) AS registratorname
-FROM 
+FROM
   paper AS p
   WHERE p.context=$CURRENTCONT
 ORDER BY p.papnum
@@ -49,7 +49,7 @@ $papid0 = 0;
 
   while( $row = pg_fetch_array($result) ) {
     $papid = $row['papnum'];
-    $ctitle1 = htmlspecialchars($row[title]);
+    $ctitle1 = htmlspecialchars($row['title']);
 //    $cauthors1 = $row['authors'];
 //    $cauthors2 = $row['authorswithpin'];
 //    $ckeywords1 = $row['keywords1'];
@@ -95,7 +95,7 @@ $papid0 = 0;
     $fin_decision_str = $FINALPAPERDECISIONS[$fin_decision];
 
 
-    $filename = $papersdir."/c".$CURRENTCONT."p".$row[papnum];
+    $filename = $papersdir."/c".$CURRENTCONT."p".$row['papnum'];
     $ftime = '';
     if ( file_exists($filename) ) {
       $filetext = "Yes";
@@ -106,8 +106,8 @@ $papid0 = 0;
     $PAGEBODY .= <<<PAGEBODY
 <tr class=$cellclass>
 <td align=center rowspan=1>
-  <a href="{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row[registrator]}.html" title="Paper information"
-    onClick="window.open('{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row[registrator]}.html', '', 'location=no, menubar=no, toolbar=no, statusbar=no, scrollbars=yes, width=620, height=550, resizable=yes'); return false;"
+  <a href="{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row['registrator']}.html" title="Paper information"
+    onClick="window.open('{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row['registrator']}.html', '', 'location=no, menubar=no, toolbar=no, statusbar=no, scrollbars=yes, width=620, height=550, resizable=yes'); return false;"
   >[&nbsp;$papid&nbsp;]</a>
 </td>
 <td>$ctitle1</td>

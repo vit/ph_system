@@ -1,4 +1,4 @@
-<?
+<?php
 
 $editorid = (int)$_REQUEST['editorid'];
 
@@ -13,7 +13,7 @@ if(!$editorid>0) {
   $result = pg_query("
 SELECT
   COUNT(p.*)
-FROM 
+FROM
   paper AS p
   WHERE p.context=$CURRENTCONT AND (p.editor=$editorid $editoridcond2)
 ");
@@ -86,9 +86,9 @@ SELECT
   getfullnamewithpin(p.registrator) AS registratorname,
   getfullnamewithpin(e.userpin) AS editorname,
   getfullnamewithpin(r.revpin) AS revname
-FROM 
+FROM
   (paper AS p LEFT JOIN editor AS e ON p.editor=e.editorid)
-    LEFT JOIN 
+    LEFT JOIN
       review AS r ON p.papnum=r.papnum AND r.context=$CURRENTCONT
   WHERE p.context=$CURRENTCONT AND (p.editor=$editorid $editoridcond2)
 ORDER BY p.papnum, r.revpin
@@ -100,7 +100,7 @@ $papid0 = 0;
 
   while( $row = pg_fetch_array($result) ) {
     $papid = $row['papnum'];
-    $ctitle1 = htmlspecialchars($row[title]);
+    $ctitle1 = htmlspecialchars($row['title']);
     $cauthors1 = $row['authors'];
     $cauthors2 = $row['authorswithpin'];
     $ckeywords1 = $row['keywords1'];
@@ -109,7 +109,7 @@ $papid0 = 0;
     $subject1 = (int)$row['subject'];
     $subject1_str = $SUBJECTS[$subject1];
 
-    $cabstract1 = nl2br( htmlspecialchars($row[abstract]) );
+    $cabstract1 = nl2br( htmlspecialchars($row['abstract']) );
     $registratorname = $row['registratorname'];
     $editorname = $row['editorname'];
 
@@ -123,8 +123,8 @@ $papid0 = 0;
     $ed_decision_str = $EDITORPAPERDECISIONS[$ed_decision];
 
 
-    $cipccomments = nl2br( htmlspecialchars($row[ed_ipccomments]) );
-    $cauthcomments = nl2br( htmlspecialchars($row[ed_authcomments]) );
+    $cipccomments = nl2br( htmlspecialchars($row['ed_ipccomments']) );
+    $cauthcomments = nl2br( htmlspecialchars($row['ed_authcomments']) );
 
     $r_subject = (int)$row['r_subject'];
     $r_subject_str = $SUBJECTS[$r_subject];
@@ -135,8 +135,8 @@ $papid0 = 0;
     $r_decision = (int)$row['r_recommendation'];
     $r_decision_str = $REVIEWERPAPERDECISIONS[$r_decision];
 
-    $rcipccomments = nl2br( htmlspecialchars($row[r_ipccomments]) );
-    $rcauthcomments = nl2br( htmlspecialchars($row[r_authcomments]) );
+    $rcipccomments = nl2br( htmlspecialchars($row['r_ipccomments']) );
+    $rcauthcomments = nl2br( htmlspecialchars($row['r_authcomments']) );
 
 
     $fin_subject = (int)$row['finalsubject'];
@@ -146,7 +146,7 @@ $papid0 = 0;
     $fin_decision_str = $FINALPAPERDECISIONS[$fin_decision];
 
 
-    $filename = $papersdir."/c".$CURRENTCONT."p".$row[papnum];
+    $filename = $papersdir."/c".$CURRENTCONT."p".$row['papnum'];
     if ( file_exists($filename) )
       $filetext = "Yes";
     else
@@ -170,8 +170,8 @@ PAGEBODY;
     $PAGEBODY .= <<<PAGEBODY
 <tr class=$cellclass>
 <td align=center rowspan=8>
-  <a href="{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row[registrator]}.html" title="Paper information"
-    onClick="window.open('{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row[registrator]}.html', '', 'location=no, menubar=no, toolbar=no, statusbar=no, scrollbars=yes, width=620, height=550, resizable=yes'); return false;"
+  <a href="{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row['registrator']}.html" title="Paper information"
+    onClick="window.open('{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row['registrator']}.html', '', 'location=no, menubar=no, toolbar=no, statusbar=no, scrollbars=yes, width=620, height=550, resizable=yes'); return false;"
   >[&nbsp;$papid&nbsp;]</a>
 </td>
 <td>$ctitle1</td>

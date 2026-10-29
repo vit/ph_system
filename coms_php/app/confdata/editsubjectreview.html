@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'revoffice';
 
 
@@ -39,8 +39,8 @@ $subjid = "";
 //$isinvited = "";
 $r_ipccomments = "";
 $r_authcomments = "";
-$score = $_REQUEST[score]?(int)$_REQUEST[score]:"NULL";
-$decision = $_REQUEST[decision]?(int)$_REQUEST[decision]:"NULL";
+$score = $_REQUEST['score']?(int)$_REQUEST['score']:"NULL";
+$decision = $_REQUEST['decision']?(int)$_REQUEST['decision']:"NULL";
 
 $subjid0 = $_REQUEST['subjid'];
 
@@ -54,11 +54,11 @@ $subjid0 = $_REQUEST['subjid'];
 
 
 if( $subjid > 0 ) {
-  $flag = $_REQUEST[flag];
+  $flag = $_REQUEST['flag'];
 //  $title = trim( $_REQUEST[title]);
 //  $abstract = trim( $_REQUEST[abstract]);
-  $r_ipccomments = trim( $_REQUEST[r_ipccomments]);
-  $r_authcomments = trim( $_REQUEST[r_authcomments]);
+  $r_ipccomments = trim( $_REQUEST['r_ipccomments']);
+  $r_authcomments = trim( $_REQUEST['r_authcomments']);
 
 
   if($PERMISSIONS['REVIEWER_EDIT_REVIEWS']) {

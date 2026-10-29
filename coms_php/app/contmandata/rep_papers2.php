@@ -1,4 +1,4 @@
-<?
+<?php
 //$PAGEID = 'papers';
 
   $PAGEBODY .= <<<PAGEBODY
@@ -22,8 +22,8 @@ SELECT p.*, r.score AS r_score, r.subject AS r_subject, r.ipccomments AS r_ipcco
   concatpaperkeywords(p.context, p.papnum, 3) AS keywords1,
   concatpaperkeywords(p.context, p.papnum, 2) AS keywords2,
   getfullnamewithpin(p.registrator) AS registratorname
-FROM 
-  review AS r 
+FROM
+  review AS r
     INNER JOIN paper AS p
       ON r.revpin=$USERPIN AND r.context=$CURRENTCONT AND r.papnum=p.papnum
 ORDER BY p.papnum;
@@ -38,9 +38,9 @@ SELECT
   c.cid AS cid,
 --  concatpaperauthors(p.context, p.papnum) AS authors,
   getfullnamewithpin(p.registrator) AS registratorname
-FROM 
+FROM
   (paper AS p LEFT JOIN userpin AS u ON p.registrator=u.pin)
-    LEFT JOIN 
+    LEFT JOIN
       country AS c ON u.country=c.cid
   WHERE p.context=$CURRENTCONT
 ORDER BY c.cid, p.papnum
@@ -55,7 +55,7 @@ ORDER BY c.cid, p.papnum
 
     while( $row = pg_fetch_array($result) ) {
       $papid = $row['papnum'];
-      $ctitle1 = htmlspecialchars($row[title]);
+      $ctitle1 = htmlspecialchars($row['title']);
       $cauthors1 = $row['authors'];
       $ccountry1 = $row['countrytitle'];
       if( !$ccountry1 )

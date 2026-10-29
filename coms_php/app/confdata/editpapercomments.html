@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'editorial';
 
 
@@ -41,9 +41,9 @@ $papid = "";
 $ed_ipccomments = "";
 $ed_authcomments = "";
 
-$score = $_REQUEST[score]?(int)$_REQUEST[score]:"NULL";
-$decision = $_REQUEST[decision]?(int)$_REQUEST[decision]:"NULL";
-$subject = $_REQUEST[subject]?(int)$_REQUEST[subject]:"NULL";
+$score = $_REQUEST['score']?(int)$_REQUEST['score']:"NULL";
+$decision = $_REQUEST['decision']?(int)$_REQUEST['decision']:"NULL";
+$subject = $_REQUEST['subject']?(int)$_REQUEST['subject']:"NULL";
 
 $papid0 = (int)$_REQUEST['papid'];
 
@@ -55,11 +55,11 @@ $papid0 = (int)$_REQUEST['papid'];
 
 
 if( $papid > 0 ) {
-  $flag = $_REQUEST[flag];
+  $flag = $_REQUEST['flag'];
 //  $title = trim( $_REQUEST[title]);
 //  $abstract = trim( $_REQUEST[abstract]);
-  $ed_ipccomments = trim( $_REQUEST[ed_ipccomments]);
-  $ed_authcomments = trim( $_REQUEST[ed_authcomments]);
+  $ed_ipccomments = trim( $_REQUEST['ed_ipccomments']);
+  $ed_authcomments = trim( $_REQUEST['ed_authcomments']);
 
 
   if($PERMISSIONS['EDITOR_EDIT_RECOMMENDATIONS']) {

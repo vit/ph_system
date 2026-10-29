@@ -1,5 +1,8 @@
-<?
+<?php
 include_once("config.php");
+
+$PAGEBODY = $PAGEBODY ?? '';
+
 
 $PAGEBODY = '';
 

@@ -1,4 +1,6 @@
-<?
+<?php
+
+$PAGEBODY = $PAGEBODY ?? '';
 
 $PAGEBODY .= <<<PAGEBODY
 <font size="+2"><b>CoMS Admin</b></font>

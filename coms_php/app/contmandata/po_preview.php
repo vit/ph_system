@@ -1,4 +1,4 @@
-<?
+<?php
 
 //  include_once("contmandata/po_start.php");
   include_once("email2/mail_func.php");
@@ -11,7 +11,7 @@
   $subject1 = htmlspecialchars($prepmail['subject']);
   $ffrom1 = htmlspecialchars($prepmail['ffrom']);
   $tto1 = htmlspecialchars($prepmail['tto']);
-  $body1 = nl2br(htmlspecialchars($prepmail[body]));
+  $body1 = nl2br(htmlspecialchars($prepmail['body']));
 
   $PAGEBODY .= <<<PAGEBODY
 <br>

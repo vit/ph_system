@@ -1,4 +1,4 @@
-<?
+<?php
 $subpageid = 'permissions';
 
 include_once("start.php");
@@ -61,8 +61,8 @@ PAGEBODY;
 $ppp = 0;
 
   $result = pg_query("
-SELECT p.*, p1.* 
-FROM permission AS p LEFT JOIN cont_perm AS p1 ON p.permid=p1.permission AND p1.context=$contid 
+SELECT p.*, p1.*
+FROM permission AS p LEFT JOIN cont_perm AS p1 ON p.permid=p1.permission AND p1.context=$contid
 ORDER BY p.name;
 ");
   while( $row = pg_fetch_array($result) ) {

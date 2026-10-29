@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'editorial';
 
 
@@ -47,19 +47,19 @@ $subjid0 = $_REQUEST['subjid'];
   $result = pg_query("SELECT * FROM subject WHERE context=$CURRENTCONT AND subjid=$subjid0 AND editor=$EDITORID");
   if( $row = pg_fetch_array($result) ) {
     $subjid = $row['subjid'];
-    $ctitle1 = htmlspecialchars($row[title]);
+    $ctitle1 = htmlspecialchars($row['title']);
     $cabstract1 = nl2br( htmlspecialchars($row['abstract']) );
   }
 //}
 
 
 if( $subjid > 0 ) {
-  $flag = $_REQUEST[flag];
+  $flag = $_REQUEST['flag'];
 
   if($PERMISSIONS['EDITOR_EDIT_REVIEWS_LIST']) {
 
-    $marked = &$_REQUEST[marked];
-    $userpin = (int)$_REQUEST[userpin];
+    $marked = &$_REQUEST['marked'];
+    $userpin = (int)$_REQUEST['userpin'];
 
     if ( $flag=="add" && $userpin ) {
       $result = @pg_query("INSERT INTO subjectreview (context, subjid, revpin) VALUES ($CURRENTCONT, $subjid, $userpin)");
@@ -125,7 +125,7 @@ PAGEBODY;
 
   $result = pg_query("
 SELECT r.*, u.email, getfullnamewithpin(r.revpin) AS name
-FROM 
+FROM
   subjectreview AS r
    INNER JOIN userpin AS u ON r.revpin=u.pin
 WHERE
@@ -135,8 +135,8 @@ ORDER BY r.revpin
 
 
   while( $row = pg_fetch_array($result) ) {
-//    $uname1 = htmlspecialchars($row[fname]." ".$row[lname]);
-    $uname1 = htmlspecialchars($row[name]);
+//    $uname1 = htmlspecialchars($row[fname]." ".$row['lname']);
+    $uname1 = htmlspecialchars($row['name']);
 
     $PAGEBODY .= <<<PAGEBODY
 <tr>

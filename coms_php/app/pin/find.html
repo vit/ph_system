@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'find';
 
 include_once("start.php");
@@ -63,7 +63,7 @@ PAGEBODY;
       $PAGEBODY .= <<<PAGEBODY
 <li>
 PIN: $row[pin]<br>
-Title: {$TITLES[$row[title]]}<br>
+Title: {$TITLES[$row['title']]}<br>
 First name: $row[fname]<br>
 Last name: $row[lname]<br>
 </li>

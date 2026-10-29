@@ -107,7 +107,8 @@ backup:
 
 # from coms
 backup_export:
-	docker run -it \
+	# docker run -it \
+	docker run -i \
 		-v ph_system_$(ENV_NAME)_backup:/data/backup \
 		-v $(DATA_EXPORT_DIR):/data/export \
 		alpine \
@@ -128,6 +129,31 @@ import_papers:
 
 
 
+# backup_upload: backup backup_export
+#       cd data/export/ && \
+#       mv "$$(ls -t pg_dump_*.sql | head -n 1)" backup_$(ENV_NAME)_pg_dump.sql && \
+#       aws s3 cp backup_$(ENV_NAME)_pg_dump.sql s3://alf && \
+#       mv "$$(ls -t coms_papers_*.tgz | head -n 1)" backup_$(ENV_NAME)_coms_papers.tgz && \
+#       aws s3 cp backup_$(ENV_NAME)_coms_papers.tgz s3://alf && \
+#       mv "$$(ls -t mongo_dump_*.gz | head -n 1)" backup_$(ENV_NAME)_mongo_dump.gz && \
+#       aws s3 cp backup_$(ENV_NAME)_mongo_dump.gz s3://alf && \
+#       cd ../..
+
+
+backup_remove:
+	rm -rf data/export/*
+#	rm data/export/*
+
+# backup_upload: backup backup_export backup_remove
+backup_upload: backup backup_export
+	cd data/export/ && \
+	aws s3 cp "$$(ls -t pg_dump_*.sql | head -n 1)" s3://alf/ && \
+	aws s3 cp "$$(ls -t coms_papers_*.tgz | head -n 1)" s3://alf/ && \
+	aws s3 cp "$$(ls -t mongo_dump_*.gz | head -n 1)" s3://alf/ && \
+	cd ../..
+
+
+
 
 
 # ======================
@@ -143,12 +169,3 @@ import_papers:
 
 # rm_volumes:
 # 	docker volume rm ph_system_$(ENV_NAME)_pg-data
-
-
-
-
-
-
-
-
-

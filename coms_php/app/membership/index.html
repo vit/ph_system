@@ -1,4 +1,4 @@
-<?
+<?php
 //$PARTID = 'pin';
 $PAGEID = 'main';
 
@@ -8,7 +8,7 @@ include_once("start.php");
 //$PAGETITLE = "Account management";
 
 
-$accept = isset( $_REQUEST['accept'] ) ? (bool)$_REQUEST['accept'] : false; 
+$accept = isset( $_REQUEST['accept'] ) ? (bool)$_REQUEST['accept'] : false;
 
 $IS_MEMBER = false;
 $CAN_BE_MEMBER = false;
@@ -23,7 +23,7 @@ if( $USERPIN ) {
   $QUERY = <<<ENDQUERY
     SELECT
       u.pin AS pin
-    FROM 
+    FROM
       (paper AS p LEFT JOIN userpin AS u ON p.registrator=u.pin)
       LEFT JOIN title AS t ON u.title=t.titleid
     WHERE (p.finaldecision>=2 AND p.finaldecision<=4)
@@ -31,7 +31,7 @@ if( $USERPIN ) {
     UNION
     SELECT
       u.pin AS pin
-    FROM 
+    FROM
       (
        (
         paper AS p
@@ -112,12 +112,12 @@ You are eligible to become the IPACS member as an author
 <br>
 Information about IPACS membership can be found <a href="http://physcon.ru/ipacs/about.html">here</a>.
 <br>
-You can become a member by pressing 'Submit' button. 
+You can become a member by pressing 'Submit' button.
 <br>
-Before pressing 'Submit' you need to check the box confirming that you wish to become a member and accept <a href="http://physcon.ru/ipacs/regulations.html">IPACS Regulations</a>. 
+Before pressing 'Submit' you need to check the box confirming that you wish to become a member and accept <a href="http://physcon.ru/ipacs/regulations.html">IPACS Regulations</a>.
 <br>
 <form method=post>
-<input type=checkbox name=accept value=1> I wish to become the IPACS member, I accept the IPACS Regulations 
+<input type=checkbox name=accept value=1> I wish to become the IPACS member, I accept the IPACS Regulations
 <br>
 <input type=submit value="Submit">
 </form>
@@ -154,10 +154,10 @@ conferences
  are eligible to become members without submitting extra papers since their
  papers have already passed peer reviewing.
 All such authors are invited to join IPACS by the following procedure: enter your
- virtual office by typing your PIN and password in the form in the upper right 
+ virtual office by typing your PIN and password in the form in the upper right
 corner of the page. Then confirm your wish to become an IPACS member and acceptance
  of the IPACS regulation by checking the box and press the button "Submit".
-You will get access to the IPACS archive immediately and receive 
+You will get access to the IPACS archive immediately and receive
 your membership certificate in a few weeks. IPACS Regulations can be accessed <a href="http://physcon.ru/ipacs/regulations.html">here</a>.
 </p>
 

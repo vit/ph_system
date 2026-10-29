@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'reports';
 
   $PAGEBODY .= <<<PAGEBODY
@@ -103,7 +103,7 @@ SELECT
   getfullnamewithpin(e.userpin) AS editorname,
   (select count(*) from paper as p where p.editor=e.editorid) AS cnt
 FROM
-  editor AS e 
+  editor AS e
   WHERE e.context=$CURRENTCONT
 ORDER BY editorname
 ");

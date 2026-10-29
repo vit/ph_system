@@ -1,4 +1,4 @@
-<?
+<?php
 
 //$FROM = 'robot@physcon.ru';
 $FROM = 'coms@physcon.ru';
@@ -15,34 +15,34 @@ while( $row = pg_fetch_array( $result ) ) {
   $result2 = pg_query("SELECT * FROM maildata WHERE mlid='$row[mlid]'");
   if( $ml = pg_fetch_array( $result2 ) ) {
 
-    $SUBJECT = $ml[mlsubject];
-    $FROM = $ml[mlfrom];
-    $MESSAGE = $ml[mlbody];
+      $SUBJECT = $ml['mlsubject'];
+    $FROM = $ml['mlfrom'];
+    $MESSAGE = $ml['mlbody'];
 
-    $USERID = $row[taskpin];
+    $USERID = $row['taskpin'];
 
     $PIN = $USERPIN = $PASS = $PASSWORD = $TITLE = $TO = $EMAIL = $FNAME = $LNAME = $PAPERTITLE = $PAPERABSTRACT = "";
 
-    if ( $row[tasktype] == 1 ) {
+    if ( $row['tasktype'] == 1 ) {
       $result3 = pg_query("SELECT * FROM userpin WHERE pin='$row[taskpin]' AND enabled=true");
       if( ! ( $userinfo = pg_fetch_array( $result3 ) ) ) {
         $errcode = 201;
       } else {
-        $PIN = $USERPIN = $userinfo[pin];
-        $PASS = $PASSWORD = $userinfo[pass];
+          $PIN = $USERPIN = $userinfo['pin'];
+        $PASS = $PASSWORD = $userinfo['pass'];
 
-        $FNAME = $userinfo[fname];
-        $LNAME = $userinfo[lname];
-        $TO = $EMAIL = $userinfo[email];
+        $FNAME = $userinfo['fname'];
+        $LNAME = $userinfo['lname'];
+        $TO = $EMAIL = $userinfo['email'];
 
-        $TITLE = $userinfo[title];
+        $TITLE = $userinfo['title'];
         $TITLE = $TITLES[$TITLE];
 
       }
     }
 
-    if ( $row[tasktype] == 2 ) {
-      $TO = $EMAIL = $row[taskemail];
+    if ( $row['tasktype'] == 2 ) {
+        $TO = $EMAIL = $row['taskemail'];
     }
 
     $pattern = '/{\$(\w*)}/e';
@@ -60,7 +60,7 @@ while( $row = pg_fetch_array( $result ) ) {
 
 //  db_ml_setTaskStatus( $row[taskid], 1, $errcode );
   $result4 = pg_query("UPDATE mailtask SET taskstatus=1, taskerror=$errcode WHERE taskid=$row[taskid]");
-  
+
 }
 
 ?>

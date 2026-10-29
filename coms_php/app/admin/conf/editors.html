@@ -1,4 +1,4 @@
-<?
+<?php
 $subpageid = 'editors';
 
 include_once("start.php");
@@ -75,8 +75,8 @@ PAGEBODY;
 
 
   $result = pg_query("
-SELECT e.*, u.* 
-FROM editor AS e INNER JOIN userpin AS u ON e.userpin=u.pin AND e.context=$contid 
+SELECT e.*, u.*
+FROM editor AS e INNER JOIN userpin AS u ON e.userpin=u.pin AND e.context=$contid
 ORDER BY e.userpin;
 ");
   while( $row = pg_fetch_array($result) ) {

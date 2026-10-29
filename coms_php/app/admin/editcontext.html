@@ -7,6 +7,7 @@ include_once("../contstatus.php");
 
 //include_once("mainmenu.php");
 
+$PAGEBODY = $PAGEBODY ?? '';
 
   $contextflag = $_REQUEST['contextflag'];
   $contid = $_REQUEST['contid'];
@@ -45,7 +46,7 @@ if( $row = pg_fetch_array($result) ) {
 //  $cont_type = (int)$row['cont_type'];
 
   $cstatus = "<select name=status>";
-  foreach($CONTSTATUS as $key => $val) {
+  foreach(($CONTSTATUS ?? []) as $key => $val) {
     $selected = $key==$row['status']?" selected":"";
     $cstatus .= "<option value=$key $selected>$val</option>";
   }

@@ -1,4 +1,4 @@
-<?
+<?php
 
 function paper_fileName( $context, $papid ) {
   return $GLOBALS['papersdir']."/c".$context."p".$papid;

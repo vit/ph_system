@@ -80,10 +80,10 @@ Password:
                             <?php
                                 $bg_style = 'coms' == $elm['id'] ? "background-color: #357edd;" : "";
                                 $text_style = 'coms' == $elm['id'] ? "color: rgba(255, 255, 255, .9);" : "color: rgba(0, 0, 0, .9);";
-                        
+
                             ?>
                             <li style="margin: 0px; padding: 10px; display: inline-block; font-weight: 400; font-size: 1.25rem; <?= $bg_style ?>">
-                                <a href="<?= $elm['url'] ?>" 
+                                <a href="<?= $elm['url'] ?>"
                                     style="text-decoration: none; font-size: 1.25rem; background-color: transparent; <?= $text_style ?>"><?= $elm['name'] ?>
                                 </a>
                             </li>

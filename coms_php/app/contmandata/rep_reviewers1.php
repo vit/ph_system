@@ -1,4 +1,4 @@
-<?
+<?php
 //$PAGEID = 'papers';
 
 
@@ -7,7 +7,7 @@
   $result = pg_query("
 SELECT
   COUNT(p.*)
-FROM 
+FROM
   paper AS p
   WHERE p.context=$CURRENTCONT AND (p.finaldecision=$decision $decisioncond2)
 ");
@@ -36,7 +36,7 @@ $revarr = array();
       u.email AS email,
       t.shortstr AS usertitle,
       c.name AS countryname
-    FROM 
+    FROM
       ((review AS r LEFT JOIN userpin AS u ON r.revpin=u.pin)
       LEFT JOIN title AS t ON u.title=t.titleid)
       LEFT JOIN country AS c ON u.country=c.cid

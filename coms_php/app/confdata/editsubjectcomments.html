@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'editorial';
 
 
@@ -40,8 +40,8 @@ $subjid = "";
 //$isinvited = "";
 $ed_ipccomments = "";
 $ed_authcomments = "";
-$score = $_REQUEST[score]?(int)$_REQUEST[score]:"NULL";
-$decision = $_REQUEST[decision]?(int)$_REQUEST[decision]:"NULL";
+$score = $_REQUEST['score']?(int)$_REQUEST['score']:"NULL";
+$decision = $_REQUEST['decision']?(int)$_REQUEST['decision']:"NULL";
 
 $subjid0 = $_REQUEST['subjid'];
 
@@ -53,11 +53,11 @@ $subjid0 = $_REQUEST['subjid'];
 
 
 if( $subjid > 0 ) {
-  $flag = $_REQUEST[flag];
+  $flag = $_REQUEST['flag'];
 //  $title = trim( $_REQUEST[title]);
 //  $abstract = trim( $_REQUEST[abstract]);
-  $ed_ipccomments = trim( $_REQUEST[ed_ipccomments]);
-  $ed_authcomments = trim( $_REQUEST[ed_authcomments]);
+  $ed_ipccomments = trim( $_REQUEST['ed_ipccomments']);
+  $ed_authcomments = trim( $_REQUEST['ed_authcomments']);
 
 
   if($PERMISSIONS['EDITOR_EDIT_RECOMMENDATIONS']) {

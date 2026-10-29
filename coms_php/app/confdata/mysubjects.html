@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'mysubjects';
 
   $PAGEBODY .= <<<PAGEBODY
@@ -27,13 +27,13 @@ else {
 if( $PERMISSIONS['USER_REGISTER_NEW_SUBJECT'] || $issubjman ) {
 
 
-  $flag = $_REQUEST[flag];
-  $title = trim( $_REQUEST[title]);
+  $flag = $_REQUEST['flag'];
+  $title = trim( $_REQUEST['title']);
   $abstract = trim( $_REQUEST['abstract']);
-  $isinvited = $_REQUEST[isinvited]?"TRUE":"FALSE";
+  $isinvited = $_REQUEST['isinvited']?"TRUE":"FALSE";
 //  $managerpin = trim( $_REQUEST[managerpin]);
 //  $managerpin = $managerpin>0?$managerpin:"NULL";
-  $marked = &$_REQUEST[marked];
+  $marked = &$_REQUEST['marked'];
 
   if ( $flag=="add" && $PERMISSIONS['USER_REGISTER_NEW_SUBJECT'] ) {
     @$result = pg_query("INSERT INTO subject (context, manager, title, abstract, isinvited) VALUES ($CURRENTCONT, $USERPIN, '$title', '$abstract', $isinvited)");
@@ -72,15 +72,15 @@ $PAGEBODY .= <<<PAGEBODY
 PAGEBODY;
 
   $result = pg_query("
-SELECT * 
+SELECT *
 FROM subject
 WHERE context=$CURRENTCONT AND manager=$USERPIN
 ORDER BY isinvited, title, subjid;
 ");
   while( $row = pg_fetch_array($result) ) {
-    $ctitle1 = htmlspecialchars($row[title]);
+    $ctitle1 = htmlspecialchars($row['title']);
     $cabstract1 = nl2br( htmlspecialchars($row['abstract']) );
-    $invited1 = $row[isinvited]=='t'?"Yes":"No";
+    $invited1 = $row['isinvited']=='t'?"Yes":"No";
 
 
     $PAGEBODY .= <<<PAGEBODY

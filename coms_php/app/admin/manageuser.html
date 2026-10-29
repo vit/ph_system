@@ -1,13 +1,15 @@
-<?
-$pageid = users;
+<?php
+$pageid = 'users';
 
 include_once("start.php");
 
 //include_once("mainmenu.php");
 
+$PAGEBODY = $PAGEBODY ?? '';
 
-  $countryflag = $_REQUEST[countryflag];
-  $USERPIN = $_REQUEST[pin];
+
+  $countryflag = $_REQUEST['countryflag'];
+  $USERPIN = $_REQUEST['pin'];
 //  $name = $_REQUEST[name];
 
 
@@ -20,7 +22,7 @@ include_once("start.php");
 
   $PAGEBODY .= <<<PAGEBODY
 
-<a href="users.html?page={$_REQUEST[retpage]}&state={$_REQUEST[retstate]}">&lt;&lt; Back</a>
+<a href="users.html?page={$_REQUEST['retpage']}&state={$_REQUEST['retstate']}">&lt;&lt; Back</a>
 
 <center>
 <h2>Manage User</h2>

@@ -1,4 +1,5 @@
-FROM php:7-cli
+#FROM php:7-cli
+FROM php:8.5-fpm
 
 RUN apt-get update
 
@@ -41,5 +42,3 @@ RUN /usr/bin/crontab -u www-data /crontab
 # RUN /bin/crontab -u www-data /crontab
 
 CMD ["cron", "-f", "-l", "8"]
-
-

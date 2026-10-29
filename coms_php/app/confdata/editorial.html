@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'editorial';
 
 $PAGEBODY = "";
@@ -84,9 +84,9 @@ SELECT
   r.revpin AS revpin, r.score AS r_score, r.subject AS r_subject, r.ipccomments AS r_ipccomments, r.authcomments AS r_authcomments, r.recommendation AS r_recommendation,
   getfullnamewithpin(p.registrator) AS registratorname,
   getfullnamewithpin(r.revpin) AS revname
-FROM 
+FROM
  (editor AS e INNER JOIN paper AS p ON e.userpin=$USERPIN AND e.context=$CURRENTCONT AND e.editorid=p.editor AND p.context=$CURRENTCONT
- ) LEFT JOIN 
+ ) LEFT JOIN
    review AS r ON p.papnum=r.papnum AND r.context=$CURRENTCONT
 ORDER BY p.papnum, r.revpin;
 ");
@@ -102,7 +102,7 @@ PAGEBODY;
 	if ($PERMISSIONS['EDITOR_EDIT_RECOMMENDATIONS']) {
 		$PAGEBODY .= <<<PAGEBODY
 <br>
-You may either set the paper score, recommended decision and section in the bottom of the page or 
+You may either set the paper score, recommended decision and section in the bottom of the page or
 enter the page "Edit recommendations" if comments to authors/IPC are needed.
 <br>
 PAGEBODY;
@@ -463,11 +463,11 @@ SELECT
   r.revpin AS revpin, r.score AS r_score, r.ipccomments AS r_ipccomments, r.authcomments AS r_authcomments, r.recommendation AS r_recommendation,
   getfullnamewithpin(s.manager) AS managername,
   getfullnamewithpin(r.revpin) AS revname
-FROM 
+FROM
  (editor AS e INNER JOIN subject AS s ON e.userpin=$USERPIN AND e.context=$CURRENTCONT AND e.editorid=s.editor
  )
- LEFT JOIN 
-   subjectreview AS r 
+ LEFT JOIN
+   subjectreview AS r
  ON s.subjid=r.subjid AND r.context=$CURRENTCONT
 ORDER BY s.isinvited, s.title, s.subjid;
 ");

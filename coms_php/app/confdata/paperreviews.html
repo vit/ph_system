@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'editorial';
 
 
@@ -74,7 +74,7 @@ ENDQUERY
           $result = @pg_query("INSERT INTO review (context, papnum, revpin) VALUES ($CURRENTCONT, $papid, $revpin)");
           include_once( "email/directmail.php" );
           if( $sendnotification )
-            $mailflag = mail_send_now("assignasreviewer", $revpin, "", 
+            $mailflag = mail_send_now("assignasreviewer", $revpin, "",
                     array(
                       'PAPERTITLE' => $PAPERTITLE,
                       'PAPERID' => $papid,
@@ -90,6 +90,7 @@ ENDQUERY
 //                      'SUBJECT' => $CURRENTCONTTITLE.': Reviewing paper '.$papid
 //                      'SUBJECT' => $CURRENTCONTTITLE.': Invitation to reviewing (paper '.$papid.')'
                       'SUBJECT' => 'Invitation to reviewing for ' .$CURRENTCONTTITLE. ': paper # ' .$papid
+//                      'SUBJECT' => 'Correction: Invitation to reviewing for ' .$CURRENTCONTTITLE. ': paper # ' .$papid
                     )
                   );
         }
@@ -139,7 +140,7 @@ ENDTEXT;
 //                if( $_REQUEST['sendpassword']==1 ) {
                   include_once( "email/directmail.php" );
                   if( $sendnotification )
-                    $mailflag = mail_send_now("assignasreviewer", $NEWPIN, "", 
+                    $mailflag = mail_send_now("assignasreviewer", $NEWPIN, "",
                             array(
 				'PAPERTITLE' => $PAPERTITLE,
 				'PAPERID' => $papid,
@@ -154,6 +155,7 @@ ENDTEXT;
 //				'SUBJECT' => $CURRENTCONTTITLE.': Reviewing paper '.$papid
 //	                      'SUBJECT' => $CURRENTCONTTITLE.': Invitation to reviewing (paper '.$papid.')'
 	                      'SUBJECT' => 'Invitation to reviewing for ' .$CURRENTCONTTITLE. ': paper # ' .$papid
+//                           'SUBJECT' => 'Correction: Invitation to reviewing for ' .$CURRENTCONTTITLE. ': paper # ' .$papid
                             )
                           );
 //                }
@@ -181,7 +183,7 @@ PAGEBODY;
 
       $result = pg_query("
 SELECT r.*, u.email, getfullnamewithpin(r.revpin) AS name
-FROM 
+FROM
   review AS r
    INNER JOIN userpin AS u ON r.revpin=u.pin
 WHERE
@@ -267,10 +269,10 @@ mentioning that the request was initiated by you (sample message can be seen
 <a target=_blank href="{$ROOT}viewmailtemplate.php?contid=$CURRENTCONT&mailname=assignasreviewer">here</a>).
 <p>
 
-If your proposed reviewer does not have a PIN yet, register him/her, 
+If your proposed reviewer does not have a PIN yet, register him/her,
 entering first name, last name and e-mail into appropriate boxes.
 Then press the button <b>"Assign nonregistered reviewer"</b>.
-Repeat the procedure for all proposed reviewers. 
+Repeat the procedure for all proposed reviewers.
 <p>
 
 PAGEBODY;
@@ -340,7 +342,7 @@ PAGEBODY;
               $PAGEBODY .= <<<PAGEBODY
 <li>
 PIN: $row[pin]<br>
-Title: {$TITLES[$row[title]]}<br>
+Title: {$TITLES[$row['title']]}<br>
 First name: $row[fname]<br>
 Last name: $row[lname]<br>
 </li>

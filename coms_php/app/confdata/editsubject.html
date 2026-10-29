@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'mysubjects';
 
 
@@ -50,7 +50,7 @@ if( $subjid0 > 0 && $PERMISSIONS['SUBJADM_EDIT_SUBJECT'] ) {
 
 
 if( $subjid > 0 ) {
-  $flag = $_REQUEST[flag];
+  $flag = $_REQUEST['flag'];
   $title = trim( $_REQUEST['title']);
   $abstract = trim( $_REQUEST['abstract']);
 //  $isinvited = $_REQUEST['isinvited']?"TRUE":"FALSE";

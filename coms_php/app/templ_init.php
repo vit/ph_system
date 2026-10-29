@@ -1,4 +1,4 @@
-<?
+<?php
 
 $SYMBOLS = array(
 //  'DARR' => '&darr;',

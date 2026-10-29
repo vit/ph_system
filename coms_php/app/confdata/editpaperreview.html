@@ -32,9 +32,9 @@ PAGEBODY;
     $r_ipccomments = "";
     $r_authcomments = "";
 
-    $score = $_REQUEST[score]?(int)$_REQUEST[score]:"NULL";
-    $decision = $_REQUEST[decision]?(int)$_REQUEST[decision]:"NULL";
-    $subject = $_REQUEST[subject]?(int)$_REQUEST[subject]:"NULL";
+    $score = $_REQUEST['score']?(int)$_REQUEST['score']:"NULL";
+    $decision = $_REQUEST['decision']?(int)$_REQUEST['decision']:"NULL";
+    $subject = $_REQUEST['subject']?(int)$_REQUEST['subject']:"NULL";
 
     $papid0 = (int)$_REQUEST['papid'];
 
@@ -45,9 +45,9 @@ PAGEBODY;
     }
 
     if( $papid > 0 ) {
-      $flag = $_REQUEST[flag];
-      $r_ipccomments = trim( $_REQUEST[r_ipccomments]);
-      $r_authcomments = trim( $_REQUEST[r_authcomments]);
+      $flag = $_REQUEST['flag'];
+      $r_ipccomments = trim( $_REQUEST['r_ipccomments']);
+      $r_authcomments = trim( $_REQUEST['r_authcomments']);
 
 /*
       $r_ipccomments_e = pg_escape_string($r_ipccomments);
@@ -154,7 +154,7 @@ PAGEBODY;
 //  $result = pg_query("SELECT count(*) FROM review WHERE authcomments like '%Using … one can%' and not (authcomments like '%with ONE CAN%')");
 //  $result = pg_query("SELECT papnum, revpin, ipccomments, authcomments FROM review WHERE authcomments not like '%Using … one can%'");
 //  $result = pg_query("SELECT papnum, revpin, ipccomments, authcomments FROM review WHERE context=$CURRENTCONT");
-  
+
 //  $result = pg_query("SELECT papnum, revpin, ipccomments, authcomments FROM review WHERE (authcomments is null or authcomments not like '%Using … one can%') and context=$CURRENTCONT");
 //  $result = pg_query("SELECT papnum, revpin, ipccomments, authcomments FROM review WHERE (authcomments is null or authcomments not like '%Using … one can%') and context=$CURRENTCONT");
 //  $result = pg_query("SELECT papnum, revpin, ipccomments, authcomments FROM review WHERE not (authcomments like '%Using … one can%') and context=$CURRENTCONT");

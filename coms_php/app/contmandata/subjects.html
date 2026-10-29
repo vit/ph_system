@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'subjects';
 
   $PAGEBODY .= <<<PAGEBODY
@@ -52,7 +52,7 @@ WHERE e.context=$CURRENTCONT
 ORDER BY name;
 ");
 while( $row = pg_fetch_array($result) ) {
-  $editors[$row[editorid]] = $row[name];
+  $editors[$row['editorid']] = $row['name'];
 }
 
 
@@ -94,30 +94,30 @@ PAGEBODY;
   $result = pg_query("
 SELECT *, getfullnamewithpin(manager) AS managername
 FROM subject
-WHERE context=$CURRENTCONT 
+WHERE context=$CURRENTCONT
 ORDER BY isinvited, title, subjid;
 ");
 
   while( $row = pg_fetch_array($result) ) {
     $ctitle1 = htmlspecialchars($row['title']);
     $cabstract1 = nl2br( htmlspecialchars($row['abstract']) );
-    $invited1 = $row[isinvited]=='t'?"Yes":"No";
+    $invited1 = $row['isinvited']=='t'?"Yes":"No";
 /*
     $managerpin1 = $row[manager];
     if( $managerpin1 ) {
       $result1 = pg_query("
 SELECT t.shortstr || ' ' || u.fname || ' ' || u.lname AS name
 FROM userpin AS u LEFT JOIN title AS t ON u.title=t.titleid
-WHERE u.pin=$managerpin1; 
+WHERE u.pin=$managerpin1;
 ");
       if( $row1 = pg_fetch_array($result1) ) {
         $managerpin1 .= " (".$row1[0].")";
       }
     }
 */
-    $managerpin1 = $row[managername];
+    $managerpin1 = $row['managername'];
 
-    $editorid1 = $editors[$row[editor]];
+    $editorid1 = $editors[$row['editor']];
 //    $editorid1 = $row[editorname];
 
 

@@ -1,4 +1,7 @@
-<?
+<?php
+
+$PAGEBODY = $PAGEBODY ?? '';
+
 
 $contid = $_REQUEST['contid'];
 

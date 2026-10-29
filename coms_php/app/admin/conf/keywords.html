@@ -1,4 +1,4 @@
-<?
+<?php
 $subpageid = 'keywords';
 
 include_once("start.php");
@@ -75,8 +75,8 @@ PAGEBODY;
 $ppp = 0;
 
   $result = pg_query("
-SELECT k.*, k1.* 
-FROM keyword AS k LEFT JOIN cont_kw AS k1 ON k.kwid=k1.keyword AND k1.context=$contid 
+SELECT k.*, k1.*
+FROM keyword AS k LEFT JOIN cont_kw AS k1 ON k.kwid=k1.keyword AND k1.context=$contid
 ORDER BY k1.keyword, k.name;
 ");
   while( $row = pg_fetch_array($result) ) {

@@ -1,4 +1,4 @@
-<?
+<?php
 header ("Content-Type: text/html; charset=utf-8");
 if($ERROR404)
   header("HTTP/1.0 404 Not Found");
@@ -7,7 +7,7 @@ if($ERROR404)
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>
-<?
+<?php
 include_once("style.php");
 ?>
 
@@ -40,7 +40,7 @@ include_once("style.php");
 <table width=100%>
 <td valign=top class=version>Conference Management System (CoMS)</td>
 <td align=right>
-<? include_once("counters.php"); ?>
+<?php include_once("counters.php"); ?>
 </td>
 </table>
 

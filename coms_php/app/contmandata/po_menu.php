@@ -1,4 +1,4 @@
-<?
+<?php
 
 $PO_SUBMENU = array();
 $PO_SUBMENU[] = array('id'=>'main', 'url'=>'./postoffice.html', 'title'=>'Main');

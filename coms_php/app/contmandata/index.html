@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'main';
 
 
@@ -19,9 +19,9 @@ if( $row = pg_fetch_array($result) ) {
 
 $COUNTRYCNT = 0;
 $result = @pg_query("
-SELECT COUNT(*) 
-FROM country 
-WHERE cid IN 
+SELECT COUNT(*)
+FROM country
+WHERE cid IN
   (SELECT u.country FROM paper AS p INNER JOIN userpin AS u ON p.registrator=u.pin AND p.context='$CURRENTCONT')
 ");
 if( $row = pg_fetch_array($result) ) {

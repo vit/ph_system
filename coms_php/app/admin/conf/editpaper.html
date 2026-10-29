@@ -1,16 +1,16 @@
-<?
-$subpageid = papers;
+<?php
+$subpageid = 'papers';
 
 include_once("start.php");
 
 
-  $flag = $_REQUEST[flag];
-  $papnum = $_REQUEST[papnum];
-  $title = trim( $_REQUEST[title] );
-  $abstract = trim( $_REQUEST[abstract] );
+  $flag = $_REQUEST['flag'];
+  $papnum = $_REQUEST['papnum'];
+  $title = trim( $_REQUEST['title'] );
+  $abstract = trim( $_REQUEST['abstract'] );
 
-  $registrator = $_REQUEST[registrator];
-  $editor = $_REQUEST[editor];
+  $registrator = $_REQUEST['registrator'];
+  $editor = $_REQUEST['editor'];
 
 
   if ( $flag=="save" && $title ) {
@@ -36,7 +36,7 @@ FROM (editor AS e INNER JOIN userpin AS u ON e.userpin=u.pin AND e.context=$cont
 ORDER BY name;
 ");
 while( $row = pg_fetch_array($result) ) {
-  $editors[$row[editorid]] = $row[name];
+  $editors[$row['editorid']] = $row['name'];
 }
 
 //print_r($editors);
@@ -47,15 +47,15 @@ if( $row = pg_fetch_array($result) ) {
   $EDLIST = "<SELECT name=editor>";
   $EDLIST .= "<OPTION value=0> -- Not defined -- </OPTION>";
   foreach($editors AS $num => $name) {
-    $selflag = $num==$row[editor]?"SELECTED":"";
+    $selflag = $num==$row['editor']?"SELECTED":"";
     $EDLIST .= "<OPTION value=$num $selflag>$name</OPTION>";
   }
   $EDLIST .= "</SELECT>";
 
 
 
-  $row[title] = htmlspecialchars($row[title]);
-  $row[abstract] = htmlspecialchars($row[abstract]);
+  $row['title'] = htmlspecialchars($row['title']);
+  $row['abstract'] = htmlspecialchars($row['abstract']);
 
   $PAGEBODY .= <<<PAGEBODY
 
@@ -86,7 +86,7 @@ PAGEBODY;
 
   $registratorname = "";
 //  $editorname = "";
-  if( $row[registrator] ) {
+  if( $row['registrator'] ) {
     $result1 = pg_query("SELECT * FROM userpin WHERE pin=$row[registrator]");
     if( $row1 = pg_fetch_array($result1) ) {
       $registratorname = $row1['fname'] ." ". $row1['lname'];

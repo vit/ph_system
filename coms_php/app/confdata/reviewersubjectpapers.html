@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'revoffice';
 
 
@@ -45,14 +45,14 @@ $subjid0 = $_REQUEST['subjid'];
   $result = pg_query("SELECT * FROM subject WHERE context=$CURRENTCONT AND subjid=$subjid0 AND editor=$EDITORID");
   if( $row = pg_fetch_array($result) ) {
     $subjid = $row['subjid'];
-    $ctitle1 = htmlspecialchars($row[title]);
-    $cabstract1 = nl2br( htmlspecialchars($row[abstract]) );
+    $ctitle1 = htmlspecialchars($row['title']);
+    $cabstract1 = nl2br( htmlspecialchars($row['abstract']) );
   }
 //}
 
 
 if( $subjid > 0 ) {
-  $flag = $_REQUEST[flag];
+  $flag = $_REQUEST['flag'];
 
 
 
@@ -91,7 +91,7 @@ PAGEBODY;
 
   $result = pg_query("
 SELECT p.*, t.shortstr || ' ' || u.fname || ' ' || u.lname || ' (PIN:' || p.registrator || ')' AS name
-FROM 
+FROM
   (paper AS p
    INNER JOIN userpin AS u ON p.registrator=u.pin AND p.subject=$subjid)
     LEFT JOIN title AS t ON u.title=t.titleid
@@ -100,20 +100,20 @@ ORDER BY p.papnum
 
   while( $row = pg_fetch_array($result) ) {
     $papid = $row['papnum'];
-    $ctitle1 = htmlspecialchars($row[title]);
-    $cabstract1 = nl2br( htmlspecialchars($row[abstract]) );
-    $uname1 = htmlspecialchars($row[name]);
+    $ctitle1 = htmlspecialchars($row['title']);
+    $cabstract1 = nl2br( htmlspecialchars($row['abstract']) );
+    $uname1 = htmlspecialchars($row['name']);
 
     $subject1 = (int)$row['subject'];
     $subject1_str = $SUBJECTS[$subject1];
 
 
-    $filename = $papersdir."/c".$CURRENTCONT."p".$row[papnum];
+    $filename = $papersdir."/c".$CURRENTCONT."p".$row['papnum'];
     if ( file_exists($filename) ) {
-      $srcfname = $row[filename];
+      $srcfname = $row['filename'];
       preg_match('|(.*)\.(.*)|', $srcfname, $fnparse);
       $fileext = $fnparse[2];
-      $externfname = "c{$CURRENTCONT}p{$row[papnum]}r{$row[registrator]}.$fileext";
+      $externfname = "c{$CURRENTCONT}p{$row['papnum']}r{$row['registrator']}.$fileext";
       $papfilesize = filesize( $filename );
 
 
@@ -133,8 +133,8 @@ downloadtext;
     $PAGEBODY .= <<<PAGEBODY
 <tr class=$cellclass>
   <td align=center rowspan=2>
-    <a href="{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row[registrator]}.html" title="Paper information"
-      onClick="window.open('{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row[registrator]}.html', '', 'location=no, menubar=no, toolbar=no, statusbar=no, scrollbars=yes, width=620, height=550, resizable=yes'); return false;"
+    <a href="{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row['registrator']}.html" title="Paper information"
+      onClick="window.open('{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row['registrator']}.html', '', 'location=no, menubar=no, toolbar=no, statusbar=no, scrollbars=yes, width=620, height=550, resizable=yes'); return false;"
     >[&nbsp;$papid&nbsp;]</a>
   </td>
   <td>

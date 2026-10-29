@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'editors';
 
   $PAGEBODY .= <<<PAGEBODY
@@ -73,7 +73,7 @@ ORDER BY e.userpin;
 
   $result = pg_query("
 SELECT e.*, getfullnamewithpin(e.userpin) AS name
-FROM editor AS e 
+FROM editor AS e
 WHERE e.context=$CURRENTCONT
 ORDER BY e.userpin;
 ");

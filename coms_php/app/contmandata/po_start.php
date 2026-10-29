@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'postoffice';
 
   $PAGEBODY .= <<<PAGEBODY

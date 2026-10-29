@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'revoffice';
 
   $PAGEBODY .= <<<PAGEBODY
@@ -80,8 +80,8 @@ SELECT p.*, r.score AS r_score, r.subject AS r_subject, r.ipccomments AS r_ipcco
   concatpaperkeywords(p.context, p.papnum, 3) AS keywords1,
   concatpaperkeywords(p.context, p.papnum, 2) AS keywords2,
   getfullnamewithpin(p.registrator) AS registratorname
-FROM 
-  review AS r 
+FROM
+  review AS r
     INNER JOIN paper AS p
       ON r.revpin=$USERPIN AND r.context=$CURRENTCONT AND r.papnum=p.papnum AND p.context=$CURRENTCONT
 ORDER BY p.papnum;
@@ -99,7 +99,7 @@ PAGEBODY;
 	if($PERMISSIONS['REVIEWER_EDIT_REVIEWS']) {
 		$PAGEBODY .= <<<PAGEBODY
 <br>
-You may either set the paper score, recommended decision and section in the bottom of the page or 
+You may either set the paper score, recommended decision and section in the bottom of the page or
 enter the page "Edit review" if comments to authors/IPC are needed.
 <br>
 PAGEBODY;
@@ -390,7 +390,7 @@ PAGEBODY;
   $result = pg_query("
 SELECT s.*, r.score AS r_score, r.ipccomments AS r_ipccomments, r.authcomments AS r_authcomments, r.recommendation AS r_recommendation,
   getfullnamewithpin(s.manager) AS managername
-FROM 
+FROM
   subjectreview AS r
     INNER JOIN subject AS s
       ON r.revpin=$USERPIN AND r.context=$CURRENTCONT AND r.subjid=s.subjid

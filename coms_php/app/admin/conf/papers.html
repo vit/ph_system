@@ -1,13 +1,13 @@
-<?
-$subpageid = papers;
+<?php
+$subpageid = 'papers';
 
 include_once("start.php");
 
 
-  $flag = $_REQUEST[flag];
+  $flag = $_REQUEST['flag'];
 //  $name = trim( $_REQUEST[name]);
-  $marked = &$_REQUEST[marked];
-  $title = trim( $_REQUEST[title] );
+  $marked = &$_REQUEST['marked'];
+  $title = trim( $_REQUEST['title'] );
 
   if ( $flag=="add" && $title ) {
     $result = pg_query("INSERT INTO paper (context, papnum, title) VALUES ($contid, createnewpapnum($contid), '$title')");
@@ -76,12 +76,12 @@ PAGEBODY;
 
 
   $result = pg_query("
-SELECT * 
-FROM paper WHERE context=$contid 
+SELECT *
+FROM paper WHERE context=$contid
 ORDER BY papnum DESC;
 ");
   while( $row = pg_fetch_array($result) ) {
-    $ptitle1 = htmlspecialchars($row[title]);
+    $ptitle1 = htmlspecialchars($row['title']);
 
     $PAGEBODY .= <<<PAGEBODY
 <tr>

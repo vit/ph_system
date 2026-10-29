@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'papers';
 
 
@@ -39,15 +39,15 @@ PAGEBODY;
 
 
 
-  $papflag = $_REQUEST[papflag];
+  $papflag = $_REQUEST['papflag'];
 
-  $subject = $_REQUEST[subject]?(int)$_REQUEST['subject']:"NULL";
-  $decision = $_REQUEST[decision]?(int)$_REQUEST['decision']:"NULL";
+  $subject = $_REQUEST['subject']?(int)$_REQUEST['subject']:"NULL";
+  $decision = $_REQUEST['decision']?(int)$_REQUEST['decision']:"NULL";
 
   $editorid = (int)$_REQUEST['editorid'];
   $editorid = $editorid>0?$editorid:"NULL";
 
-  $marked = &$_REQUEST[marked];
+  $marked = &$_REQUEST['marked'];
 
 
   if ( $papflag=="assigneditor" && isset($marked) ) {
@@ -135,7 +135,7 @@ SELECT
   p.*,
   getfullnamewithpin(p.registrator) AS registratorname,
   getfullnamewithpin(e.userpin) AS editorname
-FROM 
+FROM
   paper AS p LEFT JOIN editor AS e ON p.editor=e.editorid
   WHERE p.context=$CURRENTCONT
 ORDER BY p.papnum
@@ -178,7 +178,7 @@ LIMIT $inpage OFFSET $offs
       $srcfname = $row['filename'];
       preg_match('|(.*)\.(.*)|', $srcfname, $fnparse);
       $fileext = $fnparse[2];
-      $externfname = "c{$CURRENTCONT}p{$row[papnum]}r{$row['registrator']}.$fileext";
+      $externfname = "c{$CURRENTCONT}p{$row['papnum']}r{$row['registrator']}.$fileext";
       $papfilesize = filesize( $filename );
 
 
@@ -199,8 +199,8 @@ downloadtext;
 <tr class=$cellclass>
 <td wwidth=1 align=center rowspan=2><input type=checkbox class=$cellclass style="border: none;" name="marked[]" value=$row[papnum]></td>
 <td align=center>
-  <a href="{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row[registrator]}.html" title="Paper information"
-    onClick="window.open('{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row[registrator]}.html', '', 'location=no, menubar=no, toolbar=no, statusbar=no, scrollbars=yes, width=620, height=550, resizable=yes'); return false;"
+  <a href="{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row['registrator']}.html" title="Paper information"
+    onClick="window.open('{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row['registrator']}.html', '', 'location=no, menubar=no, toolbar=no, statusbar=no, scrollbars=yes, width=620, height=550, resizable=yes'); return false;"
   >[&nbsp;$papid&nbsp;]</a>
 </td>
 <td>$ctitle1</td>

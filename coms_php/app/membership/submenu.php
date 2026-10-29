@@ -1,4 +1,4 @@
-<?
+<?php
 
 $SUBMENU = array();
 $SUBMENU[] = array('id'=>'main', 'url'=>'./', 'title'=>'Main');

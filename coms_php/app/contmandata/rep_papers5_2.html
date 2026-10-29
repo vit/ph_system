@@ -1,7 +1,7 @@
-<?
+<?php
 //$PAGEID = 'papers';
 
-$decision = $_REQUEST[decision];
+$decision = $_REQUEST['decision'];
 $decisiontitle = $FINALPAPERDECISIONS[$decision];
 
 
@@ -16,7 +16,7 @@ if(!$decision>0) {
   $result = pg_query("
 SELECT
   COUNT(p.*)
-FROM 
+FROM
   paper AS p
   WHERE p.context=$CURRENTCONT AND (p.finaldecision=$decision $decisioncond2)
 ");
@@ -53,7 +53,7 @@ SELECT
   concatpaperkeywords(p.context, p.papnum, 3) AS keywords1,
   concatpaperkeywords(p.context, p.papnum, 2) AS keywords2,
   getfullnamewopin(p.registrator) AS registratorname
-FROM 
+FROM
   paper AS p
   WHERE p.context=$CURRENTCONT AND (p.finaldecision=$decision $decisioncond2)
 ORDER BY p.papnum
@@ -61,7 +61,7 @@ ORDER BY p.papnum
 
   while( $row = pg_fetch_array($result) ) {
     $papid = $row['papnum'];
-    $ctitle1 = htmlspecialchars($row[title]);
+    $ctitle1 = htmlspecialchars($row['title']);
     $cauthors1 = $row['authors'];
     $ckeywords1 = $row['keywords1'];
     $ckeywords2 = $row['keywords2'];
@@ -83,8 +83,8 @@ ORDER BY p.papnum
     $ed_decision_str = $EDITORPAPERDECISIONS[$ed_decision];
 
 
-    $cipccomments = nl2br( htmlspecialchars($row[ed_ipccomments]) );
-    $cauthcomments = nl2br( htmlspecialchars($row[ed_authcomments]) );
+    $cipccomments = nl2br( htmlspecialchars($row['ed_ipccomments']) );
+    $cauthcomments = nl2br( htmlspecialchars($row['ed_authcomments']) );
 
     $r_subject = (int)$row['r_subject'];
     $r_subject_str = $SUBJECTS[$r_subject];
@@ -95,8 +95,8 @@ ORDER BY p.papnum
     $r_decision = (int)$row['r_recommendation'];
     $r_decision_str = $REVIEWERPAPERDECISIONS[$r_decision];
 
-    $rcipccomments = nl2br( htmlspecialchars($row[r_ipccomments]) );
-    $rcauthcomments = nl2br( htmlspecialchars($row[r_authcomments]) );
+    $rcipccomments = nl2br( htmlspecialchars($row['r_ipccomments']) );
+    $rcauthcomments = nl2br( htmlspecialchars($row['r_authcomments']) );
 
 
     $fin_subject = (int)$row['finalsubject'];

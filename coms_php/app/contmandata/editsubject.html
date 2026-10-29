@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'subjects';
 
   $PAGEBODY .= <<<PAGEBODY
@@ -34,7 +34,7 @@ FROM (editor AS e INNER JOIN userpin AS u ON e.userpin=u.pin AND e.context=$CURR
 ORDER BY name;
 ");
 while( $row = pg_fetch_array($result) ) {
-  $editors[$row[editorid]] = $row[name];
+  $editors[$row['editorid']] = $row['name'];
 }
 
 
@@ -74,7 +74,7 @@ if( $subjid > 0 ) {
   $EDLIST = "<SELECT name=editorid>";
   $EDLIST .= "<OPTION value=0> -- Not defined -- </OPTION>";
   foreach($editors AS $num => $name) {
-    $selflag = $num==$row[editor]?"SELECTED":"";
+    $selflag = $num==$row['editor']?"SELECTED":"";
     $EDLIST .= "<OPTION value=$num $selflag>$name</OPTION>";
   }
   $EDLIST .= "</SELECT>";

@@ -1,4 +1,4 @@
-<?
+<?php
 
 $PARTID = 'conf';
 
@@ -11,7 +11,7 @@ include_once("papfuncs.php");
 
 // ----------------------------------------------
 
-// Если скрипт вызван без "/" - добавить его и 
+// Если скрипт вызван без "/" - добавить его и
 // переадресовать - как будто это подкаталог
 
 $confpath = getenv('PATH_INFO');
@@ -47,7 +47,7 @@ TEXT;
 
 // ----------------------------------------------
 
-// Разбор пути, выделение номера контекста 
+// Разбор пути, выделение номера контекста
 // и имени документа или скрипта
 
 $fpath = substr( $confpath, 1 );
@@ -148,8 +148,8 @@ $EDITORID = 0;
 if( $CURRENTCONT > 0 ) {
   // Чтение списка разрешений
   $result = pg_query("
-SELECT p.*, p1.* 
-FROM permission AS p INNER JOIN cont_perm AS p1 ON p.permid=p1.permission AND p1.context=$CURRENTCONT 
+SELECT p.*, p1.*
+FROM permission AS p INNER JOIN cont_perm AS p1 ON p.permid=p1.permission AND p1.context=$CURRENTCONT
 ORDER BY p.name;
 ");
   while( $row = pg_fetch_array($result) ) {
@@ -195,9 +195,9 @@ ORDER BY p.name;
   if( $USERPIN ) {
     $result = pg_query("
 SELECT COUNT(*)
-FROM 
-  subjectreview AS sr 
-   INNER JOIN 
+FROM
+  subjectreview AS sr
+   INNER JOIN
     subject AS s ON sr.subjid=s.subjid AND sr.revpin='$USERPIN' AND s.context=$CURRENTCONT
 ");
     if( $row = pg_fetch_array($result) ) {

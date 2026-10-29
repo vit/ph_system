@@ -1,4 +1,4 @@
-<?
+<?php
 
 /*
 $bgcolor="#3fffff";

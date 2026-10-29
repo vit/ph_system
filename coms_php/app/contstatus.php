@@ -1,4 +1,4 @@
-<?
+<?php
 $CONTSTATUS = array();
 $CONTSTATUS[0] = 'not yet open';
 

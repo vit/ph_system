@@ -1,9 +1,9 @@
-<?
+<?php
 
 include_once("start.php");
 
 
-$PATH_INFO = getenv(PATH_INFO);
+$PATH_INFO = getenv('PATH_INFO');
 preg_match('|/c(\d*)p(\d*)r(\d*)\.(.*)|', $PATH_INFO, $list);
 
 $context = $list[1];

@@ -1,4 +1,4 @@
-<?
+<?php
 $editorid = (int)$_REQUEST['editorid'];
 
 $editoridcond2 = "";
@@ -12,7 +12,7 @@ if(!$editorid>0) {
   $result = pg_query("
 SELECT
   COUNT(p.*)
-FROM 
+FROM
   paper AS p
   WHERE p.context=$CURRENTCONT AND (p.editor=$editorid $editoridcond2)
 ");
@@ -71,9 +71,9 @@ SELECT
   getfullnamewithpin(p.registrator) AS registratorname,
   getfullnamewithpin(e.userpin) AS editorname,
   getfullnamewithpin(r.revpin) AS revname
-FROM 
+FROM
   (paper AS p LEFT JOIN editor AS e ON p.editor=e.editorid)
-    LEFT JOIN 
+    LEFT JOIN
       review AS r ON p.papnum=r.papnum AND r.context=$CURRENTCONT
   WHERE p.context=$CURRENTCONT AND (p.editor=$editorid $editoridcond2)
 ORDER BY p.ed_subject, p.ed_score, p.papnum, r.revpin
@@ -89,7 +89,7 @@ $papid0 = 0;
 //print_r( $row );
 
     $papid = $row['papnum'];
-    $ctitle1 = htmlspecialchars($row[title]);
+    $ctitle1 = htmlspecialchars($row['title']);
     $cauthors = $row['authors'];
     $cauthors1 = $row['authors1'];
     $ckeywords1 = $row['keywords1'];
@@ -112,8 +112,8 @@ $papid0 = 0;
     $ed_subject_str = $EDITORPAPERsubjectS[$ed_subject];
 
 
-    $cipccomments = nl2br( htmlspecialchars($row[ed_ipccomments]) );
-    $cauthcomments = nl2br( htmlspecialchars($row[ed_authcomments]) );
+    $cipccomments = nl2br( htmlspecialchars($row['ed_ipccomments']) );
+    $cauthcomments = nl2br( htmlspecialchars($row['ed_authcomments']) );
 
     $r_subject = (int)$row['r_subject'];
     $r_subject_str = $SUBJECTS[$r_subject];
@@ -124,8 +124,8 @@ $papid0 = 0;
     $r_subject = (int)$row['r_recommendation'];
     $r_subject_str = $REVIEWERPAPERsubjectS[$r_subject];
 
-    $rcipccomments = nl2br( htmlspecialchars($row[r_ipccomments]) );
-    $rcauthcomments = nl2br( htmlspecialchars($row[r_authcomments]) );
+    $rcipccomments = nl2br( htmlspecialchars($row['r_ipccomments']) );
+    $rcauthcomments = nl2br( htmlspecialchars($row['r_authcomments']) );
 
 
     $fin_subject = (int)$row['finalsubject'];
@@ -135,7 +135,7 @@ $papid0 = 0;
     $fin_subject_str = $FINALPAPERsubjectS[$fin_subject];
 
 
-    $filename = $papersdir."/c".$CURRENTCONT."p".$row[papnum];
+    $filename = $papersdir."/c".$CURRENTCONT."p".$row['papnum'];
     if ( file_exists($filename) )
       $filetext = "Yes";
     else
@@ -159,8 +159,8 @@ PAGEBODY;
     $PAGEBODY .= <<<PAGEBODY
 <tr class=$cellclass>
 <td align=center rowspan=4>
-  <a href="{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row[registrator]}.html" title="Paper information"
-    onClick="window.open('{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row[registrator]}.html', '', 'location=no, menubar=no, toolbar=no, statusbar=no, scrollbars=yes, width=620, height=550, resizable=yes'); return false;"
+  <a href="{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row['registrator']}.html" title="Paper information"
+    onClick="window.open('{$ROOT}paperinfo/c{$CURRENTCONT}p{$papid}r{$row['registrator']}.html', '', 'location=no, menubar=no, toolbar=no, statusbar=no, scrollbars=yes, width=620, height=550, resizable=yes'); return false;"
   >[&nbsp;$papid&nbsp;]</a>
 </td>
 <td>$ctitle1</td>

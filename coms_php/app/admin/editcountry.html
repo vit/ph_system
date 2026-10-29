@@ -1,14 +1,16 @@
-<?
-$pageid = countries;
+<?php
+$pageid = 'countries';
 
 include_once("start.php");
 
 //include_once("mainmenu.php");
 
+$PAGEBODY = $PAGEBODY ?? '';
 
-  $countryflag = $_REQUEST[countryflag];
-  $cid = $_REQUEST[cid];
-  $name = $_REQUEST[name];
+
+  $countryflag = $_REQUEST['countryflag'];
+  $cid = $_REQUEST['cid'];
+  $name = $_REQUEST['name'];
 
 
   if ( $countryflag=="save" && trim($name) ) {
@@ -20,7 +22,7 @@ include_once("start.php");
 $result = pg_query("SELECT * FROM country WHERE cid='$cid'");
 if( $row = pg_fetch_array($result) ) {
 
-  $row[name] = htmlspecialchars($row[name]);
+    $row['name'] = htmlspecialchars($row['name']);
 
   $PAGEBODY .= <<<PAGEBODY
 

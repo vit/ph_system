@@ -1,9 +1,12 @@
-<?
-$pageid = mailcenter;
+<?php
+$pageid = 'mailcenter';
 
 include_once("start.php");
 
 //include_once("mainmenu.php");
+
+$PAGEBODY = $PAGEBODY ?? '';
+
 
 $mailtitle = trim( $_REQUEST['mailtitle'] );
 $addmailflag = $_REQUEST['addmailflag'];
@@ -22,7 +25,7 @@ if ( $mlaction == "savereceivers" ) {
   if( is_array( $mlrcvrflag ) )
     foreach ($mlrcvrflag as $f)
       $rcvrflags |= $f;
-  $rcvrid = (int)$mlrcvrdata[rcvrid];
+  $rcvrid = (int)$mlrcvrdata['rcvrid'];
   if( $rcvrid == 0 )
     $rcvrid = "NULL";
 
@@ -32,12 +35,12 @@ if ( $mlaction == "savereceivers" ) {
 if ( $mlaction == "send" ) {
   $result = pg_query("SELECT * FROM maildata WHERE mlid='$mlid'");
   if( $ml = pg_fetch_array( $result ) ) {
-    $rcvridflag = ( $ml[mlrcvrflags] & 1 ) > 0;
-    $rcvraddrflag = ( $ml[mlrcvrflags] & 2 ) > 0;
-    $rcvrallflag = ( $ml[mlrcvrflags] & 128 ) > 0;
+    $rcvridflag = ( $ml['mlrcvrflags'] & 1 ) > 0;
+    $rcvraddrflag = ( $ml['mlrcvrflags'] & 2 ) > 0;
+    $rcvrallflag = ( $ml['mlrcvrflags'] & 128 ) > 0;
 
-    $mlrcvrid = $ml[mlrcvrpin];
-    $mlrcvraddr = $ml[mlrcvraddr];
+    $mlrcvrid = $ml['mlrcvrpin'];
+    $mlrcvraddr = $ml['mlrcvraddr'];
 
     if ( $rcvridflag ) {
       $result = pg_query("INSERT INTO mailtask (taskpin, tasktrycnt, taskstatus, tasktype, mlid) VALUES('$mlrcvrid', '0', '0', '1', '$mlid')");
@@ -84,9 +87,9 @@ Last updated at $ml[mldate]
 
 PAGEBODY;
 
-$rcvridflag = ( $ml[mlrcvrflags] & 1 ) > 0;
-$rcvraddrflag = ( $ml[mlrcvrflags] & 2 ) > 0;
-$rcvrallflag = ( $ml[mlrcvrflags] & 128 ) > 0;
+$rcvridflag = ( $ml['mlrcvrflags'] & 1 ) > 0;
+$rcvraddrflag = ( $ml['mlrcvrflags'] & 2 ) > 0;
+$rcvrallflag = ( $ml['mlrcvrflags'] & 128 ) > 0;
 
 $rcvridchecked = $rcvridflag?" checked":"";
 $rcvraddrchecked = $rcvraddrflag?" checked":"";
@@ -118,7 +121,7 @@ $PAGEBODY .= <<<PAGEBODY
 <br>
 <a name="mailstate"></a>
 <div style="border-style: solid; border-width: thin; border-color: '#aaaaaa'; margin: 0;">
-<b>Mail control / view state: </b> 
+<b>Mail control / view state: </b>
 <FORM name=sendmailform METHOD="POST" ACTION="#mailstate" aENCTYPE="application/x-www-form-urlencoded" style="margin: 0;">
   <input type=hidden name="mlid" value="$mlid">
   <input type="hidden" name="mlaction" value="">
@@ -133,9 +136,9 @@ $mlstat = db_ml_getMailStatistics( $mlid );
 
 $PAGEBODY .= <<<PAGEBODY
 <b>Statistics:</b><br>
-<b>Queued (in all)</b>: {$mlstat[cnt]} &nbsp;
-<b>Sent</b>: {$mlstat[sent]} &nbsp;
-<b>Errors</b>: {$mlstat[err]} &nbsp;
+<b>Queued (in all)</b>: {$mlstat['cnt']} &nbsp;
+<b>Sent</b>: {$mlstat['sent']} &nbsp;
+<b>Errors</b>: {$mlstat['err']} &nbsp;
 </div>
 
 PAGEBODY;
@@ -159,22 +162,22 @@ $PAGEBODY .= <<<PAGEBODY
 
 PAGEBODY;
 
-$by_arr = array(1 => pin, 2 => email, 4 => context, 8 => 'paper id');
+$by_arr = array(1 => 'pin', 2 => 'email', 4 => 'context', 8 => 'paper id');
 
 $result = pg_query("SELECT * FROM mailtask WHERE mlid='$mlid' AND (taskstatus='1' OR taskstatus='0') ORDER BY taskid DESC");
 while( $row = pg_fetch_array( $result ) ) {
-  $err = $row[taskerror];
+  $err = $row['taskerror'];
   $marker = '';
   if ( $err ) {
     $marker = 'style="background-color: #ff0000;"';
   }
 
-  $proc1 = $row[taskstatus]==1?"processed":"not processed";
+  $proc1 = $row['taskstatus']==1?"processed":"not processed";
   $PAGEBODY .= <<<PAGEBODY
 <tr>
   <td>$proc1</td>
   <td $marker>$err</td>
-  <td>{$by_arr[$row[tasktype]]}</td>
+  <td>{$by_arr[$row['tasktype']]}</td>
   <td>$row[taskpin]</td>
   <td>$row[taskemail]</td>
 </tr>
@@ -220,22 +223,22 @@ $PAGEBODY .= <<<PAGEBODY
 
 PAGEBODY;
 
-$by_arr = array(1 => pin, 2 => email, 4 => context, 8 => 'paper id');
+$by_arr = array(1 => 'pin', 2 => 'email', 4 => 'context', 8 => 'paper id');
 
 $result = pg_query("SELECT * FROM mailtask WHERE mlid='$mlid' AND (taskstatus='2' OR taskstatus='3') ORDER BY taskid DESC");
 while( $row = pg_fetch_array( $result ) ) {
-    $err = $row[taskerror];
+    $err = $row['taskerror'];
     $marker = '';
     if ( $err ) {
       $marker = 'style="background-color: #ff0000;"';
     }
-    $proc1 = $row[taskstatus]==3?"processed":"not processed";
+    $proc1 = $row['taskstatus']==3?"processed":"not processed";
 
 $PAGEBODY .= <<<PAGEBODY
 <tr>
   <td>$proc1</td>
   <td $marker>$err</td>
-  <td>{$by_arr[$row[tasktype]]}</td>
+  <td>{$by_arr[$row['tasktype']]}</td>
   <td>$row[taskpin]</td>
   <td>$row[taskemail]</td>
 </tr>
@@ -261,7 +264,7 @@ function db_ml_getMailStatistics( $mlid ) {
       $cnt = $row[0];
     }
   }
-  $rez[cnt] = $cnt;
+  $rez['cnt'] = $cnt;
 
   $result = pg_query("SELECT COUNT(*) FROM mailtask WHERE mlid='$mlid' AND taskstatus='1' AND taskerror='0'");
   if ( $result ) {
@@ -270,7 +273,7 @@ function db_ml_getMailStatistics( $mlid ) {
       $sent = $row[0];
     }
   }
-  $rez[sent] = $sent;
+  $rez['sent'] = $sent;
 
   $result = pg_query("SELECT COUNT(*) FROM mailtask WHERE mlid='$mlid' AND taskstatus='1' AND taskerror!='0'");
   if ( $result ) {
@@ -279,7 +282,7 @@ function db_ml_getMailStatistics( $mlid ) {
       $err = $row[0];
     }
   }
-  $rez[err] = $err;
+  $rez['err'] = $err;
 
   return $rez;
 }

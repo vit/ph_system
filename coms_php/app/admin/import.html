@@ -1,4 +1,4 @@
-<?
+<?php
 
 include_once("start.php");
 
@@ -37,29 +37,29 @@ include_once("start.php");
 //    print_r($row);
 //    print "<br>\n";
 
-    $usid = $row[usid];
+    $usid = $row['usid'];
 
-    $title = $row[title];
+    $title = $row['title'];
 
-    $fname = addslashes( $row[fname] );
-    $lname = addslashes( $row[lname] );
+    $fname = addslashes( $row['fname'] );
+    $lname = addslashes( $row['lname'] );
 
-    $gender = $row[gender];
+    $gender = $row['gender'];
 
-    $affiliation = addslashes( $row[affiliation] );
+    $affiliation = addslashes( $row['affiliation'] );
 
-    $countryid = $row[countryid];
+    $countryid = $row['countryid'];
     $countryid = $countryid>0?$countryid+100:"NULL";
 
-    $city = addslashes( $row[city] );
-    $address = addslashes( $row[address] );
+    $city = addslashes( $row['city'] );
+    $address = addslashes( $row['address'] );
 
-    $phone = addslashes( $row[phone] );
-    $fax = addslashes( $row[fax] );
-    $email = addslashes( $row[email] );
+    $phone = addslashes( $row['phone'] );
+    $fax = addslashes( $row['fax'] );
+    $email = addslashes( $row['email'] );
 
     $result2 = pg_query("
-INSERT INTO userpin (pin, pass, title, fname, lname, gender, country, affiliation, city, address, phone, fax, email, updtime) 
+INSERT INTO userpin (pin, pass, title, fname, lname, gender, country, affiliation, city, address, phone, fax, email, updtime)
 VALUES ('$usid', create6digitsrandom(), $title, '$fname', '$lname', '$gender', $countryid, '$affiliation', '$city', '$address', '$phone', '$fax', '$email', NOW())
 ");
 
@@ -96,8 +96,8 @@ VALUES ('$usid', create6digitsrandom(), $title, '$fname', '$lname', '$gender', $
 //    print_r($row);
 //    print "<br>\n";
 
-    $kwid = $row[kwid];
-    $keyword = $row[keyword];
+    $kwid = $row['kwid'];
+    $keyword = $row['keyword'];
 
     $result2 = pg_query("INSERT INTO keyword (kwid, name) VALUES ('$kwid', '$keyword')");
 

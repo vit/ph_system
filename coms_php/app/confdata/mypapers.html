@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'mypapers';
 
   $PAGEBODY .= <<<PAGEBODY
@@ -67,9 +67,9 @@ SELECT
   concatpaperkeywords(p.context, p.papnum, 3) AS keywords1,
   concatpaperkeywords(p.context, p.papnum, 2) AS keywords2,
   r.revpin AS revpin, r.score AS r_score, r.subject AS r_subject, r.ipccomments AS r_ipccomments, r.authcomments AS r_authcomments, r.recommendation AS r_recommendation
-FROM 
-  paper AS p 
-    LEFT JOIN 
+FROM
+  paper AS p
+    LEFT JOIN
       review AS r ON p.papnum=r.papnum AND r.context=$CURRENTCONT
 WHERE
   p.registrator=$USERPIN AND p.context=$CURRENTCONT

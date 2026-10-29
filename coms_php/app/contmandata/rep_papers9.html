@@ -1,4 +1,4 @@
-<?
+<?php
 //$PAGEID = 'papers';
 
   $PAGEBODY .= <<<PAGEBODY
@@ -16,9 +16,9 @@ SELECT
   count(p.*) as cnt,
   c.name AS countrytitle,
   c.cid AS cid
-FROM 
+FROM
   (paper AS p LEFT JOIN userpin AS u ON p.registrator=u.pin)
-    LEFT JOIN 
+    LEFT JOIN
       country AS c ON u.country=c.cid
   WHERE p.context=$CURRENTCONT
 GROUP BY c.name, c.cid

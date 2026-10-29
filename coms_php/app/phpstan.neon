@@ -1,0 +1,7 @@
+parameters:
+    level: 1
+    ignoreErrors:
+        - identifier: variable.undefined
+        - identifier: regexp.pattern
+        - identifier: function.notFound
+#        - identifier: includeOnce.fileNotFound

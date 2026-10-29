@@ -1,4 +1,4 @@
-<?
+<?php
 
 $SUBPAGEID = 'tasks';
 
@@ -149,8 +149,8 @@ PAGEBODY;
   while( $row = pg_fetch_array($result) ) {
 //echo $row[argname2]." | " .$row[argvalue2];
 //echo "<br><br>";
-    $arr1 = explode("\1", $row[argname2]);
-    $arr2 = explode("\1", $row[argvalue2]);
+    $arr1 = explode("\1", $row['argname2']);
+    $arr2 = explode("\1", $row['argvalue2']);
     $arr3 = array_combine1($arr1, $arr2);
     $argstr = "";
     foreach($arr3 as $key => $val) {
@@ -165,12 +165,12 @@ PAGEBODY;
 //print "<br>";
 
 
-    $errtext = $row[error]==0?$row[error]:"<span style=\"color:red\">$row[error]</span>";
+    $errtext = $row['error']==0?$row['error']:"<span style=\"color:red\">$row[error]</span>";
     $PAGEBODY .= <<<PAGEBODY
   <tr valign=top class=$cellclass>
   <td rowspan=2 width=1><input type=checkbox name="marked[]" value="$row[qid]"></td>
   <td rowspan=2 width=1 align=center>$row[qid]</td>
-  <td width=1 align=center>{$TASKSNAMES[$row[status]]}</td>
+  <td width=1 align=center>{$TASKSNAMES[$row['status']]}</td>
   <td rowspan=2>$argstr</td>
   <td width=1 align=center><a target=_blank href="po_preview.php?qid=$row[qid]">preview</a></td>
   </tr>

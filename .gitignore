@@ -44,3 +44,6 @@ app/admin/
 
 __pycache__
 
+coms_php/composer.json
+coms_php/composer.lock
+coms_php/vendor

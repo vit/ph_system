@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'main';
 
 if( $CURRENTCONT > 0 ) {
@@ -13,7 +13,7 @@ if( $CURRENTCONT > 0 ) {
 PAGEBODY;
 
     $textarr = array();
-    $flag = 
+    $flag =
       $PERMISSIONS['USER_REGISTER_NEW_PAPER'] ||
       $ispapreg && (
         $PERMISSIONS['PAPREG_DELETE_REGISTERED_PAPER'] ||
@@ -57,17 +57,17 @@ PAGEBODY;
 
     $textarr = array();
 
-    $flag = 
+    $flag =
       $PERMISSIONS['EDITOR_WIEW_REVIEWING_DATA'] && $iseditor;
     if($flag)
       $textarr[] = "You may view reviewing data";
 
-    $flag = 
+    $flag =
       $PERMISSIONS['EDITOR_EDIT_REVIEWS_LIST'] && $iseditor;
     if($flag)
       $textarr[] = "You may edit reviews list and add new reviewers";
 
-    $flag = 
+    $flag =
       $PERMISSIONS['EDITOR_EDIT_RECOMMENDATIONS'] && $iseditor;
     if($flag)
       $textarr[] = "You may edit your recommendations";
@@ -89,12 +89,12 @@ PAGEBODY;
 
     $textarr = array();
 
-    $flag = 
+    $flag =
       $PERMISSIONS['REVIEWER_WIEW_REVIEWING_DATA'] && $isreviewer;
     if($flag)
       $textarr[] = "You may view reviewing data";
 
-    $flag = 
+    $flag =
       $PERMISSIONS['REVIEWER_EDIT_REVIEWS'] && $isreviewer;
     if($flag)
       $textarr[] = "You may edit your reviews";

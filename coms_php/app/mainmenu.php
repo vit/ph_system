@@ -1,4 +1,4 @@
-<?
+<?php
 
 $MAINMENU = array();
 $MAINMENU[] = array('id'=>'home', 'url'=>"{$ROOT}", 'title'=>'Home');

@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'permissions';
 
   $PAGEBODY .= <<<PAGEBODY
@@ -7,9 +7,9 @@ $PAGEID = 'permissions';
 
 PAGEBODY;
 
-  $flag = $_REQUEST[flag];
-  $name = trim( $_REQUEST[name]);
-  $marked = &$_REQUEST[marked];
+  $flag = $_REQUEST['flag'];
+  $name = trim( $_REQUEST['name']);
+  $marked = &$_REQUEST['marked'];
 
   if ( $flag=="add" && isset($marked) ) {
     foreach( $marked as $nomer ) {
@@ -41,13 +41,13 @@ $PAGEBODY .= <<<PAGEBODY
 PAGEBODY;
 
   $result = pg_query("
-SELECT p.*, p1.* 
-FROM permission AS p LEFT JOIN cont_perm AS p1 ON p.permid=p1.permission AND p1.context=$CURRENTCONT 
+SELECT p.*, p1.*
+FROM permission AS p LEFT JOIN cont_perm AS p1 ON p.permid=p1.permission AND p1.context=$CURRENTCONT
 ORDER BY p.name;
 ");
   while( $row = pg_fetch_array($result) ) {
-    $cname1 = htmlspecialchars($row[name]);
-    $exists = $row[value]=='t'?"+":"-";
+    $cname1 = htmlspecialchars($row['name']);
+    $exists = $row['value']=='t'?"+":"-";
     $PAGEBODY .= <<<PAGEBODY
 <tr>
 <td wwidth=1 align=center><input type=checkbox name="marked[]" value=$row[permid]></td>

@@ -1,10 +1,11 @@
-<?
+<?php
 $pageid = 'mailcenter';
 
 include_once("start.php");
 
 //include_once("mainmenu.php");
 
+$PAGEBODY = $PAGEBODY ?? '';
 
 $mailtitle = trim( $_REQUEST['mailtitle'] );
 $addmailflag = $_REQUEST['addmailflag'];

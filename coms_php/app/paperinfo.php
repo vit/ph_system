@@ -1,8 +1,8 @@
-<?
+<?php
 
 include_once("start.php");
 
-$PATH_INFO = getenv(PATH_INFO);
+$PATH_INFO = getenv('PATH_INFO');
 //preg_match('|(.*)/c(\d*)p(\d*)r(\d*)\.(.*)|', $PATH_INFO, $list);
 preg_match('|/c(\d*)p(\d*)r(\d*)\.html|', $PATH_INFO, $list);
 
@@ -30,8 +30,8 @@ if( $PAPID && $CONTEXT ) {
 
   $result = pg_query("
 SELECT p.*, t.shortstr || ' ' || u.fname || ' ' || u.lname AS registratorname, c.name AS registratorcountry, ct.title AS conttitle
-FROM 
-  (((paper AS p LEFT JOIN userpin AS u ON p.registrator=u.pin) 
+FROM
+  (((paper AS p LEFT JOIN userpin AS u ON p.registrator=u.pin)
   LEFT JOIN title AS t ON u.title=t.titleid)
   LEFT JOIN country AS c ON u.country=c.cid)
   INNER JOIN context AS ct ON p.context=ct.contid
@@ -51,15 +51,15 @@ if( $PAPID ) {
   $kw1 = array(); $kw2 = array();
   $result = pg_query("
 SELECT pk.*, k.*
-FROM pap_kw AS pk INNER JOIN keyword AS k 
+FROM pap_kw AS pk INNER JOIN keyword AS k
     ON pk.context=$CONTEXT AND pk.papnum=$PAPID AND pk.keyword=k.kwid
 ORDER BY k.name
 ");
   while( $row = pg_fetch_array($result) ) {
-    if ($row[weight]==3)
-      $kw1[] = $row[name];
-    else if ($row[weight]==2)
-      $kw2[] = $row[name];
+      if ($row['weight']==3)
+      $kw1[] = $row['name'];
+    else if ($row['weight']==2)
+      $kw2[] = $row['name'];
   }
   $MAINKWD = join(", ", $kw1);
   $SECONDKWD = join(", ", $kw2);
@@ -86,7 +86,7 @@ AUTHORS;
   $result = pg_query("
 SELECT a.*, u.*, t.shortstr AS usertitle, c.name AS countryname
 FROM
-  ((author AS a LEFT JOIN userpin AS u ON a.autpin=u.pin) 
+  ((author AS a LEFT JOIN userpin AS u ON a.autpin=u.pin)
   LEFT JOIN title AS t ON u.title=t.titleid)
   LEFT JOIN country AS c ON u.country=c.cid
 WHERE a.context=$CONTEXT AND a.papnum=$PAPID

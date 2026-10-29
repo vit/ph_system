@@ -1,4 +1,4 @@
-<?
+<?php
 $PAGEID = 'mypapers';
 
 if (!$USERPIN)
@@ -622,10 +622,10 @@ Choose main and secondary keywords of the paper:
 <!-- br -->
 
 $asterisk - field cannot be empty
-<br> 
+<br>
 
 <input style="color: red;" type=checkbox value="1" name="confirmed"> Please confirm that all authors and abstracts are entered and the title is correct.
-<br> 
+<br>
 <input style="color: red;" type=button value="Save paper info" onClick="if( this.form.confirmed.checked ) { savealllists(); document.paperinfoform.editpaperop.value='save'; document.paperinfoform.submit(); } else alert('You did not confirm that all authors and abstracts are entered and the title is correct'); return false;">
 <!-- input style="color: red;" type=button value="Save paper info" onClick="alert( this.form.confirmed.checked );" -->
 <!-- input style="color: red;" type=button value="Save paper info QQQQQQQQQ" onClick="alert( 'clicked' );" -->
@@ -648,7 +648,7 @@ PAGEBODY;
 if( $PAPID ) {
 	$diagnosis = "";
 
-	if ( $_FILES[paperfile] ) {
+	if ( $_FILES['paperfile'] ) {
 		$fex = file_exists(paper_fileName( $CURRENTCONT, $PAPID ));
 		if( $fex && $PERMISSIONS['PAPREG_REUPLOAD_REGISTERED_PAPER'] || !$fex && $PERMISSIONS['PAPREG_UPLOAD_REGISTERED_PAPER'] ) {
 			if( paper_upload_file( $CURRENTCONT, $PAPID ) ) {
@@ -1040,7 +1040,7 @@ function paper_upload_file( $context, $papid ) {
 function paper_getFileType( $context, $papid ) {
   $result = pg_query("SELECT filetype FROM paper WHERE context=$context AND papnum='$papid'");
   if ($row = pg_fetch_array($result))
-    return $row[filetype];
+    return $row['filetype'];
 }
 
 function paper_getFileSize( $context, $papid ) {

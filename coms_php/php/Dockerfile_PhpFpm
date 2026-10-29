@@ -1,4 +1,5 @@
-FROM php:7-fpm
+# FROM php:7-fpm
+FROM php:8.5-fpm
 
 RUN apt-get update
 
@@ -25,5 +26,3 @@ RUN chmod 666 /etc/msmtprc
 
 
 COPY ./config/backup-papers.sh /backup-papers.sh
-
-

@@ -1,4 +1,4 @@
-<?
+<?php
 header ("Content-Type: text/html; charset=utf-8");
 if( isset($ERROR404) )
   header("HTTP/1.0 404 Not Found");
@@ -15,7 +15,7 @@ if( isset($ERROR404) )
 
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
-<?
+<?php
 include_once("style.php");
 ?>
 
@@ -43,7 +43,7 @@ include_once("style.php");
 <?php
   include_once("ipacs_header.php");
 ?>
-  
+
 
 <?php /* ?>
 
@@ -93,7 +93,7 @@ include_once("style.php");
       </td>
       <td align=right>
 
-<?
+<?php
 if( $USERPIN ) {
 
   if( isset($JUSTLOGGED) )
@@ -144,7 +144,7 @@ ENDTEXT;
 
 
 
-<?
+<?php
 if ( $USERERROR ) {
   print <<<ENDTEXT
 <div class=error align=center>
