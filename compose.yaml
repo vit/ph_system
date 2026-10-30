@@ -4,7 +4,7 @@ name: ph_system_${ENV_NAME}
 services:
 
   mongo:
-    image: mongo:4.2
+    image: mongo:4.4
     restart: always
     container_name: ph_system_mongo_${ENV_NAME}
     expose:
